@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Ad Studio — IPAK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
+    --app-text:#edf1f5; --app-muted:#8b95a5;
+    --accent:#2fb8c4; --accent-rgb:47,184,196;
+    --glass-a:.16;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
+      --app-text:#edf1f5; --app-muted:#8b95a5;
+    }
+  }
+  :root[data-theme="dark"]{
+    --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
+    --app-text:#edf1f5; --app-muted:#8b95a5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--app-bg); color:var(--app-text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',system-ui,sans-serif;}
+
+  /* ---------- Topbar ---------- */
+  #topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px; border-bottom:1px solid var(--app-border);
+    background:var(--app-panel); flex-shrink:0; gap:16px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg, var(--accent), #1c2733);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk';font-weight:700;font-size:14px;color:#08121a;
+    flex-shrink:0;
+  }
+  .brand-text{line-height:1.15;}
+  .brand-text strong{display:block;font-size:15px;font-weight:600;}
+  .brand-text span{font-size:12px;color:var(--app-muted);}
+  #downloadBtn{
+    appearance:none;border:none;cursor:pointer;
+    background:linear-gradient(135deg, var(--accent), #1f8e97);
+    color:#06161a; font-weight:600; font-size:14px;
+    padding:11px 20px; border-radius:10px; font-family:'Inter';
+    display:flex; align-items:center; gap:8px;
+    box-shadow:0 6px 18px -6px rgba(var(--accent-rgb),.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  #downloadBtn:hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(var(--accent-rgb),.6);}
+  #downloadBtn:disabled{opacity:.6; cursor:progress; transform:none;}
+
+  /* ---------- Layout ---------- */
+  #main{display:flex; flex:1; min-height:0;}
+  #sidebar{
+    width:360px; flex-shrink:0; border-right:1px solid var(--app-border);
+    background:var(--app-panel); overflow-y:auto; padding:20px 20px 60px;
+  }
+  #stageArea{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    padding:36px; overflow:auto; background:
+      radial-gradient(circle at 25% 20%, rgba(var(--accent-rgb),.06), transparent 45%),
+      radial-gradient(circle at 80% 85%, rgba(var(--accent-rgb),.05), transparent 40%),
+      var(--app-bg);
+  }
+
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--app-muted); margin-bottom:6px;}
+  .field input[type="text"], .field textarea{
+    width:100%; background:var(--app-panel-2); border:1px solid var(--app-border);
+    color:var(--app-text); border-radius:8px; padding:10px 11px; font-family:'Inter'; font-size:13.5px;
+    resize:vertical;
+  }
+  .field input[type="text"]:focus, .field textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent;}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .section-title{
+    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--app-muted); margin:26px 0 12px; padding-top:18px; border-top:1px solid var(--app-border);
+  }
+  .section-title:first-child{margin-top:0; padding-top:0; border-top:none;}
+  .hint{font-size:11.5px; color:var(--app-muted); line-height:1.5; margin:-6px 0 14px;}
+
+  /* template picker */
+  #tplPicker{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .tpl-opt{
+    border:1.5px solid var(--app-border); border-radius:10px; padding:8px; cursor:pointer;
+    background:var(--app-panel-2); text-align:left;
+  }
+  .tpl-opt.active{border-color:var(--accent); box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25);}
+  .tpl-swatch{height:44px; border-radius:6px; margin-bottom:7px;}
+  .tpl-opt span{font-size:11.5px; font-weight:600; color:var(--app-text);}
+  .sw-transparent{background:linear-gradient(150deg,#eaf5f7,#cfe9ec 55%,#e8f6f2);}
+  .sw-metalized{background:linear-gradient(120deg,#0c0e11,#3a4048 45%,#0c0e11);}
+  .sw-white{background:linear-gradient(150deg,#f7f5f0,#ece7dc);}
+  .sw-pearlized{background:linear-gradient(120deg,#2a1b3d,#7a5ca8 35%,#3c8aa0 65%,#c98f6b);}
+  .sw-matte{background:linear-gradient(150deg,#171717,#0a0a0a);}
+
+  /* image upload */
+  .upload-btn{
+    display:block; border:1px dashed var(--app-border); border-radius:9px; background:var(--app-panel-2);
+    color:var(--app-muted); font-size:12.5px; padding:14px 10px; text-align:center; cursor:pointer;
+    font-family:'Inter'; font-weight:500;
+  }
+  .upload-btn:hover{border-color:var(--accent); color:var(--app-text);}
+  .upload-btn.has-file{border-style:solid; border-color:var(--accent); color:var(--app-text);}
+
+  /* color wheel */
+  .wheel-wrap{display:flex; gap:18px; align-items:center;}
+  #wheelCanvas{border-radius:50%; cursor:crosshair; box-shadow:0 0 0 1px var(--app-border);}
+  .wheel-marker{
+    position:absolute; width:12px; height:12px; border-radius:50%;
+    border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.4); pointer-events:none;
+    transform:translate(-50%,-50%);
+  }
+  .wheel-canvas-wrap{position:relative; width:150px; height:150px; flex-shrink:0;}
+  .accent-controls{flex:1;}
+  .accent-preview{
+    width:100%; height:34px; border-radius:8px; margin-bottom:10px; border:1px solid var(--app-border);
+    background:var(--accent);
+  }
+  input[type="range"]{width:100%; accent-color:var(--accent);}
+  .mini-label{font-size:11px; color:var(--app-muted); display:flex; justify-content:space-between; margin-bottom:4px;}
+
+  /* ---------- Stage / Ad (1:1) ---------- */
+  #stage{
+    width:540px; aspect-ratio:1/1; position:relative; border-radius:16px; overflow:hidden;
+    box-shadow:0 30px 60px -24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+    font-family:'Inter'; flex-shrink:0;
+  }
+  #stage *{box-sizing:border-box;}
+  .ad-bg{position:absolute; inset:0; background-size:cover; background-position:center;}
+  .ad-photo{position:absolute; inset:0; background-size:cover; background-position:center;}
+  .ad-content{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; padding:32px;}
+
+  /* film-layer logotype mark (no upload needed) */
+  .logo-mark{display:flex; align-items:center; gap:11px;}
+  .logo-mark .mark{width:32px; height:32px; position:relative; flex-shrink:0;}
+  .logo-mark .mark i{position:absolute; width:21px; height:21px; border-radius:6px; font-style:normal;}
+  .logo-mark .mark i:nth-child(1){background:var(--accent); top:0; left:0; opacity:.92;}
+  .logo-mark .mark i:nth-child(2){background:currentColor; top:9px; left:9px; opacity:.16; border:1px solid currentColor;}
+  .logo-mark .word{font-family:'Space Grotesk'; font-weight:700; font-size:15px; letter-spacing:.005em; line-height:1.1;}
+  .logo-mark .sub{font-size:9.5px; letter-spacing:.06em; opacity:.6; margin-top:1px;}
+
+  .glass{position:relative; overflow:hidden;}
+  .glass::after{
+    content:""; position:absolute; top:-60%; left:-20%; width:55%; height:220%;
+    background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
+    transform:rotate(12deg) translateX(-140%); opacity:0;
+  }
+  .glass.sweep::after{ animation:sweep 1.1s ease forwards; }
+  @keyframes sweep{
+    0%{ transform:rotate(12deg) translateX(-140%); opacity:0; }
+    12%{ opacity:.55; }
+    60%{ opacity:.28; }
+    100%{ transform:rotate(12deg) translateX(140%); opacity:0; }
+  }
+
+  .meta-row{display:flex; flex-wrap:wrap; align-items:center;}
+  .meta-chip{font-size:11px; font-weight:600; padding-right:12px; margin-right:12px; border-right:1px solid; white-space:nowrap; line-height:1;}
+  .meta-chip:last-child{padding-right:0; margin-right:0; border-right:none;}
+  .req-list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px;}
+  .req-list li{display:flex; gap:8px; align-items:flex-start; font-size:12px; line-height:1.38;}
+  .req-dot{width:5px;height:5px;border-radius:50%; background:var(--accent); margin-top:5px; flex-shrink:0;}
+  .accent-rule{width:40px; height:3px; border-radius:3px; background:var(--accent);}
+  .title-lg{font-family:'Space Grotesk'; font-weight:700; line-height:1.0; letter-spacing:-.02em;}
+  .apply-line{font-size:11.5px; line-height:1.5;}
+
+  /* ===================== Template: Transparent ===================== */
+  #stage[data-tpl="transparent"] .ad-bg{background:
+    radial-gradient(circle at 100% 0%, rgba(8,28,34,.12), transparent 55%),
+    linear-gradient(160deg,#e6eef0 0%,#c6dade 45%,#dbe6df 100%);}
+  #stage[data-tpl="transparent"] .ring{position:absolute; width:300px; height:300px; border-radius:50%; border:1px solid rgba(10,40,48,.16); top:-110px; right:-110px;}
+  #stage[data-tpl="transparent"] .ring2{position:absolute; width:190px; height:190px; border-radius:50%; border:1px solid rgba(10,40,48,.13); top:-55px; right:-55px;}
+  #stage[data-tpl="transparent"] .logo-mark{color:#0a1c24;}
+  #stage[data-tpl="transparent"] .title-block{margin:20px 0 auto;}
+  #stage[data-tpl="transparent"] .title-lg{font-size:34px; color:#0a1c24; max-width:80%;}
+  #stage[data-tpl="transparent"] .company-line{font-size:12px; font-weight:600; color:#375862; margin-top:10px;}
+  #stage[data-tpl="transparent"] .glass{
+    background:linear-gradient(155deg, rgba(255,255,255,.6), rgba(255,255,255,.32));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 18px 34px -18px rgba(8,28,34,.3);
+    border:1px solid rgba(255,255,255,.6); border-radius:14px;
+    padding:20px 20px; color:#0f2530;
+  }
+  #stage[data-tpl="transparent"] .tagline{font-size:12px; color:#365a64; margin-bottom:14px; line-height:1.5;}
+  #stage[data-tpl="transparent"] .meta-chip{color:#164452; border-color:rgba(10,40,48,.25); margin-bottom:14px;}
+  #stage[data-tpl="transparent"] .req-list{color:#1a3641; margin-bottom:12px;}
+  #stage[data-tpl="transparent"] .apply-line{color:#0f2530; border-top:1px solid rgba(20,60,70,.15); padding-top:10px;}
+
+  /* ===================== Template: Metalized ===================== */
+  #stage[data-tpl="metalized"] .ad-bg{background:linear-gradient(150deg,#15171b 0%,#07080a 55%,#101214 100%);}
+  #stage[data-tpl="metalized"] .sheen{
+    position:absolute; top:41%; left:-30%; width:160%; height:13%;
+    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.05) 46%, rgba(255,255,255,.32) 50%, rgba(255,255,255,.05) 54%, transparent 65%);
+    transform:rotate(-6deg);
+  }
+  #stage[data-tpl="metalized"] .logo-mark{color:#eef1f4;}
+  #stage[data-tpl="metalized"] .title-block{margin-top:14px;}
+  #stage[data-tpl="metalized"] .title-lg{font-size:33px; color:#f3f5f7; max-width:85%;}
+  #stage[data-tpl="metalized"] .company-line{font-size:11.5px; font-weight:600; color:#9aa3ac; margin-top:10px; letter-spacing:.01em;}
+  #stage[data-tpl="metalized"] .glass{
+    background:linear-gradient(155deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 16px 32px -18px rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.12); border-radius:14px;
+    padding:18px 18px; color:#e9ecef;
+  }
+  #stage[data-tpl="metalized"] .tagline{font-size:12px; color:#9aa3ac; line-height:1.5; margin-bottom:14px;}
+  #stage[data-tpl="metalized"] .meta-chip{color:#dfe3e7; border-color:rgba(255,255,255,.2); margin-bottom:14px;}
+  #stage[data-tpl="metalized"] .req-list{color:#d9dde1; margin-bottom:12px;}
+  #stage[data-tpl="metalized"] .apply-line{color:#c3c9cf; border-top:1px solid rgba(255,255,255,.14); padding-top:10px;}
+
+  /* ===================== Template: White ===================== */
+  #stage[data-tpl="white"] .ad-bg{background:#f2f2ee;}
+  #stage[data-tpl="white"] .photo-slot{
+    position:absolute; top:26px; right:26px; width:74px; height:74px; border-radius:50%;
+    background-size:cover; background-position:center; box-shadow:0 8px 18px -8px rgba(0,0,0,.2);
+    border:3px solid #fff;
+  }
+  #stage[data-tpl="white"] .ad-content{justify-content:center;}
+  #stage[data-tpl="white"] .logo-mark{color:#1c1c17;}
+  #stage[data-tpl="white"] .title-block{
+    background:rgba(255,255,255,.8); border:1px solid rgba(255,255,255,.9); border-bottom:none;
+    border-radius:16px 16px 0 0; padding:26px 24px 4px; margin-top:0;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.95);
+  }
+  #stage[data-tpl="white"] .title-lg{font-size:27px; color:#1c1c17; margin-top:12px;}
+  #stage[data-tpl="white"] .company-line{font-size:11.5px; font-weight:600; color:#6f6a5b; margin-top:8px;}
+  #stage[data-tpl="white"] .glass{
+    background:rgba(255,255,255,.8);
+    box-shadow:0 18px 36px -20px rgba(20,17,10,.3), inset 0 -1px 0 rgba(255,255,255,.6);
+    border:1px solid rgba(255,255,255,.9); border-top:none;
+    border-radius:0 0 16px 16px;
+    padding:16px 24px 22px;
+  }
+  #stage[data-tpl="white"] .tagline{font-size:12px; color:#54503f; line-height:1.5; margin-bottom:14px;}
+  #stage[data-tpl="white"] .meta-chip{color:#33312a; border-color:#d8d2c1; margin-bottom:14px;}
+  #stage[data-tpl="white"] .req-list{color:#2c2a22; margin-bottom:12px;}
+  #stage[data-tpl="white"] .apply-line{color:#3c3a30; border-top:1px solid #e7e2d5; padding-top:10px;}
+
+  /* ===================== Template: Pearlized ===================== */
+  #stage[data-tpl="pearlized"] .ad-bg{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(130,115,190,.28), transparent 50%),
+      radial-gradient(circle at 85% 15%, rgba(90,155,180,.26), transparent 50%),
+      radial-gradient(circle at 25% 90%, rgba(110,95,165,.24), transparent 55%),
+      radial-gradient(circle at 90% 85%, rgba(160,135,110,.16), transparent 50%),
+      #14101c;
+  }
+  #stage[data-tpl="pearlized"] .logo-mark{color:#f0ecf5;}
+  #stage[data-tpl="pearlized"] .title-block{margin:16px 0 -14px; position:relative; z-index:2;}
+  #stage[data-tpl="pearlized"] .title-lg{font-size:31px; color:#f5f2f8; max-width:78%;}
+  #stage[data-tpl="pearlized"] .company-line{font-size:11.5px; font-weight:600; color:#c3b8d4; margin-top:8px;}
+  #stage[data-tpl="pearlized"] .glass{
+    background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
+    border:1px solid rgba(255,255,255,.28); border-radius:14px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 18px 38px -18px rgba(15,8,22,.55);
+    padding:26px 20px 18px; color:#f0ecf5;
+  }
+  #stage[data-tpl="pearlized"] .tagline{font-size:12px; color:#cabfd9; line-height:1.5; margin-bottom:14px;}
+  #stage[data-tpl="pearlized"] .meta-chip{color:#ede8f2; border-color:rgba(255,255,255,.25); margin-bottom:14px;}
+  #stage[data-tpl="pearlized"] .req-list{color:#f0e9fa; margin-bottom:12px;}
+  #stage[data-tpl="pearlized"] .apply-line{color:#f0e9fa; border-top:1px solid rgba(255,255,255,.3); padding-top:10px;}
+
+  /* ===================== Template: Matte ===================== */
+  #stage[data-tpl="matte"] .ad-bg{background:#111111;}
+  #stage[data-tpl="matte"] .logo-mark{color:#eaeaea;}
+  #stage[data-tpl="matte"] .title-block{margin-top:18px;}
+  #stage[data-tpl="matte"] .title-lg{font-size:38px; color:#f4f4f4; max-width:88%;}
+  #stage[data-tpl="matte"] .accent-rule{margin:14px 0 10px;}
+  #stage[data-tpl="matte"] .tagline{font-size:12px; color:#9c9c9c; line-height:1.5; max-width:80%; margin-bottom:14px;}
+  #stage[data-tpl="matte"] .req-list{color:#c9c9c9; margin-bottom:14px; display:grid; grid-template-columns:1fr 1fr; gap:6px 12px;}
+  #stage[data-tpl="matte"] .meta-chip{color:#d5d5d5; border-color:rgba(255,255,255,.2); margin-bottom:14px;}
+  #stage[data-tpl="matte"] .glass{
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1); border-radius:12px;
+    box-shadow:none; padding:16px 18px; color:#d8d8d8;
+  }
+  #stage[data-tpl="matte"] .apply-line{color:#b8b8b8; border-top:1px solid rgba(255,255,255,.12); padding-top:10px;}
+
+  footer{padding:10px 24px; text-align:center; font-size:11px; color:var(--app-muted); border-top:1px solid var(--app-border); background:var(--app-panel);}
+
+  @media (max-width:900px){
+    #sidebar{width:100%; border-right:none; border-bottom:1px solid var(--app-border);}
+    #main{flex-direction:column;}
+    #stage{width:min(420px,86vw);}
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <div class="brand-mark">JA</div>
+    <div class="brand-text">
+      <strong>Job Ad Studio</strong>
+      <span>Liquid‑glass corporate ad templates · 1:1</span>
+    </div>
+  </div>
+  <button id="downloadBtn">⬇ Download PNG (2K)</button>
+</div>
+
+<div id="main">
+  <div id="sidebar">
+
+    <div class="section-title">Template</div>
+    <div id="tplPicker">
+      <button class="tpl-opt active" data-tpl="transparent"><div class="tpl-swatch sw-transparent"></div><span>Transparent</span></button>
+      <button class="tpl-opt" data-tpl="metalized"><div class="tpl-swatch sw-metalized"></div><span>Metalized</span></button>
+      <button class="tpl-opt" data-tpl="white"><div class="tpl-swatch sw-white"></div><span>White</span></button>
+      <button class="tpl-opt" data-tpl="pearlized"><div class="tpl-swatch sw-pearlized"></div><span>Pearlized</span></button>
+      <button class="tpl-opt" data-tpl="matte"><div class="tpl-swatch sw-matte"></div><span>Matte</span></button>
+    </div>
+
+    <div class="section-title">Company & Role</div>
+    <div class="field"><label>Company name</label><input type="text" id="f-company" value="IPAK — International Packaging Films Ltd."></div>
+    <div class="field"><label>Job title</label><input type="text" id="f-title" value="Senior Production Engineer"></div>
+    <div class="field"><label>Location</label><input type="text" id="f-location" value="Lahore, Pakistan"></div>
+    <div class="field row3">
+      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Type</label><input type="text" id="f-type" value="Full-time"></div>
+      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Mode</label><input type="text" id="f-mode" value="On-site"></div>
+      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Experience</label><input type="text" id="f-exp" value="5+ Years"></div>
+    </div>
+
+    <div class="section-title">Content</div>
+    <div class="field"><label>Tagline</label><textarea id="f-tagline" rows="2">Join Pakistan's leading manufacturer of BOPP &amp; CPP packaging films.</textarea></div>
+    <div class="field"><label>Requirements (one per line)</label><textarea id="f-reqs" rows="5">Bachelor's in Polymer / Mechanical / Chemical Engineering
+Experience in film extrusion or packaging manufacturing
+Strong understanding of quality & process control
+Willingness to work rotational shifts</textarea></div>
+    <div class="field"><label>How to apply</label><input type="text" id="f-apply" value="Send your CV to careers@ipak.com.pk"></div>
+    <div class="field"><label>Deadline</label><input type="text" id="f-deadline" value="Apply before 30 Sep 2026"></div>
+
+    <div class="section-title">Background photo</div>
+    <div class="hint">The IPAK mark is built in — no logo upload needed. Add a plant/product photo if you want one behind the design (Metalized, Pearlized &amp; Matte use it full-bleed; White uses it in the corner circle).</div>
+    <label class="upload-btn" id="photoBtn">🖼 Upload background photo<input type="file" id="f-photo" accept="image/*" style="display:none;"></label>
+
+    <div class="section-title">Accent Color</div>
+    <div class="wheel-wrap">
+      <div class="wheel-canvas-wrap">
+        <canvas id="wheelCanvas" width="150" height="150"></canvas>
+        <div class="wheel-marker" id="wheelMarker"></div>
+      </div>
+      <div class="accent-controls">
+        <div class="accent-preview" id="accentPreview"></div>
+        <div class="mini-label"><span>Lightness</span><span id="lightVal">40%</span></div>
+        <input type="range" id="f-light" min="15" max="85" value="40">
+        <div class="mini-label" style="margin-top:10px;"><span>Glass intensity</span><span id="glassVal">16%</span></div>
+        <input type="range" id="f-glass" min="6" max="35" value="16">
+      </div>
+    </div>
+
+  </div>
+
+  <div id="stageArea">
+    <div id="stage" data-tpl="transparent">
+      <div class="ad-bg"></div>
+      <div class="ad-photo" id="adPhoto"></div>
+
+      <div class="ring" data-only="transparent"></div>
+      <div class="ring2" data-only="transparent"></div>
+      <div class="sheen" data-only="metalized"></div>
+      <div class="photo-slot" id="photoSlot" data-only="white"></div>
+
+      <div class="ad-content">
+        <div class="logo-mark">
+          <div class="mark"><i></i><i></i></div>
+          <div>
+            <div class="word">IPAK</div>
+            <div class="sub">Packaging Films</div>
+          </div>
+        </div>
+
+        <div class="title-block">
+          <div class="title-lg" id="titleLine">Senior Production Engineer</div>
+          <div class="company-line" id="companyLine">IPAK — International Packaging Films Ltd.</div>
+        </div>
+
+        <div class="glass" id="glassCard">
+          <div class="accent-rule" data-only="matte"></div>
+          <div class="tagline" id="taglineLine">Join Pakistan's leading manufacturer of BOPP &amp; CPP packaging films.</div>
+          <div class="meta-row" id="metaRow">
+            <span class="meta-chip" id="chipLoc">📍 Lahore, Pakistan</span>
+            <span class="meta-chip" id="chipType">Full-time</span>
+            <span class="meta-chip" id="chipMode">On-site</span>
+            <span class="meta-chip" id="chipExp">5+ Years</span>
+          </div>
+          <ul class="req-list" id="reqList"></ul>
+          <div class="apply-line" id="applyLine">
+            <div id="applyText">Send your CV to careers@ipak.com.pk</div>
+            <div id="deadlineText" style="opacity:.75; margin-top:2px;">Apply before 30 Sep 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Built for IPAK · Exports at 2160×2160px (2K+) PNG</footer>
+
+<script>
+(function(){
+  const state = {
+    tpl:'transparent',
+    company:'IPAK — International Packaging Films Ltd.',
+    title:'Senior Production Engineer',
+    location:'Lahore, Pakistan',
+    type:'Full-time', mode:'On-site', exp:'5+ Years',
+    tagline:"Join Pakistan's leading manufacturer of BOPP & CPP packaging films.",
+    reqs:["Bachelor's in Polymer / Mechanical / Chemical Engineering","Experience in film extrusion or packaging manufacturing","Strong understanding of quality & process control","Willingness to work rotational shifts"],
+    apply:'Send your CV to careers@ipak.com.pk',
+    deadline:'Apply before 30 Sep 2026',
+    photo:null,
+    hue:188, sat:46, light:40, glass:16
+  };
+
+  const $ = id => document.getElementById(id);
+  const stage = $('stage');
+
+  function applyVisibility(){
+    document.querySelectorAll('[data-only]').forEach(el=>{
+      const list = el.getAttribute('data-only').split(' ');
+      el.style.display = list.includes(state.tpl) ? '' : 'none';
+    });
+  }
+
+  function render(){
+    $('companyLine').textContent = state.company;
+    $('titleLine').textContent = state.title;
+    $('taglineLine').textContent = state.tagline;
+    $('chipLoc').textContent = state.location;
+    $('chipType').textContent = state.type;
+    $('chipMode').textContent = state.mode;
+    $('chipExp').textContent = state.exp;
+    $('applyText').textContent = state.apply;
+    $('deadlineText').textContent = state.deadline;
+
+    const reqList = $('reqList');
+    reqList.innerHTML = '';
+    state.reqs.forEach(line=>{
+      if(!line.trim()) return;
+      const li = document.createElement('li');
+      const dot = document.createElement('span'); dot.className='req-dot';
+      const txt = document.createElement('span'); txt.textContent = line.trim();
+      li.appendChild(dot); li.appendChild(txt);
+      reqList.appendChild(li);
+    });
+
+    const photo = $('adPhoto'), slot = $('photoSlot');
+    if(state.photo){
+      photo.style.backgroundImage = `url(${state.photo})`;
+      slot.style.backgroundImage = `url(${state.photo})`;
+      photo.style.opacity = (state.tpl==='metalized'||state.tpl==='pearlized'||state.tpl==='matte') ? '.5' : '0';
+    } else {
+      photo.style.backgroundImage = '';
+      slot.style.backgroundImage = 'linear-gradient(135deg,#e2ddcf,#cfc9b8)';
+      photo.style.opacity = '0';
+    }
+
+    applyVisibility();
+  }
+
+  function switchTemplate(t){
+    state.tpl = t;
+    stage.dataset.tpl = t;
+    document.querySelectorAll('.tpl-opt').forEach(b=>b.classList.toggle('active', b.dataset.tpl===t));
+    render();
+    const glass = $('glassCard');
+    glass.classList.remove('sweep');
+    void glass.offsetWidth;
+    glass.classList.add('sweep');
+  }
+
+  $('f-company').addEventListener('input', e=>{ state.company=e.target.value; render(); });
+  $('f-title').addEventListener('input', e=>{ state.title=e.target.value; render(); });
+  $('f-location').addEventListener('input', e=>{ state.location=e.target.value; render(); });
+  $('f-type').addEventListener('input', e=>{ state.type=e.target.value; render(); });
+  $('f-mode').addEventListener('input', e=>{ state.mode=e.target.value; render(); });
+  $('f-exp').addEventListener('input', e=>{ state.exp=e.target.value; render(); });
+  $('f-tagline').addEventListener('input', e=>{ state.tagline=e.target.value; render(); });
+  $('f-reqs').addEventListener('input', e=>{ state.reqs=e.target.value.split('\n'); render(); });
+  $('f-apply').addEventListener('input', e=>{ state.apply=e.target.value; render(); });
+  $('f-deadline').addEventListener('input', e=>{ state.deadline=e.target.value; render(); });
+
+  document.querySelectorAll('.tpl-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchTemplate(btn.dataset.tpl));
+  });
+
+  $('f-photo').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      state.photo = ev.target.result;
+      $('photoBtn').classList.add('has-file');
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function hslToRgb(h,s,l){
+    s/=100; l/=100;
+    const k = n => (n + h/30) % 12;
+    const a = s * Math.min(l, 1-l);
+    const f = n => l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1)));
+    return [Math.round(255*f(0)), Math.round(255*f(8)), Math.round(255*f(4))];
+  }
+  function rgbToHex(r,g,b){ return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join(''); }
+
+  function updateAccent(){
+    const [r,g,b] = hslToRgb(state.hue, state.sat, state.light);
+    const hex = rgbToHex(r,g,b);
+    document.documentElement.style.setProperty('--accent', hex);
+    document.documentElement.style.setProperty('--accent-rgb', `${r},${g},${b}`);
+    document.documentElement.style.setProperty('--glass-a', (state.glass/100).toFixed(2));
+    $('accentPreview').style.background = hex;
+  }
+
+  const wheelCanvas = $('wheelCanvas');
+  const wctx = wheelCanvas.getContext('2d');
+  const wsize = wheelCanvas.width;
+  const wradius = wsize/2;
+
+  function drawWheel(){
+    const img = wctx.createImageData(wsize, wsize);
+    for(let y=0;y<wsize;y++){
+      for(let x=0;x<wsize;x++){
+        const dx = x-wradius, dy = y-wradius;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        const idx = (y*wsize+x)*4;
+        if(dist<=wradius){
+          let angle = Math.atan2(dy,dx)*180/Math.PI;
+          if(angle<0) angle+=360;
+          const sat = Math.min(dist/wradius,1)*100;
+          const [r,g,b] = hslToRgb(angle, sat, 50);
+          img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=255;
+        } else { img.data[idx+3]=0; }
+      }
+    }
+    wctx.putImageData(img,0,0);
+  }
+  drawWheel();
+
+  function setMarkerFromState(){
+    const rad = (state.sat/100) * wradius;
+    const ang = state.hue * Math.PI/180;
+    const x = wradius + rad*Math.cos(ang);
+    const y = wradius + rad*Math.sin(ang);
+    $('wheelMarker').style.left = x+'px';
+    $('wheelMarker').style.top = y+'px';
+  }
+  setMarkerFromState();
+
+  let dragging = false;
+  function pickAt(clientX, clientY){
+    const rect = wheelCanvas.getBoundingClientRect();
+    let x = clientX - rect.left - wradius;
+    let y = clientY - rect.top - wradius;
+    let dist = Math.sqrt(x*x+y*y);
+    if(dist>wradius){ x = x*(wradius/dist); y = y*(wradius/dist); dist = wradius; }
+    let angle = Math.atan2(y,x)*180/Math.PI; if(angle<0) angle+=360;
+    state.hue = angle;
+    state.sat = Math.min(dist/wradius,1)*100;
+    $('wheelMarker').style.left = (x+wradius)+'px';
+    $('wheelMarker').style.top = (y+wradius)+'px';
+    updateAccent();
+  }
+  wheelCanvas.addEventListener('pointerdown', e=>{ dragging=true; pickAt(e.clientX,e.clientY); });
+  window.addEventListener('pointermove', e=>{ if(dragging) pickAt(e.clientX,e.clientY); });
+  window.addEventListener('pointerup', ()=> dragging=false);
+
+  $('f-light').addEventListener('input', e=>{
+    state.light = +e.target.value;
+    $('lightVal').textContent = state.light+'%';
+    updateAccent();
+  });
+  $('f-glass').addEventListener('input', e=>{
+    state.glass = +e.target.value;
+    $('glassVal').textContent = state.glass+'%';
+    updateAccent();
+  });
+
+  $('downloadBtn').addEventListener('click', ()=>{
+    const btn = $('downloadBtn');
+    const original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Rendering…';
+    const desiredWidth = 2160;
+    const scale = desiredWidth / stage.offsetWidth;
+    html2canvas(stage, { scale, backgroundColor:null, useCORS:true, logging:false }).then(canvas=>{
+      const link = document.createElement('a');
+      const name = (state.title || 'job-ad').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+      link.download = name + '-' + state.tpl + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.disabled = false; btn.textContent = original;
+    }).catch(()=>{
+      btn.disabled = false; btn.textContent = original;
+      alert('Could not render the ad. Please try again.');
+    });
+  });
+
+  updateAccent();
+  render();
+  switchTemplate('transparent');
+})();
+</script>
+</body>
+</html>
