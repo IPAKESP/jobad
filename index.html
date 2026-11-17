@@ -1,617 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Job Ad Studio — IPAK</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPAK PMS 2025 – User guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
-    --app-text:#edf1f5; --app-muted:#8b95a5;
-    --accent:#2fb8c4; --accent-rgb:47,184,196;
-    --glass-a:.16;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
-      --app-text:#edf1f5; --app-muted:#8b95a5;
-    }
-  }
-  :root[data-theme="dark"]{
-    --app-bg:#0a0e14; --app-panel:#10151d; --app-panel-2:#141a24; --app-border:#232b38;
-    --app-text:#edf1f5; --app-muted:#8b95a5;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--app-bg); color:var(--app-text);
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
-    min-height:100vh; display:flex; flex-direction:column;
-  }
-  h1,h2,h3,.display{font-family:'Space Grotesk',system-ui,sans-serif;}
+:root{--g0:#0b2b1a;--g1:#14532d;--g2:#1f7a4a;--g3:#4fd49b;--lime:#a7cf74;--mist:#eaf3ec;--ink:#10281c;--ink2:#47665a;--line:#cfe0d4;--or:#d9824f;--fd:Outfit,system-ui,sans-serif;--fb:Figtree,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:var(--g0);font:16px/1.5 var(--fb);color:var(--ink)}
+.logo{position:fixed;top:14px;left:18px;z-index:20;background:#fff;border-radius:10px;padding:6px 12px;box-shadow:0 4px 16px rgba(0,0,0,.25)}.logo img{height:34px;display:block}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;gap:14px;padding:84px clamp(18px,4.5vw,72px) 74px;overflow:auto;background:radial-gradient(700px 420px at 90% 0,rgba(79,212,155,.22),transparent 70%),linear-gradient(160deg,#f4faf5,var(--mist))}
+.slide.on{display:flex}
+.dk{background:radial-gradient(800px 500px at 85% 10%,rgba(79,212,155,.28),transparent 70%),linear-gradient(135deg,var(--g0),var(--g1) 70%,var(--g2));color:#f4fbf6}
+h1,h2,h3{font-family:var(--fd);line-height:1.1;letter-spacing:-.015em}
+h2{font-size:clamp(24px,3.4vw,40px);color:var(--g1)}.dk h2,.dk h1{color:#fff}h1{font-size:clamp(38px,6.5vw,78px);max-width:13ch}h3{font-size:17px;color:var(--g1)}
+.sub{color:var(--ink2);font-size:16px;max-width:76ch}.dk .sub{color:#c4e6d1}
+.g{display:grid;gap:12px}.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 10px 24px -18px rgba(20,83,45,.5)}
+.box p,.box li{font-size:14px;color:var(--ink2)}ul{padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font:600 12.5px var(--fb);background:#d6f0df;color:var(--g1)}.tag.b{background:#d3eeea;color:#0b4f4f}.tag.c{background:#fbe2d1;color:#8a3d18}.tag.n{background:#e3e8ee;color:#3d4a58}
+.note{border-left:5px solid var(--g3);background:#fff;padding:9px 14px;border-radius:0 12px 12px 0;font-size:14.5px;color:var(--ink2)}
+svg{width:100%;height:auto;display:block}
+.on .a{animation:up .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0)*.09s)}@keyframes up{from{opacity:0;transform:translateY(20px)}}
+.on .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--d,0)*.1s)}@keyframes pop{from{opacity:0;transform:scale(.6)}}
+.on .draw{stroke-dasharray:1;animation:dr 1.6s ease-out .3s both}@keyframes dr{from{stroke-dashoffset:1}}
+.on .grow{transform-origin:left;animation:gr 1.1s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0)*.12s + .2s)}@keyframes gr{from{transform:scaleX(0)}}
+.on .flowl{stroke-dasharray:6 8;animation:fl 1s linear infinite}@keyframes fl{to{stroke-dashoffset:-14}}
+.on .ring{stroke-dasharray:251;animation:rg 1.4s ease-out .3s both}@keyframes rg{from{stroke-dashoffset:251}to{stroke-dashoffset:var(--o)}}
+.on .tk{animation:tl 6s ease-in-out infinite}@keyframes tl{0%{left:12%}60%,100%{left:calc(88% - 24px)}}
+.hex{position:absolute;right:5%;top:50%;width:min(36vw,440px);transform:translateY(-50%)}.hex g{animation:fy 6s ease-in-out infinite}.hex g:nth-child(2){animation-delay:-1.5s}.hex g:nth-child(3){animation-delay:-3s}.hex g:nth-child(4){animation-delay:-4.5s}@keyframes fy{50%{transform:translateY(-8px)}}
+.bar{height:14px;border-radius:9px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--g2),var(--g3))}
+.row{display:grid;grid-template-columns:120px 1fr 48px;gap:12px;align-items:center;font-weight:600}
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;font-size:14px;border:1px solid var(--line)}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left}th{background:var(--g1);color:#fff;font:600 13px var(--fd)}
+td.y,td.x{text-align:center;font-weight:700}td.y{color:var(--g2)}td.x{color:#b9c2bc}th.m{text-align:center}
+/* 9 box */
+.nb{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.nb div{aspect-ratio:1.5;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font:600 12px/1.2 var(--fb);padding:4px;transition:.35s;opacity:.4}
+.nb b{font:700 22px var(--fd)}.nb .h{background:#2f7a35;color:#fff}.nb .m{background:#b7dc9b}.nb .l{background:#bfe0d2}.nb .w{background:#f8cbad}
+.nb .hot{opacity:1;transform:scale(1.07);box-shadow:0 12px 24px -8px rgba(0,0,0,.45);outline:3px solid var(--ink);z-index:2}
+.nbw{display:grid;grid-template-columns:22px 1fr;gap:4px}.ax{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font:600 12px var(--fd);color:var(--ink2)}.axx{grid-column:2;text-align:center;font:600 12px var(--fd);color:var(--ink2)}
+.big{font:700 40px/1 var(--fd);color:var(--g2)}
+input[type=range]{width:100%;accent-color:var(--g2)}
+/* form mock */
+.mock{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 18px 40px -24px rgba(20,83,45,.6);font-size:13px}
+.mh{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:9px 14px;background:linear-gradient(120deg,var(--g0),var(--g2));color:#fff;font:600 14px var(--fd)}
+.chp{display:inline-block;padding:2px 10px;border-radius:99px;font:600 12px var(--fb);background:#e3e8ee;color:#3d4a58;transition:.4s}.chp.go{background:#d3eeea;color:#0b4f4f}
+.mock table{border-radius:0;border:0;font-size:12.5px}.mock th{padding:5px 8px;font-size:12px}.mock td{padding:5px 8px}
+.rv{opacity:0;transition:opacity .5s,transform .5s;transform:translateY(5px)}.rv.v{opacity:1;transform:none}
+.zn{margin:8px 12px;padding:6px 8px;border-radius:10px;border:2px solid transparent;transition:.3s}.hl{border-color:var(--or);box-shadow:0 0 0 5px rgba(217,130,79,.2)}
+.lv{font-style:normal;font-weight:700;padding:1px 8px;border-radius:99px;background:#d6f0df;color:var(--g1)}.lv.b{background:#d3eeea;color:#0b4f4f}
+.bp{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.bp span{padding:4px 7px;border-radius:8px;background:#f1f6f2;font-size:12px}.bp .d{background:#d6f0df;color:var(--g1)}.bp .ni{background:#fbe2d1;color:#8a3d18}
+.res{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;align-items:center}
+.btn2{border:0;border-radius:9px;padding:6px 12px;background:var(--g2);color:#fff;font:600 12.5px var(--fb);opacity:.35}.btn2.on2{opacity:1}
+.cap{background:var(--g1);color:#fff;border-radius:14px;padding:12px 16px;min-height:96px}.cap b{font:600 18px var(--fd)}.cap p{font-size:14px;color:#d4efdd}.cap em{font-style:normal;color:var(--lime);font-weight:600}
+.ctl{display:flex;gap:8px;align-items:center;margin-top:8px}.ctl button,.cb{border:0;background:#fff;border:1px solid var(--line);border-radius:9px;padding:5px 12px;font:600 13px var(--fb);cursor:pointer}
+.dots{display:flex;gap:5px;flex:1}.dots i{flex:1;height:5px;border-radius:5px;background:var(--line)}.dots i.f{background:var(--g2)}
+/* workflow */
+.wfw{position:relative}.wf{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding-top:34px}.wf:before{content:"";position:absolute;left:12%;right:12%;top:15px;height:4px;background:var(--line);border-radius:4px}
+.wf .st{text-align:center}.dot{position:absolute;margin:-33px 0 0 -14px;width:28px;height:28px;border-radius:50%;background:var(--g2);color:#fff;font:700 14px/28px var(--fd);text-align:center}
+.tk{position:absolute;top:-3px;left:12%;width:24px;height:24px;border-radius:50%;background:var(--or);box-shadow:0 0 0 6px rgba(217,130,79,.28);z-index:3}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:11px clamp(16px,4vw,48px);background:rgba(10,36,22,.92)}
+.nav button{border:0;background:var(--g2);color:#fff;border-radius:10px;padding:7px 16px;font:600 14px var(--fb);cursor:pointer}.nav button:hover{background:var(--g3);color:var(--g0)}.nav button:disabled{opacity:.3}
+.pg{flex:1;height:5px;background:rgba(255,255,255,.18);border-radius:9px;overflow:hidden}.pg i{display:block;height:100%;background:var(--g3);transition:width .4s}#cnt{color:#c4e6d1;font-size:14px;min-width:56px;text-align:right}
+:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+@media (max-width:900px){.c2,.c3,.res{grid-template-columns:1fr}.slide{justify-content:flex-start}.hex{display:none}.wf{grid-template-columns:1fr 1fr;padding-top:0}.wf:before,.tk{display:none}.dot{position:static;margin:0 auto 4px}.row{grid-template-columns:96px 1fr 40px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{html,body{overflow:visible;height:auto}.slide{display:flex!important;position:relative;min-height:100vh;page-break-after:always}.nav{display:none}}
 
-  /* ---------- Topbar ---------- */
-  #topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 24px; border-bottom:1px solid var(--app-border);
-    background:var(--app-panel); flex-shrink:0; gap:16px; flex-wrap:wrap;
-  }
-  .brand{display:flex; align-items:center; gap:10px;}
-  .brand-mark{
-    width:34px;height:34px;border-radius:9px;
-    background:linear-gradient(135deg, var(--accent), #1c2733);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'Space Grotesk';font-weight:700;font-size:14px;color:#08121a;
-    flex-shrink:0;
-  }
-  .brand-text{line-height:1.15;}
-  .brand-text strong{display:block;font-size:15px;font-weight:600;}
-  .brand-text span{font-size:12px;color:var(--app-muted);}
-  #downloadBtn{
-    appearance:none;border:none;cursor:pointer;
-    background:linear-gradient(135deg, var(--accent), #1f8e97);
-    color:#06161a; font-weight:600; font-size:14px;
-    padding:11px 20px; border-radius:10px; font-family:'Inter';
-    display:flex; align-items:center; gap:8px;
-    box-shadow:0 6px 18px -6px rgba(var(--accent-rgb),.55);
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  #downloadBtn:hover{transform:translateY(-1px); box-shadow:0 10px 22px -6px rgba(var(--accent-rgb),.6);}
-  #downloadBtn:disabled{opacity:.6; cursor:progress; transform:none;}
+.rtabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.rtabs button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 16px;font:600 14px var(--fb);cursor:pointer}.rtabs .on{background:var(--g1);color:#fff;border-color:var(--g1)}
+.org{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.dp{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 10px 10px;text-align:center}.dp>b{font:600 14px var(--fd);color:var(--g1)}
+.tms{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.tm{position:relative;background:#f1f7f3;border-radius:12px;padding:20px 4px 8px}.pps{display:flex;justify-content:center;gap:6px}
+.pe{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:600 13px var(--fb);font-style:normal;background:var(--g2);color:#fff;opacity:.22;filter:grayscale(1);transform:scale(.8);transition:opacity .45s,transform .45s,filter .45s}.pe.lit{opacity:1;filter:none;transform:scale(1);box-shadow:0 0 0 4px rgba(79,212,155,.3)}
+.bd{position:absolute;top:-9px;left:50%;transform:translateX(-50%) scale(.6);opacity:0;transition:.4s;white-space:nowrap;background:var(--or);color:#fff;border-radius:99px;padding:1px 10px;font:600 11.5px var(--fb)}.bd.on{opacity:1;transform:translateX(-50%) scale(1)}
+.rcard{min-height:250px}.pw{margin-top:8px;gap:7px}.pw li{font-size:14.5px;list-style:none;padding:5px 10px;background:#f1f7f3;border-radius:10px}.pw li:before{content:"✔ ";color:var(--g2);font-weight:700}
+.rm{display:grid;grid-template-columns:minmax(150px,1.8fr) repeat(3,1fr);gap:6px 10px;align-items:center}.rh{text-align:center;font:600 14px var(--fd);color:var(--g1)}.rh b{display:block}
+.rl{font-size:14px;padding:6px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}.ck{justify-self:center;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#d6f0df;color:var(--g1)}.ck.n{background:#eef1ef;color:#b0b9b3}
+.mock{position:relative;max-height:calc(100vh - 200px);overflow:auto;font-size:12px}.mh small{font:400 12px var(--fb);color:#d4efdd}.mh .fin{background:rgba(255,255,255,.14);padding:4px 12px;border-radius:12px;font:500 12px var(--fb)}.mh .fin b{font:700 20px var(--fd);margin-left:6px}
+.mock h4{font:600 14px var(--fd);color:var(--g1);margin:0 0 6px;padding-left:8px;border-left:4px solid var(--g2)}.zn{margin:8px 12px;padding:8px;border-radius:10px;border:2px solid transparent;transition:.3s}
+.inp{display:inline-block;min-width:70px;padding:2px 8px;border:1px solid var(--line);border-radius:8px;margin:0 8px;font-weight:600;background:#fff}.gob{background:var(--g2);color:#fff;border-radius:8px;padding:2px 10px;font-weight:600}
+.inf{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;margin-top:8px}.inf div{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line)}.inf span{color:var(--ink2)}
+.tw{overflow-x:auto}.mock table{min-width:560px}.mock .ob{min-width:150px;height:26px}
+.msg{padding:6px 10px;border-radius:10px;background:#d6f0df;color:var(--g1)}
+.sel{display:inline-block;padding:3px 9px;border-radius:8px;border:1px solid var(--line);background:#fff;min-width:150px;transition:.3s}.sel.d{background:#d6f0df;border-color:#9fd2b1}.sel.ni{background:#fbe2d1;border-color:#e8b896}
+.pbtn{display:inline-block;padding:3px 14px;border-radius:9px;border:1px solid var(--line);background:#f4f7f5;font-weight:600;margin-left:4px;transition:.3s}.pbtn.on3{background:var(--g1);color:#fff}.wfp{background:#f6faf7;border:1px solid var(--line)}
+@media (max-width:900px){.fm,.rg{grid-template-columns:1fr!important}.org{grid-template-columns:1fr}.rm{grid-template-columns:1.4fr repeat(3,1fr);font-size:12px}.rl{font-size:12px}}
 
-  /* ---------- Layout ---------- */
-  #main{display:flex; flex:1; min-height:0;}
-  #sidebar{
-    width:360px; flex-shrink:0; border-right:1px solid var(--app-border);
-    background:var(--app-panel); overflow-y:auto; padding:20px 20px 60px;
-  }
-  #stageArea{
-    flex:1; display:flex; align-items:center; justify-content:center;
-    padding:36px; overflow:auto; background:
-      radial-gradient(circle at 25% 20%, rgba(var(--accent-rgb),.06), transparent 45%),
-      radial-gradient(circle at 80% 85%, rgba(var(--accent-rgb),.05), transparent 40%),
-      var(--app-bg);
-  }
+.rr{display:grid;grid-template-columns:110px minmax(0,1.1fr) minmax(0,1.2fr);gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-left:8px solid var(--c);border-radius:16px;padding:10px 14px}
+.rr .rn{font:700 19px var(--fd);color:var(--c)}.rr small{display:block;color:var(--ink2);font-size:12.5px}.dts2{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.dts2 hr{width:10px;border:0}
+.dt{width:20px;height:20px;border-radius:50%;background:#dfe6e1}.on .dt.l{background:var(--c);animation:pop .4s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*55ms + var(--r)*400ms)}
+.rr .ch{display:flex;gap:5px;flex-wrap:wrap}.rr .ch span{background:#f1f7f3;border-radius:99px;padding:2px 10px;font-size:13px;color:var(--g1);font-weight:600}
+.app{position:relative;display:grid;grid-template-columns:132px 1fr;background:#eef4ee;border:1px solid var(--line);border-radius:16px;overflow:hidden;height:min(450px,calc(100vh - 220px));font-size:11.5px;box-shadow:0 18px 40px -24px rgba(20,83,45,.6)}
+.sb{background:#fff;padding:10px 8px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px}.sb b{font:700 15px var(--fd);color:var(--g1);padding:2px 8px 8px}
+.sb button{border:0;background:none;text-align:left;padding:7px 8px;border-radius:8px;font:500 12px var(--fb);color:var(--ink2);cursor:pointer}.sb .on{background:linear-gradient(135deg,#14532d,#2e9d63);color:#fff}
+.mn{padding:10px 12px;overflow:hidden;display:flex;flex-direction:column;gap:8px}.mn>*{animation:up .5s cubic-bezier(.2,.8,.2,1) both}.mn h5{font:600 16px var(--fd);color:var(--g1)}
+.kp{display:grid;gap:6px}.kp div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px}.kp small{display:block;color:var(--ink2)}.kp b{font:700 18px var(--fd)}
+.cur{position:absolute;left:60px;top:30px;width:16px;height:16px;border-radius:50%;background:var(--or);box-shadow:0 0 0 5px rgba(217,130,79,.3);z-index:5;transition:left .6s ease,top .6s ease;pointer-events:none}.cur.k{animation:rip .4s}@keyframes rip{50%{box-shadow:0 0 0 14px rgba(217,130,79,.12)}}
+.mt{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}.mt table{border:0;border-radius:0;font-size:11px;min-width:0}.mt th{padding:4px 6px;font-size:10.5px}.mt td{padding:4px 6px}
+.hb{background:linear-gradient(135deg,var(--g0),var(--g2));color:#fff;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}.hb b{font:700 18px var(--fd)}
+.fl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.fl span{background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 10px}.fl .gb{background:var(--g2);color:#fff;border-color:var(--g2);font-weight:600}
+.tw2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tw2>div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.lv.c{background:#fbe2d1;color:#8a3d18}.lv.n{background:#e3e8ee;color:#3d4a58}
+@media (max-width:900px){.rr{grid-template-columns:1fr}.app{grid-template-columns:1fr;height:auto}.sb{flex-direction:row;flex-wrap:wrap}}
 
-  .field{margin-bottom:16px;}
-  .field label{display:block; font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--app-muted); margin-bottom:6px;}
-  .field input[type="text"], .field textarea{
-    width:100%; background:var(--app-panel-2); border:1px solid var(--app-border);
-    color:var(--app-text); border-radius:8px; padding:10px 11px; font-family:'Inter'; font-size:13.5px;
-    resize:vertical;
-  }
-  .field input[type="text"]:focus, .field textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:transparent;}
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
-  .section-title{
-    font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-    color:var(--app-muted); margin:26px 0 12px; padding-top:18px; border-top:1px solid var(--app-border);
-  }
-  .section-title:first-child{margin-top:0; padding-top:0; border-top:none;}
-  .hint{font-size:11.5px; color:var(--app-muted); line-height:1.5; margin:-6px 0 14px;}
-
-  /* template picker */
-  #tplPicker{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
-  .tpl-opt{
-    border:1.5px solid var(--app-border); border-radius:10px; padding:8px; cursor:pointer;
-    background:var(--app-panel-2); text-align:left;
-  }
-  .tpl-opt.active{border-color:var(--accent); box-shadow:0 0 0 2px rgba(var(--accent-rgb),.25);}
-  .tpl-swatch{height:44px; border-radius:6px; margin-bottom:7px;}
-  .tpl-opt span{font-size:11.5px; font-weight:600; color:var(--app-text);}
-  .sw-transparent{background:linear-gradient(150deg,#eaf5f7,#cfe9ec 55%,#e8f6f2);}
-  .sw-metalized{background:linear-gradient(120deg,#0c0e11,#3a4048 45%,#0c0e11);}
-  .sw-white{background:linear-gradient(150deg,#f7f5f0,#ece7dc);}
-  .sw-pearlized{background:linear-gradient(120deg,#2a1b3d,#7a5ca8 35%,#3c8aa0 65%,#c98f6b);}
-  .sw-matte{background:linear-gradient(150deg,#171717,#0a0a0a);}
-
-  /* image upload */
-  .upload-btn{
-    display:block; border:1px dashed var(--app-border); border-radius:9px; background:var(--app-panel-2);
-    color:var(--app-muted); font-size:12.5px; padding:14px 10px; text-align:center; cursor:pointer;
-    font-family:'Inter'; font-weight:500;
-  }
-  .upload-btn:hover{border-color:var(--accent); color:var(--app-text);}
-  .upload-btn.has-file{border-style:solid; border-color:var(--accent); color:var(--app-text);}
-
-  /* color wheel */
-  .wheel-wrap{display:flex; gap:18px; align-items:center;}
-  #wheelCanvas{border-radius:50%; cursor:crosshair; box-shadow:0 0 0 1px var(--app-border);}
-  .wheel-marker{
-    position:absolute; width:12px; height:12px; border-radius:50%;
-    border:2px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.4); pointer-events:none;
-    transform:translate(-50%,-50%);
-  }
-  .wheel-canvas-wrap{position:relative; width:150px; height:150px; flex-shrink:0;}
-  .accent-controls{flex:1;}
-  .accent-preview{
-    width:100%; height:34px; border-radius:8px; margin-bottom:10px; border:1px solid var(--app-border);
-    background:var(--accent);
-  }
-  input[type="range"]{width:100%; accent-color:var(--accent);}
-  .mini-label{font-size:11px; color:var(--app-muted); display:flex; justify-content:space-between; margin-bottom:4px;}
-
-  /* ---------- Stage / Ad (1:1) ---------- */
-  #stage{
-    width:540px; aspect-ratio:1/1; position:relative; border-radius:16px; overflow:hidden;
-    box-shadow:0 30px 60px -24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
-    font-family:'Inter'; flex-shrink:0;
-  }
-  #stage *{box-sizing:border-box;}
-  .ad-bg{position:absolute; inset:0; background-size:cover; background-position:center;}
-  .ad-photo{position:absolute; inset:0; background-size:cover; background-position:center;}
-  .ad-content{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; padding:32px;}
-
-  /* film-layer logotype mark (no upload needed) */
-  .logo-mark{display:flex; align-items:center; gap:11px;}
-  .logo-mark .mark{width:32px; height:32px; position:relative; flex-shrink:0;}
-  .logo-mark .mark i{position:absolute; width:21px; height:21px; border-radius:6px; font-style:normal;}
-  .logo-mark .mark i:nth-child(1){background:var(--accent); top:0; left:0; opacity:.92;}
-  .logo-mark .mark i:nth-child(2){background:currentColor; top:9px; left:9px; opacity:.16; border:1px solid currentColor;}
-  .logo-mark .word{font-family:'Space Grotesk'; font-weight:700; font-size:15px; letter-spacing:.005em; line-height:1.1;}
-  .logo-mark .sub{font-size:9.5px; letter-spacing:.06em; opacity:.6; margin-top:1px;}
-
-  .glass{position:relative; overflow:hidden;}
-  .glass::after{
-    content:""; position:absolute; top:-60%; left:-20%; width:55%; height:220%;
-    background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 66%);
-    transform:rotate(12deg) translateX(-140%); opacity:0;
-  }
-  .glass.sweep::after{ animation:sweep 1.1s ease forwards; }
-  @keyframes sweep{
-    0%{ transform:rotate(12deg) translateX(-140%); opacity:0; }
-    12%{ opacity:.55; }
-    60%{ opacity:.28; }
-    100%{ transform:rotate(12deg) translateX(140%); opacity:0; }
-  }
-
-  .meta-row{display:flex; flex-wrap:wrap; align-items:center;}
-  .meta-chip{font-size:11px; font-weight:600; padding-right:12px; margin-right:12px; border-right:1px solid; white-space:nowrap; line-height:1;}
-  .meta-chip:last-child{padding-right:0; margin-right:0; border-right:none;}
-  .req-list{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px;}
-  .req-list li{display:flex; gap:8px; align-items:flex-start; font-size:12px; line-height:1.38;}
-  .req-dot{width:5px;height:5px;border-radius:50%; background:var(--accent); margin-top:5px; flex-shrink:0;}
-  .accent-rule{width:40px; height:3px; border-radius:3px; background:var(--accent);}
-  .title-lg{font-family:'Space Grotesk'; font-weight:700; line-height:1.0; letter-spacing:-.02em;}
-  .apply-line{font-size:11.5px; line-height:1.5;}
-
-  /* ===================== Template: Transparent ===================== */
-  #stage[data-tpl="transparent"] .ad-bg{background:
-    radial-gradient(circle at 100% 0%, rgba(8,28,34,.12), transparent 55%),
-    linear-gradient(160deg,#e6eef0 0%,#c6dade 45%,#dbe6df 100%);}
-  #stage[data-tpl="transparent"] .ring{position:absolute; width:300px; height:300px; border-radius:50%; border:1px solid rgba(10,40,48,.16); top:-110px; right:-110px;}
-  #stage[data-tpl="transparent"] .ring2{position:absolute; width:190px; height:190px; border-radius:50%; border:1px solid rgba(10,40,48,.13); top:-55px; right:-55px;}
-  #stage[data-tpl="transparent"] .logo-mark{color:#0a1c24;}
-  #stage[data-tpl="transparent"] .title-block{margin:20px 0 auto;}
-  #stage[data-tpl="transparent"] .title-lg{font-size:34px; color:#0a1c24; max-width:80%;}
-  #stage[data-tpl="transparent"] .company-line{font-size:12px; font-weight:600; color:#375862; margin-top:10px;}
-  #stage[data-tpl="transparent"] .glass{
-    background:linear-gradient(155deg, rgba(255,255,255,.6), rgba(255,255,255,.32));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 18px 34px -18px rgba(8,28,34,.3);
-    border:1px solid rgba(255,255,255,.6); border-radius:14px;
-    padding:20px 20px; color:#0f2530;
-  }
-  #stage[data-tpl="transparent"] .tagline{font-size:12px; color:#365a64; margin-bottom:14px; line-height:1.5;}
-  #stage[data-tpl="transparent"] .meta-chip{color:#164452; border-color:rgba(10,40,48,.25); margin-bottom:14px;}
-  #stage[data-tpl="transparent"] .req-list{color:#1a3641; margin-bottom:12px;}
-  #stage[data-tpl="transparent"] .apply-line{color:#0f2530; border-top:1px solid rgba(20,60,70,.15); padding-top:10px;}
-
-  /* ===================== Template: Metalized ===================== */
-  #stage[data-tpl="metalized"] .ad-bg{background:linear-gradient(150deg,#15171b 0%,#07080a 55%,#101214 100%);}
-  #stage[data-tpl="metalized"] .sheen{
-    position:absolute; top:41%; left:-30%; width:160%; height:13%;
-    background:linear-gradient(100deg, transparent 35%, rgba(255,255,255,.05) 46%, rgba(255,255,255,.32) 50%, rgba(255,255,255,.05) 54%, transparent 65%);
-    transform:rotate(-6deg);
-  }
-  #stage[data-tpl="metalized"] .logo-mark{color:#eef1f4;}
-  #stage[data-tpl="metalized"] .title-block{margin-top:14px;}
-  #stage[data-tpl="metalized"] .title-lg{font-size:33px; color:#f3f5f7; max-width:85%;}
-  #stage[data-tpl="metalized"] .company-line{font-size:11.5px; font-weight:600; color:#9aa3ac; margin-top:10px; letter-spacing:.01em;}
-  #stage[data-tpl="metalized"] .glass{
-    background:linear-gradient(155deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 16px 32px -18px rgba(0,0,0,.55);
-    border:1px solid rgba(255,255,255,.12); border-radius:14px;
-    padding:18px 18px; color:#e9ecef;
-  }
-  #stage[data-tpl="metalized"] .tagline{font-size:12px; color:#9aa3ac; line-height:1.5; margin-bottom:14px;}
-  #stage[data-tpl="metalized"] .meta-chip{color:#dfe3e7; border-color:rgba(255,255,255,.2); margin-bottom:14px;}
-  #stage[data-tpl="metalized"] .req-list{color:#d9dde1; margin-bottom:12px;}
-  #stage[data-tpl="metalized"] .apply-line{color:#c3c9cf; border-top:1px solid rgba(255,255,255,.14); padding-top:10px;}
-
-  /* ===================== Template: White ===================== */
-  #stage[data-tpl="white"] .ad-bg{background:#f2f2ee;}
-  #stage[data-tpl="white"] .photo-slot{
-    position:absolute; top:26px; right:26px; width:74px; height:74px; border-radius:50%;
-    background-size:cover; background-position:center; box-shadow:0 8px 18px -8px rgba(0,0,0,.2);
-    border:3px solid #fff;
-  }
-  #stage[data-tpl="white"] .ad-content{justify-content:center;}
-  #stage[data-tpl="white"] .logo-mark{color:#1c1c17;}
-  #stage[data-tpl="white"] .title-block{
-    background:rgba(255,255,255,.8); border:1px solid rgba(255,255,255,.9); border-bottom:none;
-    border-radius:16px 16px 0 0; padding:26px 24px 4px; margin-top:0;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95);
-  }
-  #stage[data-tpl="white"] .title-lg{font-size:27px; color:#1c1c17; margin-top:12px;}
-  #stage[data-tpl="white"] .company-line{font-size:11.5px; font-weight:600; color:#6f6a5b; margin-top:8px;}
-  #stage[data-tpl="white"] .glass{
-    background:rgba(255,255,255,.8);
-    box-shadow:0 18px 36px -20px rgba(20,17,10,.3), inset 0 -1px 0 rgba(255,255,255,.6);
-    border:1px solid rgba(255,255,255,.9); border-top:none;
-    border-radius:0 0 16px 16px;
-    padding:16px 24px 22px;
-  }
-  #stage[data-tpl="white"] .tagline{font-size:12px; color:#54503f; line-height:1.5; margin-bottom:14px;}
-  #stage[data-tpl="white"] .meta-chip{color:#33312a; border-color:#d8d2c1; margin-bottom:14px;}
-  #stage[data-tpl="white"] .req-list{color:#2c2a22; margin-bottom:12px;}
-  #stage[data-tpl="white"] .apply-line{color:#3c3a30; border-top:1px solid #e7e2d5; padding-top:10px;}
-
-  /* ===================== Template: Pearlized ===================== */
-  #stage[data-tpl="pearlized"] .ad-bg{
-    background:
-      radial-gradient(circle at 15% 10%, rgba(130,115,190,.28), transparent 50%),
-      radial-gradient(circle at 85% 15%, rgba(90,155,180,.26), transparent 50%),
-      radial-gradient(circle at 25% 90%, rgba(110,95,165,.24), transparent 55%),
-      radial-gradient(circle at 90% 85%, rgba(160,135,110,.16), transparent 50%),
-      #14101c;
-  }
-  #stage[data-tpl="pearlized"] .logo-mark{color:#f0ecf5;}
-  #stage[data-tpl="pearlized"] .title-block{margin:16px 0 -14px; position:relative; z-index:2;}
-  #stage[data-tpl="pearlized"] .title-lg{font-size:31px; color:#f5f2f8; max-width:78%;}
-  #stage[data-tpl="pearlized"] .company-line{font-size:11.5px; font-weight:600; color:#c3b8d4; margin-top:8px;}
-  #stage[data-tpl="pearlized"] .glass{
-    background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
-    border:1px solid rgba(255,255,255,.28); border-radius:14px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.3), 0 18px 38px -18px rgba(15,8,22,.55);
-    padding:26px 20px 18px; color:#f0ecf5;
-  }
-  #stage[data-tpl="pearlized"] .tagline{font-size:12px; color:#cabfd9; line-height:1.5; margin-bottom:14px;}
-  #stage[data-tpl="pearlized"] .meta-chip{color:#ede8f2; border-color:rgba(255,255,255,.25); margin-bottom:14px;}
-  #stage[data-tpl="pearlized"] .req-list{color:#f0e9fa; margin-bottom:12px;}
-  #stage[data-tpl="pearlized"] .apply-line{color:#f0e9fa; border-top:1px solid rgba(255,255,255,.3); padding-top:10px;}
-
-  /* ===================== Template: Matte ===================== */
-  #stage[data-tpl="matte"] .ad-bg{background:#111111;}
-  #stage[data-tpl="matte"] .logo-mark{color:#eaeaea;}
-  #stage[data-tpl="matte"] .title-block{margin-top:18px;}
-  #stage[data-tpl="matte"] .title-lg{font-size:38px; color:#f4f4f4; max-width:88%;}
-  #stage[data-tpl="matte"] .accent-rule{margin:14px 0 10px;}
-  #stage[data-tpl="matte"] .tagline{font-size:12px; color:#9c9c9c; line-height:1.5; max-width:80%; margin-bottom:14px;}
-  #stage[data-tpl="matte"] .req-list{color:#c9c9c9; margin-bottom:14px; display:grid; grid-template-columns:1fr 1fr; gap:6px 12px;}
-  #stage[data-tpl="matte"] .meta-chip{color:#d5d5d5; border-color:rgba(255,255,255,.2); margin-bottom:14px;}
-  #stage[data-tpl="matte"] .glass{
-    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.1); border-radius:12px;
-    box-shadow:none; padding:16px 18px; color:#d8d8d8;
-  }
-  #stage[data-tpl="matte"] .apply-line{color:#b8b8b8; border-top:1px solid rgba(255,255,255,.12); padding-top:10px;}
-
-  footer{padding:10px 24px; text-align:center; font-size:11px; color:var(--app-muted); border-top:1px solid var(--app-border); background:var(--app-panel);}
-
-  @media (max-width:900px){
-    #sidebar{width:100%; border-right:none; border-bottom:1px solid var(--app-border);}
-    #main{flex-direction:column;}
-    #stage{width:min(420px,86vw);}
-  }
+.rwrap{position:relative;height:min(470px,calc(100vh - 215px));border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 40px -24px rgba(20,83,45,.6);background:#eef4ee}
+.rwrap iframe{position:absolute;left:0;top:0;width:1280px;border:0;transform-origin:0 0}
+.rwrap .cur{position:absolute;left:30px;top:60px;width:20px;height:20px;border-radius:50%;background:var(--or);box-shadow:0 0 0 6px rgba(217,130,79,.3);z-index:5;transition:left .7s ease,top .7s ease;pointer-events:none}.rwrap .cur.k{animation:rip .45s}
 </style>
 </head>
 <body>
+<div class="logo"><img src="logo.png" alt="IPAK logo"></div>
 
-<div id="topbar">
-  <div class="brand">
-    <div class="brand-mark">JA</div>
-    <div class="brand-text">
-      <strong>Job Ad Studio</strong>
-      <span>Liquid‑glass corporate ad templates · 1:1</span>
+<section class="slide dk on">
+  <svg class="hex" viewBox="0 0 44 40" aria-hidden="true"><g><polygon points="11,6 19,6 23,13 19,20 11,20 7,13" fill="#3f7d3a"/></g><g><polygon points="19,6 27,6 31,13 27,20 19,20 15,13" fill="#74b043"/></g><g><polygon points="27,6 35,6 39,13 35,20 27,20 23,13" fill="#a7cf74"/></g><g><polygon points="19,19 27,19 31,26 27,33 19,33 15,26" fill="#d1e6b0"/></g></svg>
+  <h1 class="a">Performance Management System 2025</h1>
+  <p class="sub a" style="--d:2;font-size:21px;max-width:34ch">A step by step guide: who can do what, how to fill the form, and how the rating is decided.</p>
+  <p class="sub a" style="--d:3">Team HR · IPAK</p>
+</section>
+
+<section class="slide">
+  <h2 class="a">Four roles, four views</h2>
+  <p class="sub a" style="--d:1">Each dot is one employee. A lit dot means the role can see that person (3 departments of 4).</p>
+  <div class="g" id="rl" style="gap:10px"></div>
+</section>
+
+<section class="slide">
+  <h2 class="a">Rights at a glance</h2>
+  <p class="sub a" style="--d:1">Each ring counts how many of the 10 rights a role has.</p>
+  <div class="rm" id="rm"></div>
+</section>
+
+<section class="slide dk">
+  <h2 class="a">Sign in safely</h2>
+  <div class="g c3" style="text-align:center">
+    <div class="a" style="--d:1"><svg viewBox="0 0 100 100" style="max-width:140px;margin:auto"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/><circle class="ring" style="--o:0" cx="50" cy="50" r="40" fill="none" stroke="#4fd49b" stroke-width="9" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="60" text-anchor="middle" fill="#fff" font-family="Outfit" font-weight="700" font-size="30">5</text></svg><h3 style="color:#fff">Wrong PIN tries</h3><p class="sub">After 5 wrong tries the account locks for 10 minutes.</p></div>
+    <div class="a" style="--d:2"><svg viewBox="0 0 100 100" style="max-width:140px;margin:auto"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/><circle class="ring" style="--o:168" cx="50" cy="50" r="40" fill="none" stroke="#a7cf74" stroke-width="9" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="60" text-anchor="middle" fill="#fff" font-family="Outfit" font-weight="700" font-size="28">30m</text></svg><h3 style="color:#fff">Idle logout</h3><p class="sub">Refresh keeps you signed in. Save your work before a long break.</p></div>
+    <div class="a" style="--d:3"><svg viewBox="0 0 100 100" style="max-width:140px;margin:auto"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="9"/><circle class="ring" style="--o:84" cx="50" cy="50" r="40" fill="none" stroke="#d9824f" stroke-width="9" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="60" text-anchor="middle" fill="#fff" font-family="Outfit" font-weight="700" font-size="28">PIN</text></svg><h3 style="color:#fff">Keep it private</h3><p class="sub">Use your email and the PIN from HR. A changed PIN ends old sessions.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2 class="a">What each page does: live view</h2>
+  <div class="g fm" style="grid-template-columns:2.2fr 1fr;align-items:start">
+    <div class="rwrap a" style="--d:1" id="pgx"><iframe id="rif" title="Live system view" tabindex="-1"></iframe><span class="cur" id="cur"></span></div>
+    <div>
+      <div class="cap a" style="--d:2" aria-live="polite"><b id="pt"></b><p id="pu"></p><p id="pw"></p></div>
+      <p class="sub" style="font-size:13px;margin-top:8px">This is the real system screen with sample data. The cursor opens each page from the sidebar.</p>
     </div>
   </div>
-  <button id="downloadBtn">⬇ Download PNG (2K)</button>
-</div>
+  <script type="text/plain" id="rdoc"><!DOCTYPE html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"><style>
+:root{--bg1:#eef4ee;--bg2:#e2ece4;--orb1:rgba(143,209,169,.55);--orb2:rgba(31,122,74,.22);--orb3:rgba(167,207,116,.30);--ink:#10281c;--ink2:#47665a;--ink3:#789287;--navy2:#1f7a4a;--blue:#4f9d73;--accent:#8fd1a9;--card:rgba(255,255,255,.72);--card-solid:#f6fbf7;--card-2:rgba(255,255,255,.5);--line:rgba(20,83,45,.14);--edge:rgba(255,255,255,.85);--shadow:0 1px 0 rgba(255,255,255,.95) inset,0 12px 32px -14px rgba(20,83,45,.30);--primary:#14532d;--on-primary:#f4fbf6;--a:#1f7a4a;--a-bg:#d6f0df;--b:#0f6b6b;--b-bg:#d3eeea;--c:#9a4a22;--c-bg:#fbe2d1;--na:#5b6b7b;--na-bg:#e3e8ee;--bad:#a3262a;--bad-bg:#fde2e1;--curve:#2e9d63;--curve2:#14532d;--nb-dark:#2f7a35;--nb-mid:#b7dc9b;--nb-blue:#bfe0d2;--nb-warm:#f8cbad;--nb-ink:#10281c;--hero1:#0f4125;--hero2:#1f7a4a;--font-d:"Outfit","Segoe UI",system-ui,sans-serif;--font-b:"Figtree","Segoe UI",system-ui,sans-serif;--r-lg:22px;--r-md:14px}
+*,*::before,*::after{box-sizing:border-box}html::-webkit-scrollbar{display:none}html{scrollbar-width:none}
+body{margin:0;min-height:100%;background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;color:var(--ink);font:15px/1.55 var(--font-b);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(520px 420px at 12% 8%,var(--orb1),transparent 70%),radial-gradient(620px 520px at 92% 18%,var(--orb2),transparent 72%),radial-gradient(520px 460px at 70% 96%,var(--orb3),transparent 70%)}
+h1,h2,h3{font-family:var(--font-d);margin:0;font-weight:600;letter-spacing:-.01em;line-height:1.2;color:var(--ink)}p{margin:0}button,input,select{font:inherit;color:inherit}
+.shell{display:grid;grid-template-columns:252px minmax(0,1fr);gap:22px;max-width:1440px;margin:0 auto;padding:20px}
+.side{align-self:start;display:flex;flex-direction:column;gap:18px;padding:18px 14px;border-radius:var(--r-lg);background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow)}
+.brand{padding:4px 8px 0}.brand img{height:46px;display:block}.nav{display:flex;flex-direction:column;gap:4px}
+.nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:0;border-radius:12px;background:transparent;color:var(--ink2);text-align:left;font-weight:500}
+.nav button[aria-current="page"]{background:linear-gradient(135deg,#14532d,#2e9d63);color:#f4fbf6;box-shadow:0 8px 18px -10px rgba(20,83,45,.75)}
+.side-foot{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid var(--line)}.side-foot small{color:var(--ink3);font-size:12.5px;padding:0 6px 4px}.link-btn{padding:8px 10px;color:var(--ink2);font-size:13.5px}
+main{min-width:0;display:flex;flex-direction:column;gap:20px}
+.glass{background:var(--card);border:1px solid var(--edge);border-radius:var(--r-lg);box-shadow:var(--shadow)}.pad{padding:24px}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;padding:6px 4px 0}.page-head h1{font-size:30px}.page-head p{color:var(--ink2);margin-top:6px;max-width:62ch}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid transparent;background:var(--primary);color:var(--on-primary);font-weight:600;box-shadow:0 6px 14px -8px rgba(20,83,45,.7)}.btn.ghost{background:var(--card-2);color:var(--ink);border-color:var(--line);box-shadow:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip-a{background:var(--a-bg);color:var(--a)}.chip-b{background:var(--b-bg);color:var(--b)}.chip-c{background:var(--c-bg);color:var(--c)}.chip-na{background:var(--na-bg);color:var(--na)}.chip.lg{padding:6px 14px;font-size:14.5px}
+.code{display:inline-grid;place-items:center;min-width:42px;padding:2px 8px;border-radius:8px;font:600 14px var(--font-d)}.code.dark{background:var(--nb-dark);color:#fff}.code.mid{background:var(--nb-mid);color:var(--nb-ink)}.code.blue{background:var(--nb-blue);color:var(--nb-ink)}.code.warm{background:var(--nb-warm);color:var(--nb-ink)}
+.hero-banner{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 30px;padding:40px 44px;border-radius:26px;color:#f4fbf6;background:linear-gradient(135deg,var(--hero1),var(--hero2));box-shadow:0 24px 50px -26px rgba(20,83,45,.75)}
+.hero-banner h1{color:#fff;font-size:44px;letter-spacing:-.03em;line-height:1.06}.hb-tag{margin-top:10px;font:300 24px/1.3 var(--font-d);color:#d4efdd}.hb-tag b{font-weight:600;color:#fff}
+.hb-dates{display:flex;gap:10px}.hb-dates div{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22)}.hb-dates small{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:#d4efdd}.hb-dates strong{display:block;font:600 16px var(--font-d);color:#fff;white-space:nowrap}.hb-dates .end{background:rgba(255,255,255,.92)}.hb-dates .end small{color:#a24b4e}.hb-dates .end strong{color:#8c1f23}
+.lead{font-size:17px;color:var(--ink2);max-width:78ch}.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.card h2{font-size:21px;margin-bottom:6px}.card .sub{color:var(--ink2);margin-bottom:14px}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}.rules li{position:relative;padding-left:22px}.rules li::before{content:"";position:absolute;left:2px;top:.62em;width:9px;height:9px;border-radius:50%;background:var(--curve)}.rules .note{display:block;color:var(--ink2);font-size:14px}
+.scale{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}.scale div{padding:11px 12px;border-radius:12px;background:var(--card-2);border:1px solid var(--line)}.scale b{display:block;font:600 15px var(--font-d)}.scale span{display:block;color:var(--ink2);font-size:13.5px}.sa{border-left:5px solid var(--a)}.sb{border-left:5px solid var(--b)}.sc{border-left:5px solid var(--c)}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s;display:flex;flex-direction:column}.steps li{counter-increment:s;position:relative;padding:0 0 14px 48px}.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#14532d,#2e9d63);color:#f4fbf6;font:600 14px var(--font-d)}
+.nb{display:grid;grid-template-columns:auto auto repeat(3,minmax(0,1fr));gap:6px;align-items:stretch}.nb .axis-y{grid-row:1/4;grid-column:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font:600 13px var(--font-d);color:var(--ink2)}
+.nb .rl{display:flex;flex-direction:column;justify-content:center;align-items:center;font:600 15px var(--font-d);min-width:44px}.nb small{display:block;font:400 12px var(--font-b);color:var(--ink3)}.nb .ct{text-align:center;font:600 15px var(--font-d)}
+.nb .cell{min-height:70px;padding:8px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--nb-ink)}.nb .cell b{font:600 20px var(--font-d)}.nb .cell span{font-size:12.5px;line-height:1.25}.nb .dark{background:var(--nb-dark);color:#fff}.nb .mid{background:var(--nb-mid)}.nb .blue{background:var(--nb-blue)}.nb .warm{background:var(--nb-warm)}.nb .axis-x{grid-column:3/6;text-align:center;font:600 13px var(--font-d);color:var(--ink2)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.kpis.k5{grid-template-columns:repeat(5,minmax(0,1fr))}.kpi{padding:20px}.kpi small{color:var(--ink2);font-size:13.5px}.kpi .v{font:600 34px/1.1 var(--font-d);margin:6px 0 2px}.kpi .s{color:var(--ink2);font-size:13.5px}
+.mix{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--na-bg);margin:12px 0 8px}.mix i{display:block;height:100%}.ma{background:var(--a)}.mb{background:var(--blue)}.mc{background:#d9824f}.legend{display:flex;gap:12px;font-size:13px;color:var(--ink2)}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.chart-card h2{font-size:20px}.chart-card .sub{color:var(--ink2);font-size:14px;margin:4px 0 8px}svg{width:100%;height:auto;display:block}
+.tbl-wrap{overflow:hidden;border-radius:var(--r-md);border:1px solid var(--line);background:var(--card-2)}table{border-collapse:collapse;width:100%}th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{font:600 13.5px var(--font-d);color:var(--ink2);background:var(--card-2);white-space:nowrap}tbody tr:last-child td{border-bottom:0}.num{text-align:right;white-space:nowrap}
+.name-chip{border:1px solid var(--line);background:var(--card-2);border-radius:99px;padding:2px 10px;font-size:13px}.nm{font-weight:600}.ds{display:block;color:var(--ink2);font-size:13px}
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between}.search{flex:1 1 260px;max-width:420px}.search input{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}.toggle{color:var(--ink2);font-size:14px}
+.picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.picker select,.cell-in{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 11px;font-weight:600}.cell-in{font-weight:400}
+.paper{padding:0;overflow:hidden}.paper-head{padding:30px 32px 26px;background:linear-gradient(120deg,var(--hero1),var(--hero2) 70%,#2e9d63);color:#fff;display:flex;justify-content:space-between;align-items:center}.paper-head h1{color:#fff;font-size:26px}.paper-head p{color:#d4efdd;font-size:14px;margin-top:4px}.paper-head .final{display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:16px}.paper-head .final b{font:600 28px var(--font-d)}.paper-head small{display:block;color:#d4efdd;font-size:13px}
+.sec{padding:26px 32px;border-top:1px solid var(--line)}.sec>h2{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:10px}.sec>h2::before{content:"";width:5px;height:22px;border-radius:3px;background:linear-gradient(var(--curve),var(--navy2))}.sec>.sub{color:var(--ink2);margin-bottom:16px;font-size:14.5px}
+.info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 28px}.info .row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}.info .row span:first-child{color:var(--ink2);font-size:14px}
+.rep{padding:24px;display:flex;flex-direction:column;gap:20px}.rep-head{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-radius:16px;background:linear-gradient(120deg,var(--hero1),var(--hero2));color:#fff}.rep-head h2{color:#fff;font-size:22px}.rep-head p,.rep-head small{color:#d4efdd}
+.rep-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.rep-kpis>div{padding:14px 16px;border-radius:14px;background:var(--card-2);border:1px solid var(--line)}.rep-kpis small{display:block;color:var(--ink2);font-size:13px}.rep-kpis b{display:block;font:600 28px/1.15 var(--font-d)}.rep-kpis span{color:var(--ink2);font-size:12.5px}
+.seg{display:inline-flex;padding:4px;border-radius:12px;background:var(--card-2);border:1px solid var(--line);gap:2px}.seg button{border:0;background:transparent;padding:7px 14px;border-radius:9px;color:var(--ink2);font-weight:600}.seg button[aria-pressed="true"]{background:var(--primary);color:var(--on-primary)}.pr-sub{display:block;color:var(--ink2);font-size:13px}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}#view>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}#view>*:nth-child(2){animation-delay:.05s}#view>*:nth-child(3){animation-delay:.1s}#view>*:nth-child(n+4){animation-delay:.15s}
+</style></head><body><div class="shell"><aside class="side"><div class="brand"><img src="logo.png" alt=""></div><nav class="nav" id="rn"></nav><div class="side-foot"><small>ahmed@company.com · Admin</small><span class="link-btn">Dark mode</span><span class="link-btn">Sign out</span></div></aside><main id="view"></main></div></body></html></script>
+</section>
 
-<div id="main">
-  <div id="sidebar">
-
-    <div class="section-title">Template</div>
-    <div id="tplPicker">
-      <button class="tpl-opt active" data-tpl="transparent"><div class="tpl-swatch sw-transparent"></div><span>Transparent</span></button>
-      <button class="tpl-opt" data-tpl="metalized"><div class="tpl-swatch sw-metalized"></div><span>Metalized</span></button>
-      <button class="tpl-opt" data-tpl="white"><div class="tpl-swatch sw-white"></div><span>White</span></button>
-      <button class="tpl-opt" data-tpl="pearlized"><div class="tpl-swatch sw-pearlized"></div><span>Pearlized</span></button>
-      <button class="tpl-opt" data-tpl="matte"><div class="tpl-swatch sw-matte"></div><span>Matte</span></button>
+<section class="slide">
+  <h2 class="a">How to fill the form: live preview</h2>
+  <div class="g fm" style="grid-template-columns:2.2fr 1fr;align-items:start">
+    <div class="mock a" style="--d:1" id="mock">
+      <div class="mh"><div><b>IPAK Performance Assessment Form – 2025</b><br><small>Ahmed Raza · HR Officer</small></div><div class="fin">Final rating <b id="hc">–</b></div></div>
+      <div class="zn" id="z0"><b>Employee code</b><span class="inp" id="cin">&nbsp;</span><span class="gob">Open</span>
+        <div class="inf rv" data-s="0"><div><span>Employee ID</span><b>690</b></div><div><span>Grade</span><b>MM2</b></div><div><span>Name</span><b>Ahmed Raza</b></div><div><span>Line manager</span><b>Sara Khan</b></div><div><span>Designation</span><b>HR Officer</b></div><div><span>Head of department</span><b>Usman Ali</b></div><div><span>Department</span><b>Human Resources</b></div><div><span>Date of joining</span><b>12 Mar 2019</b></div><div><span>Sub department</span><b>Recruitment</b></div><div><span>Performance rating 2025</span><b>N/A</b></div></div></div>
+      <div class="zn" id="z1"><h4>Individual Performance Indicator – IPI</h4><div class="tw"><table><thead><tr><th>Smart objective</th><th>A – Exceed</th><th>B – Meet</th><th>C – Below</th><th>Weightage</th><th>Achievement %</th><th>Level</th><th>Score</th></tr></thead><tbody id="ob"></tbody></table></div></div>
+      <div class="zn" id="z2"><div class="msg rv" data-s="2">✔ Weightage totals 100 across 4 objectives, and none is above 30%.</div></div>
+      <div class="zn" id="z3"><div class="rv" data-s="3"><b>IPI total score:</b> 95 / 100 &nbsp; <b>IPI final rating:</b> <i class="lv b">B – Meet Expectation</i></div></div>
+      <div class="zn" id="z4"><h4>Behaviour Performance Indicator – BPI</h4><div class="tw"><table><thead><tr><th>Competency</th><th>Achievement level</th></tr></thead><tbody id="bp"></tbody></table></div><div class="rv" data-s="4" style="margin-top:6px"><b>BPI total:</b> 83.35% &nbsp; <b>BPI final rating:</b> <i class="lv b">B – Meet Expectation</i></div></div>
+      <div class="zn res" id="z5"><div class="rv" data-s="5"><h4>Final rating</h4><span style="font:700 34px var(--fd);color:var(--g2)">BB</span> <b>Good Performer</b><br><span style="color:var(--ink2)">IPI B + BPI B</span></div><div class="nb rv" data-s="5" id="mnb" style="gap:3px"></div></div>
+      <div class="zn" id="z6"><h4>Promotion recommendation</h4>Do you want to recommend <b>Ahmed Raza</b> for a promotion? <span class="pbtn" id="py">Yes</span> <span class="pbtn" id="pn">No</span><div class="rv" data-s="6" style="margin-top:4px;color:var(--ink2)">Position: <b>Senior HR Officer</b> · Grade: <b>MM1</b> · <i class="lv b">HR review pending</i></div></div>
+      <div class="zn wfp" id="z7"><span class="chp" id="stc">Draft – with Line Manager</span> <button class="btn2" id="snd">Send to HOD</button> <button class="btn2 on2" id="svb" style="background:#fff;color:var(--ink);border:1px solid var(--line)">Save changes</button><p id="hint" style="margin-top:6px;color:var(--ink2)"></p><p id="svs" style="color:var(--ink2)"></p></div>
     </div>
-
-    <div class="section-title">Company & Role</div>
-    <div class="field"><label>Company name</label><input type="text" id="f-company" value="IPAK — International Packaging Films Ltd."></div>
-    <div class="field"><label>Job title</label><input type="text" id="f-title" value="Senior Production Engineer"></div>
-    <div class="field"><label>Location</label><input type="text" id="f-location" value="Lahore, Pakistan"></div>
-    <div class="field row3">
-      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Type</label><input type="text" id="f-type" value="Full-time"></div>
-      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Mode</label><input type="text" id="f-mode" value="On-site"></div>
-      <div><label style="display:block;font-size:11px;color:var(--app-muted);margin-bottom:6px;">Experience</label><input type="text" id="f-exp" value="5+ Years"></div>
-    </div>
-
-    <div class="section-title">Content</div>
-    <div class="field"><label>Tagline</label><textarea id="f-tagline" rows="2">Join Pakistan's leading manufacturer of BOPP &amp; CPP packaging films.</textarea></div>
-    <div class="field"><label>Requirements (one per line)</label><textarea id="f-reqs" rows="5">Bachelor's in Polymer / Mechanical / Chemical Engineering
-Experience in film extrusion or packaging manufacturing
-Strong understanding of quality & process control
-Willingness to work rotational shifts</textarea></div>
-    <div class="field"><label>How to apply</label><input type="text" id="f-apply" value="Send your CV to careers@ipak.com.pk"></div>
-    <div class="field"><label>Deadline</label><input type="text" id="f-deadline" value="Apply before 30 Sep 2026"></div>
-
-    <div class="section-title">Background photo</div>
-    <div class="hint">The IPAK mark is built in — no logo upload needed. Add a plant/product photo if you want one behind the design (Metalized, Pearlized &amp; Matte use it full-bleed; White uses it in the corner circle).</div>
-    <label class="upload-btn" id="photoBtn">🖼 Upload background photo<input type="file" id="f-photo" accept="image/*" style="display:none;"></label>
-
-    <div class="section-title">Accent Color</div>
-    <div class="wheel-wrap">
-      <div class="wheel-canvas-wrap">
-        <canvas id="wheelCanvas" width="150" height="150"></canvas>
-        <div class="wheel-marker" id="wheelMarker"></div>
-      </div>
-      <div class="accent-controls">
-        <div class="accent-preview" id="accentPreview"></div>
-        <div class="mini-label"><span>Lightness</span><span id="lightVal">40%</span></div>
-        <input type="range" id="f-light" min="15" max="85" value="40">
-        <div class="mini-label" style="margin-top:10px;"><span>Glass intensity</span><span id="glassVal">16%</span></div>
-        <input type="range" id="f-glass" min="6" max="35" value="16">
-      </div>
-    </div>
-
-  </div>
-
-  <div id="stageArea">
-    <div id="stage" data-tpl="transparent">
-      <div class="ad-bg"></div>
-      <div class="ad-photo" id="adPhoto"></div>
-
-      <div class="ring" data-only="transparent"></div>
-      <div class="ring2" data-only="transparent"></div>
-      <div class="sheen" data-only="metalized"></div>
-      <div class="photo-slot" id="photoSlot" data-only="white"></div>
-
-      <div class="ad-content">
-        <div class="logo-mark">
-          <div class="mark"><i></i><i></i></div>
-          <div>
-            <div class="word">IPAK</div>
-            <div class="sub">Packaging Films</div>
-          </div>
-        </div>
-
-        <div class="title-block">
-          <div class="title-lg" id="titleLine">Senior Production Engineer</div>
-          <div class="company-line" id="companyLine">IPAK — International Packaging Films Ltd.</div>
-        </div>
-
-        <div class="glass" id="glassCard">
-          <div class="accent-rule" data-only="matte"></div>
-          <div class="tagline" id="taglineLine">Join Pakistan's leading manufacturer of BOPP &amp; CPP packaging films.</div>
-          <div class="meta-row" id="metaRow">
-            <span class="meta-chip" id="chipLoc">📍 Lahore, Pakistan</span>
-            <span class="meta-chip" id="chipType">Full-time</span>
-            <span class="meta-chip" id="chipMode">On-site</span>
-            <span class="meta-chip" id="chipExp">5+ Years</span>
-          </div>
-          <ul class="req-list" id="reqList"></ul>
-          <div class="apply-line" id="applyLine">
-            <div id="applyText">Send your CV to careers@ipak.com.pk</div>
-            <div id="deadlineText" style="opacity:.75; margin-top:2px;">Apply before 30 Sep 2026</div>
-          </div>
-        </div>
-      </div>
+    <div>
+      <div class="cap a" style="--d:2" aria-live="polite"><b id="ct"></b><p id="cy"></p><p id="ca"></p></div>
+      <div class="ctl a" style="--d:3"><button id="fpv">‹</button><button id="fpl">Pause</button><button id="fnx">›</button><div class="dots" id="dts"></div></div>
+      <p class="sub" style="font-size:13px;margin-top:8px">Sample employee and values. The orange frame shows the part of the form you are working on.</p>
     </div>
   </div>
-</div>
+</section>
 
-<footer>Built for IPAK · Exports at 2160×2160px (2K+) PNG</footer>
+<section class="slide">
+  <h2 class="a">The 9-box model: try it</h2>
+  <p class="sub a" style="--d:1">Final rating = IPI letter + BPI letter. Move the sliders, or watch the demo change them.</p>
+  <div class="g c2" style="grid-template-columns:1fr 1.2fr;align-items:center">
+    <div class="g a" style="--d:2;gap:14px">
+      <div class="box"><label for="s1"><b>IPI score</b> <span class="big" id="v1">85</span></label><input id="s1" type="range" min="0" max="100" value="85"><p><span class="tag c">C below 80</span> <span class="tag b">B 80–98</span> <span class="tag">A 98+</span></p></div>
+      <div class="box"><label for="s2"><b>BPI: competencies developed (of 6)</b> <span class="big" id="v2">4</span></label><input id="s2" type="range" min="0" max="6" value="4"><p><span class="tag c">C 3 or fewer</span> <span class="tag b">B 4–5</span> <span class="tag">A all 6</span></p></div>
+      <div class="note"><b id="nr" style="font-family:var(--fd);font-size:19px;color:var(--g1)"></b><br><span id="nd"></span></div>
+    </div>
+    <div class="nbw a" style="--d:3"><div class="ax">IPI: individual performance</div><div class="nb" id="nb"></div><span></span><div class="axx">BPI: behaviour performance (C, B, A)</div></div>
+  </div>
+</section>
 
+<section class="slide">
+  <h2 class="a">Approval workflow</h2>
+  <div class="wfw a" style="--d:1"><span class="tk"></span>
+    <div class="wf">
+      <div class="st"><span class="dot">1</span><h3>Draft</h3><p class="sub" style="font-size:13.5px">Line Manager fills the form and promotion Yes / No.</p></div>
+      <div class="st"><span class="dot">2</span><h3>Send to HOD</h3><p class="sub" style="font-size:13.5px">Checked for completeness, then locked for the Line Manager.</p></div>
+      <div class="st"><span class="dot">3</span><h3>Submitted</h3><p class="sub" style="font-size:13.5px">HOD reviews, can edit, then approves or returns.</p></div>
+      <div class="st"><span class="dot" style="background:var(--or)">4</span><h3>Approved</h3><p class="sub" style="font-size:13.5px">Final and locked. Only Admin / HR can reopen.</p></div>
+    </div>
+  </div>
+  <div class="g c3">
+    <div class="box a" style="--d:3"><h3>Complete before sending</h3><p>At least 4 objectives, weightage 100, none above 30%, all 6 BPI rated, promotion answered.</p></div>
+    <div class="box a" style="--d:4"><h3>Returned forms</h3><p>The HOD note shows on top of the form. Fix and send again.</p></div>
+    <div class="box a" style="--d:5"><h3>History</h3><p>Every send, approval and return is logged with who and when.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2 class="a">Dashboard and Report</h2>
+  <div class="g c2" style="align-items:center">
+    <div class="box a" style="--d:1"><svg viewBox="0 0 540 210" role="img" aria-label="Ideal and actual curves"><g id="curve"></g></svg><p style="font-size:13px">Dashed: ideal. Green: your team's actual spread over the nine ratings.</p></div>
+    <div class="g" style="gap:14px">
+      <div class="row a" style="--d:2"><span>Needs attention</span><div class="bar"><i class="grow" style="width:13%;--d:2;background:var(--or)"></i></div><span>15%</span></div>
+      <div class="row a" style="--d:3"><span>Core</span><div class="bar"><i class="grow" style="width:68%;--d:3"></i></div><span>70%</span></div>
+      <div class="row a" style="--d:4"><span>Top</span><div class="bar"><i class="grow" style="width:19%;--d:4;background:var(--lime)"></i></div><span>15%</span></div>
+      <p class="sub a" style="--d:5;font-size:13.5px">Bars are sample values; the target is 15 / 70 / 15. Filter by department, section or status. The Report page adds the employee table with signature lines for print and CSV.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2 class="a">Promotions</h2>
+  <svg viewBox="0 0 900 100" role="img" aria-label="Promotion pipeline"><g class="pop" style="--d:1"><rect x="5" y="20" width="250" height="60" rx="14" fill="#14532d"/><text x="130" y="56" text-anchor="middle" fill="#fff" font-weight="600" font-size="16">LM / HOD: Yes or No</text></g><g class="pop" style="--d:3"><rect x="325" y="20" width="250" height="60" rx="14" fill="#1f7a4a"/><text x="450" y="56" text-anchor="middle" fill="#fff" font-weight="600" font-size="16">Form + 2022–2025 history</text></g><g class="pop" style="--d:5"><rect x="645" y="20" width="250" height="60" rx="14" fill="#a7cf74"/><text x="770" y="56" text-anchor="middle" fill="#10281c" font-weight="600" font-size="16">HR: Promoted / Rejected</text></g><g stroke="#d9824f" stroke-width="3" class="flowl"><path d="M255 50H325"/><path d="M575 50H645"/></g></svg>
+  <div class="g c3">
+    <div class="box a" style="--d:2"><h3>Step 1: Yes or No</h3><p>On the assessment form. No is saved as Not Recommended.</p></div>
+    <div class="box a" style="--d:3"><h3>Step 2: Details</h3><p>Yes opens a form. History fills from Master. Add position, grade and key achievements.</p></div>
+    <div class="box a" style="--d:4"><h3>Step 3: HR decides</h3><p>Organogram, remarks, final status. Every decision is logged.</p></div>
+  </div>
+  <div class="note a" style="--d:5">The Promotions page lists Promoted, Not Recommended, Rejected by HR, Recommended and Pending, with filters and CSV export.</div>
+</section>
+
+<section class="slide dk">
+  <h1 class="a">Questions?</h1>
+  <p class="sub a" style="--d:2;font-size:21px;max-width:36ch">Contact the HR Department for your email, PIN or any help.</p>
+  <p class="sub a" style="--d:3">Team HR</p>
+</section>
+
+<div class="nav"><button id="pv">Back</button><div class="pg"><i id="pb"></i></div><span id="cnt"></span><button id="nx">Next</button></div>
 <script>
 (function(){
-  const state = {
-    tpl:'transparent',
-    company:'IPAK — International Packaging Films Ltd.',
-    title:'Senior Production Engineer',
-    location:'Lahore, Pakistan',
-    type:'Full-time', mode:'On-site', exp:'5+ Years',
-    tagline:"Join Pakistan's leading manufacturer of BOPP & CPP packaging films.",
-    reqs:["Bachelor's in Polymer / Mechanical / Chemical Engineering","Experience in film extrusion or packaging manufacturing","Strong understanding of quality & process control","Willingness to work rotational shifts"],
-    apply:'Send your CV to careers@ipak.com.pk',
-    deadline:'Apply before 30 Sep 2026',
-    photo:null,
-    hue:188, sat:46, light:40, glass:16
-  };
-
-  const $ = id => document.getElementById(id);
-  const stage = $('stage');
-
-  function applyVisibility(){
-    document.querySelectorAll('[data-only]').forEach(el=>{
-      const list = el.getAttribute('data-only').split(' ');
-      el.style.display = list.includes(state.tpl) ? '' : 'none';
-    });
-  }
-
-  function render(){
-    $('companyLine').textContent = state.company;
-    $('titleLine').textContent = state.title;
-    $('taglineLine').textContent = state.tagline;
-    $('chipLoc').textContent = state.location;
-    $('chipType').textContent = state.type;
-    $('chipMode').textContent = state.mode;
-    $('chipExp').textContent = state.exp;
-    $('applyText').textContent = state.apply;
-    $('deadlineText').textContent = state.deadline;
-
-    const reqList = $('reqList');
-    reqList.innerHTML = '';
-    state.reqs.forEach(line=>{
-      if(!line.trim()) return;
-      const li = document.createElement('li');
-      const dot = document.createElement('span'); dot.className='req-dot';
-      const txt = document.createElement('span'); txt.textContent = line.trim();
-      li.appendChild(dot); li.appendChild(txt);
-      reqList.appendChild(li);
-    });
-
-    const photo = $('adPhoto'), slot = $('photoSlot');
-    if(state.photo){
-      photo.style.backgroundImage = `url(${state.photo})`;
-      slot.style.backgroundImage = `url(${state.photo})`;
-      photo.style.opacity = (state.tpl==='metalized'||state.tpl==='pearlized'||state.tpl==='matte') ? '.5' : '0';
-    } else {
-      photo.style.backgroundImage = '';
-      slot.style.backgroundImage = 'linear-gradient(135deg,#e2ddcf,#cfc9b8)';
-      photo.style.opacity = '0';
-    }
-
-    applyVisibility();
-  }
-
-  function switchTemplate(t){
-    state.tpl = t;
-    stage.dataset.tpl = t;
-    document.querySelectorAll('.tpl-opt').forEach(b=>b.classList.toggle('active', b.dataset.tpl===t));
-    render();
-    const glass = $('glassCard');
-    glass.classList.remove('sweep');
-    void glass.offsetWidth;
-    glass.classList.add('sweep');
-  }
-
-  $('f-company').addEventListener('input', e=>{ state.company=e.target.value; render(); });
-  $('f-title').addEventListener('input', e=>{ state.title=e.target.value; render(); });
-  $('f-location').addEventListener('input', e=>{ state.location=e.target.value; render(); });
-  $('f-type').addEventListener('input', e=>{ state.type=e.target.value; render(); });
-  $('f-mode').addEventListener('input', e=>{ state.mode=e.target.value; render(); });
-  $('f-exp').addEventListener('input', e=>{ state.exp=e.target.value; render(); });
-  $('f-tagline').addEventListener('input', e=>{ state.tagline=e.target.value; render(); });
-  $('f-reqs').addEventListener('input', e=>{ state.reqs=e.target.value.split('\n'); render(); });
-  $('f-apply').addEventListener('input', e=>{ state.apply=e.target.value; render(); });
-  $('f-deadline').addEventListener('input', e=>{ state.deadline=e.target.value; render(); });
-
-  document.querySelectorAll('.tpl-opt').forEach(btn=>{
-    btn.addEventListener('click', ()=> switchTemplate(btn.dataset.tpl));
-  });
-
-  $('f-photo').addEventListener('change', e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ev=>{
-      state.photo = ev.target.result;
-      $('photoBtn').classList.add('has-file');
-      render();
-    };
-    reader.readAsDataURL(file);
-  });
-
-  function hslToRgb(h,s,l){
-    s/=100; l/=100;
-    const k = n => (n + h/30) % 12;
-    const a = s * Math.min(l, 1-l);
-    const f = n => l - a*Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n),1)));
-    return [Math.round(255*f(0)), Math.round(255*f(8)), Math.round(255*f(4))];
-  }
-  function rgbToHex(r,g,b){ return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join(''); }
-
-  function updateAccent(){
-    const [r,g,b] = hslToRgb(state.hue, state.sat, state.light);
-    const hex = rgbToHex(r,g,b);
-    document.documentElement.style.setProperty('--accent', hex);
-    document.documentElement.style.setProperty('--accent-rgb', `${r},${g},${b}`);
-    document.documentElement.style.setProperty('--glass-a', (state.glass/100).toFixed(2));
-    $('accentPreview').style.background = hex;
-  }
-
-  const wheelCanvas = $('wheelCanvas');
-  const wctx = wheelCanvas.getContext('2d');
-  const wsize = wheelCanvas.width;
-  const wradius = wsize/2;
-
-  function drawWheel(){
-    const img = wctx.createImageData(wsize, wsize);
-    for(let y=0;y<wsize;y++){
-      for(let x=0;x<wsize;x++){
-        const dx = x-wradius, dy = y-wradius;
-        const dist = Math.sqrt(dx*dx+dy*dy);
-        const idx = (y*wsize+x)*4;
-        if(dist<=wradius){
-          let angle = Math.atan2(dy,dx)*180/Math.PI;
-          if(angle<0) angle+=360;
-          const sat = Math.min(dist/wradius,1)*100;
-          const [r,g,b] = hslToRgb(angle, sat, 50);
-          img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=255;
-        } else { img.data[idx+3]=0; }
-      }
-    }
-    wctx.putImageData(img,0,0);
-  }
-  drawWheel();
-
-  function setMarkerFromState(){
-    const rad = (state.sat/100) * wradius;
-    const ang = state.hue * Math.PI/180;
-    const x = wradius + rad*Math.cos(ang);
-    const y = wradius + rad*Math.sin(ang);
-    $('wheelMarker').style.left = x+'px';
-    $('wheelMarker').style.top = y+'px';
-  }
-  setMarkerFromState();
-
-  let dragging = false;
-  function pickAt(clientX, clientY){
-    const rect = wheelCanvas.getBoundingClientRect();
-    let x = clientX - rect.left - wradius;
-    let y = clientY - rect.top - wradius;
-    let dist = Math.sqrt(x*x+y*y);
-    if(dist>wradius){ x = x*(wradius/dist); y = y*(wradius/dist); dist = wradius; }
-    let angle = Math.atan2(y,x)*180/Math.PI; if(angle<0) angle+=360;
-    state.hue = angle;
-    state.sat = Math.min(dist/wradius,1)*100;
-    $('wheelMarker').style.left = (x+wradius)+'px';
-    $('wheelMarker').style.top = (y+wradius)+'px';
-    updateAccent();
-  }
-  wheelCanvas.addEventListener('pointerdown', e=>{ dragging=true; pickAt(e.clientX,e.clientY); });
-  window.addEventListener('pointermove', e=>{ if(dragging) pickAt(e.clientX,e.clientY); });
-  window.addEventListener('pointerup', ()=> dragging=false);
-
-  $('f-light').addEventListener('input', e=>{
-    state.light = +e.target.value;
-    $('lightVal').textContent = state.light+'%';
-    updateAccent();
-  });
-  $('f-glass').addEventListener('input', e=>{
-    state.glass = +e.target.value;
-    $('glassVal').textContent = state.glass+'%';
-    updateAccent();
-  });
-
-  $('downloadBtn').addEventListener('click', ()=>{
-    const btn = $('downloadBtn');
-    const original = btn.textContent;
-    btn.disabled = true; btn.textContent = 'Rendering…';
-    const desiredWidth = 2160;
-    const scale = desiredWidth / stage.offsetWidth;
-    html2canvas(stage, { scale, backgroundColor:null, useCORS:true, logging:false }).then(canvas=>{
-      const link = document.createElement('a');
-      const name = (state.title || 'job-ad').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
-      link.download = name + '-' + state.tpl + '.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      btn.disabled = false; btn.textContent = original;
-    }).catch(()=>{
-      btn.disabled = false; btn.textContent = original;
-      alert('Could not render the ad. Please try again.');
-    });
-  });
-
-  updateAccent();
-  render();
-  switchTemplate('transparent');
+var $=function(i){return document.getElementById(i)},S=[].slice.call(document.querySelectorAll(".slide")),i=0,pv=$("pv"),nx=$("nx");
+var NM={AA:"Exceptional Performer",AB:"High Performer",AC:"Potential Resource",BA:"High Performer",BB:"Good Performer",BC:"Contributor",CA:"Concern",CB:"Low Performer",CC:"Low Performer"},CL={AA:"h",AB:"h",BA:"h",BB:"m",AC:"l",BC:"l",CA:"l",CB:"w",CC:"w"};
+function grid(el,lab){["A","B","C"].forEach(function(r){["C","B","A"].forEach(function(c){var d=document.createElement("div"),k=r+c;d.className=CL[k];d.dataset.k=k;d.innerHTML="<b>"+k+"</b>"+(lab?NM[k]:"");el.appendChild(d)})})}
+function hot(el,k){[].forEach.call(el.children,function(d){d.classList.toggle("hot",d.dataset.k===k)})}
+grid($("nb"),1);grid($("mnb"),0);
+/* 9-box sliders + demo */
+var s1=$("s1"),s2=$("s2"),auto=null;
+function nbUp(){var a=+s1.value,b=+s2.value,I=a>=98?"A":a>=80?"B":"C",B=b===6?"A":b>=4?"B":"C",k=I+B;$("v1").textContent=a;$("v2").textContent=b;hot($("nb"),k);$("nr").textContent=k+": "+NM[k];$("nd").textContent="IPI "+I+" (score "+a+") + BPI "+B+" ("+b+" of 6 developed)"}
+s1.oninput=s2.oninput=function(e){if(e&&e.isTrusted)clearInterval(auto);nbUp()};nbUp();
+var cb=[[100,6],[90,5],[85,4],[70,3],[99,2],[60,1],[92,6],[75,5]],ci=0;
+function demo(){clearInterval(auto);auto=setInterval(function(){var c=cb[ci++%cb.length];s1.value=c[0];s2.value=c[1];nbUp()},2200)}
+/* curve */
+function P(v){var p=v.map(function(y,k){return[30+k*60,185-y*3.2]}),d="M"+p[0][0]+" "+p[0][1];for(var k=0;k<8;k++){var a=p[k],b=p[k+1],m=(a[0]+b[0])/2;d+=" C"+m+" "+a[1]+" "+m+" "+b[1]+" "+b[0]+" "+b[1]}return d}
+$("curve").innerHTML='<path d="'+P([5,5,5,10,50,10,5,5,5])+'" fill="none" stroke="#789287" stroke-width="2.5" stroke-dasharray="6 5"/><path class="draw" pathLength="1" d="'+P([4,6,3,12,42,14,8,6,5])+'" fill="none" stroke="#1f7a4a" stroke-width="5" stroke-linecap="round"/>'+["CC","CB","CA","BC","BB","AC","BA","AB","AA"].map(function(c,k){return'<text x="'+(30+k*60)+'" y="205" text-anchor="middle" font-size="13" font-weight="600" fill="#47665a">'+c+'</text>'}).join("");
+/* roles: simple dot rows */
+var RR=[["Admin","#14532d",12,"Sees all 12 employees",["Manage employees","Reopen forms","Print and Excel"]],["HR","#1f7a4a",12,"Sees all 12 employees",["Same as Admin","HR part of promotions","Final promotion status"]],["HOD","#4f9d73",4,"Sees own department: 4",["Review and edit","Approve or return","Dashboard"]],["Line Manager","#d9824f",2,"Sees own team: 2",["Fill the form","Send to HOD","Promotion Yes / No"]]];
+$("rl").innerHTML=RR.map(function(r,k){var d="";for(var j=0;j<12;j++){if(j&&j%4===0)d+="<hr>";d+='<i class="dt'+(j<r[2]?" l":"")+'" style="--i:'+j+';--r:'+k+'"></i>'}return'<div class="rr a" style="--c:'+r[1]+';--d:'+(k+1)+'"><div><div class="rn">'+r[0]+'</div><small>'+r[3]+'</small></div><div class="dts2">'+d+'</div><div class="ch">'+r[4].map(function(x){return"<span>"+x+"</span>"}).join("")+'</div></div>'}).join("");
+/* pages: real system view */
+var IP={g:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h6"/>',d:'<path d="M3 20h18"/><path d="M4 15c3 0 3-9 6-9s3 12 6 12 2-6 4-6"/>',e:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.4 2.7-5.5 6-5.5s6 2.1 6 5.5"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.3c2.4.2 4 1.8 4 4.2"/>',f:'<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>',r:'<path d="M5 3h14v18H5z"/><path d="M9 8h6M9 12h6M9 16h3"/>',p:'<path d="M12 19V6M6.5 11.5L12 6l5.5 5.5M5 20h14"/>'},
+ic=function(k){return'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+IP[k]+'</svg>'},
+chp=function(t,k){return'<span class="chip chip-'+k+'">'+t+'</span>'},cde=function(c){var m={AA:"dark",AB:"dark",BA:"dark",BB:"mid",AC:"blue",BC:"blue",CA:"blue",CB:"warm",CC:"warm"};return'<span class="code '+m[c]+'">'+c+'</span>'},
+bar=function(){return'<div class="picker"><label><select><option>All departments</option></select></label><label><select><option>All sections</option></select></label><label><select><option>All status</option></select></label><button class="btn ghost">Clear filters</button><span style="color:var(--ink2);font-size:13.5px">42 employees</span></div>'},
+mix=function(a,b,c){var n=a+b+c;return'<div class="mix"><i class="ma" style="width:'+a/n*100+'%"></i><i class="mb" style="width:'+b/n*100+'%"></i><i class="mc" style="width:'+c/n*100+'%"></i></div><div class="legend"><span>A '+a+'</span><span>B '+b+'</span><span>C '+c+'</span></div>'},
+kp=function(t,v,s){return'<div class="glass kpi"><small>'+t+'</small><div class="v">'+v+'</div><div class="s">'+s+'</div></div>'},
+CD=["CC","CB","CA","BC","BB","AC","BA","AB","AA"],
+cur2=function(v,ref){var W=680,L=8,bw=(W-16)/9,pts=v.map(function(y,k){return[L+bw*k+bw/2,246-Math.min(y,60)/60*220]}),d="M"+L+" "+pts[0][1];pts.forEach(function(p,k){if(k){var a=pts[k-1],m=(a[0]+p[0])/2;d+=" C"+m+" "+a[1]+" "+m+" "+p[1]+" "+p[0]+" "+p[1]}});
+ var r="";CD.forEach(function(c,k){r+='<rect x="'+(L+bw*k+3)+'" y="8" width="'+(bw-6)+'" height="312" rx="8" fill="#2e9d63" opacity="'+(.1+[5,5,5,10,50,10,5,5,5][k]/50*.5).toFixed(2)+'"/><text x="'+(L+bw*k+bw/2)+'" y="272" text-anchor="middle" font-size="15" fill="#10281c">'+v[k]+'%</text><text x="'+(L+bw*k+bw/2)+'" y="296" text-anchor="middle" font-size="16" font-weight="700" fill="#10281c">'+c+'</text>'});
+ return'<svg viewBox="0 0 680 330">'+r+(ref?'<path d="M'+L+' 190 C200 190 280 40 340 40 S480 190 672 190" fill="none" stroke="#47665a" stroke-width="2" stroke-dasharray="6 5" opacity=".8"/>':"")+'<path d="'+d+'" fill="none" stroke="'+(ref?"#14532d":"#2e9d63")+'" stroke-width="5" stroke-linecap="round"/></svg>'},
+ER=[[690,"Ahmed Raza","HR Officer","MM2","95","B","83.35%","B","BB","With HOD","b"],[712,"Sana Malik","Accountant","E3","99","A","100%","A","AA","Approved","a"],[745,"Bilal Ahmed","Officer","E2","78","C","66.68%","B","CB","With Line Manager","na"],[801,"Hira Noor","Analyst","E3","88","B","100%","A","BA","With HOD","b"]],
+kd=function(x){return x==="A"?"a":x==="B"?"b":"c"},
+PGS=[
+["guidelines","Guidelines","The rule book inside the system","Read it once before assessing: rating bands, the 9-box model, six competencies and the review steps.","Everyone",function(){return'<section class="hero-banner"><div><h1>Performance Assessment 2026</h1><p class="hb-tag">Your Performance. <b>Your Growth.</b></p></div><div class="hb-dates"><div><small>Period</small><strong>Jan – Dec 2026</strong></div><div><small>Start</small><strong>24 Nov 2026</strong></div><div class="end"><small>Deadline</small><strong>25 Dec 2026</strong></div></div></section><p class="lead">At IPAK, performance excellence is at the heart of our success. The 2025 assessment rests on two components: the <b>Individual Performance Indicator (IPI)</b> and the <b>Behaviour Performance Indicator (BPI)</b>.</p><div class="two"><section class="glass pad card"><h2>Individual Performance Indicator (IPI)</h2><p class="sub">Evaluates work performance through SMART objectives.</p><ul class="rules"><li>Add a minimum of 4 and a maximum of 7 SMART objectives.</li><li>Assign a weightage so the total equals 100%.<span class="note">No single objective above 30%.</span></li><li>Enter the achievement percentage for each objective.</li></ul><div class="scale"><div class="sa"><b>A – Exceed</b><span>score 98 or more</span></div><div class="sb"><b>B – Meet</b><span>80 to below 98</span></div><div class="sc"><b>C – Below</b><span>below 80</span></div></div></section><section class="glass pad card"><h2>Behaviour Performance Indicator (BPI)</h2><p class="sub">Evaluates behaviours in line with the IPAK Competency Framework.</p><ul class="rules"><li>Review the 6 behavioural competencies in the form.</li><li>Choose Developed Behaviour or Need Improvement for each.<span class="note">Each Developed Behaviour is worth 16.67%.</span></li><li>The form shows the overall BPI rating automatically.</li></ul><div class="scale"><div class="sa"><b>A – Exceed</b><span>all 6 developed</span></div><div class="sb"><b>B – Meet</b><span>4 or 5 developed</span></div><div class="sc"><b>C – Below</b><span>3 or fewer</span></div></div></section></div>'}],
+["dashboard","Dashboard","How the team compares with the ideal curve","Filter by department, section or status. Numbers and charts recalculate as forms change.","Admin, HR, HOD",function(){return bar()+'<div class="page-head"><div><h1>Dashboard</h1><p>How the team’s final ratings compare with the ideal distribution. Everything here recalculates as forms change.</p></div></div><div class="kpis">'+kp("Employees assessed","42","3 sections in the register")+'<div class="glass kpi"><small>IPI ratings</small>'+mix(5,31,6)+'</div><div class="glass kpi"><small>BPI ratings</small>'+mix(9,27,6)+'</div>'+kp("Top performers (BA, AB, AA)",'6 <span style="font-size:17px;font-weight:400;color:var(--ink2)">of 42</span>',"14.3% against an ideal 15%")+'</div><div class="charts"><section class="glass pad chart-card"><h2>Ideal performance curve</h2><p class="sub">The target spread across the nine final-rating boxes.</p>'+cur2([5,5,5,10,50,10,5,5,5],0)+'</section><section class="glass pad chart-card"><h2>Actual performance curve</h2><p class="sub">Your team’s spread. The dashed line is the ideal curve.</p>'+cur2([4,6,3,12,42,14,8,6,5],1)+'</section></div>'}],
+["employees","Employees","Your people and where each form stands","Search, filter and click a name to open the form. Admin and HR can also add, edit and delete.","Everyone (edit: Admin, HR)",function(){return bar()+'<div class="page-head"><div><h1>Employees</h1><p></p></div><div style="display:flex;gap:10px"><button class="btn ghost">Export CSV</button><button class="btn">'+ic("e").replace("18","16")+' Add employee</button></div></div><div class="toolbar"><label class="search"><input placeholder="Search by name, ID, designation or grade"></label><label class="toggle">☐ Show location, department and reporting columns</label></div><div class="glass" style="padding:8px"><div class="tbl-wrap" style="border:0;background:transparent"><table><thead><tr><th>Emp ID</th><th>Full name</th><th>Designation</th><th>Grade</th><th class="num">IPI 2025</th><th>Short IPI</th><th class="num">BPI 2025</th><th>Short BPI</th><th>Final performance</th><th>Status</th></tr></thead><tbody>'+ER.map(function(e){return'<tr><td>'+e[0]+'</td><td class="nm">'+e[1]+'</td><td>'+e[2]+'</td><td>'+e[3]+'</td><td class="num">'+e[4]+'</td><td>'+chp("IPI "+e[5],kd(e[5]))+'</td><td class="num">'+e[6]+'</td><td>'+chp("BPI "+e[7],kd(e[7]))+'</td><td>'+cde(e[8])+'</td><td>'+chp(e[9],e[10])+'</td></tr>'}).join("")+'</tbody></table></div></div><p style="color:var(--ink2);font-size:13.5px;padding:0 4px">Showing 4 of 42 employees</p>'}],
+["form","Assessment form","Where you rate one employee","Open it from a name or the Employee code box. The step by step demo is on the next slide.","Everyone in the team",function(){return bar()+'<div class="page-head"><div><h1>Assessment form</h1><p></p></div><div class="picker"><input class="cell-in" placeholder="Employee code" style="width:150px"><button class="btn ghost">Open</button><select><option>690 – Ahmed Raza</option></select><button class="btn ghost">Print form</button></div></div><article class="glass paper"><header class="paper-head"><div><h1>IPAK Performance Assessment Form – 2025</h1><p>Ahmed Raza · HR Officer</p></div><div class="final"><div><small>Final rating</small><b>BB</b></div><span style="font-weight:600">Good Performer</span></div></header><section class="sec"><h2>Employee information</h2><div class="info"><div><div class="row"><span>Employee ID</span><strong>690</strong></div><div class="row"><span>Name</span><strong>Ahmed Raza</strong></div><div class="row"><span>Designation</span><strong>HR Officer</strong></div></div><div><div class="row"><span>Grade</span><strong>MM2</strong></div><div class="row"><span>Line manager</span><strong>Sara Khan</strong></div><div class="row"><span>Head of department</span><strong>Usman Ali</strong></div></div></div></section><section class="sec"><h2>Individual Performance Indicator – IPI</h2><p class="sub">Add 4 to 7 SMART objectives. Weightage must total 100.</p><div class="tbl-wrap"><table><thead><tr><th>Smart objective</th><th>A – Exceed</th><th>B – Meet</th><th>C – Below</th><th class="num">Weightage</th><th class="num">Achievement %</th><th>Level</th><th class="num">Score</th></tr></thead><tbody><tr><td>Close monthly payroll on time</td><td>≤ 2 days</td><td>≤ 3 days</td><td>&gt; 3 days</td><td class="num">30</td><td class="num">100</td><td>'+chp("A – Exceed","a")+'</td><td class="num">30</td></tr><tr><td>Reduce time to hire</td><td>≤ 25 days</td><td>≤ 30 days</td><td>&gt; 30 days</td><td class="num">25</td><td class="num">95</td><td>'+chp("B – Meet","b")+'</td><td class="num">23.75</td></tr></tbody></table></div></section></article>'}],
+["report","Report","A printable summary with signature lines","Counts, curve and employee table for your people. Print on A4 (Admin / HR) or export CSV.","Everyone (print: Admin, HR)",function(){return bar()+'<div class="page-head"><div><h1>Report</h1><p>A printable summary for the people you are responsible for.</p></div><div class="picker"><button class="btn ghost">Export CSV</button><button class="btn">Print report</button></div></div><article class="glass pad rep"><header class="rep-head"><div><h2>IPAK Performance Assessment Report – 2025</h2><p>All departments</p></div><div><small>Generated</small><br><strong>17 Nov 2026</strong></div></header><div class="rep-kpis"><div><small>Employees</small><b>42</b><span>42 assessed</span></div><div><small>Top performers</small><b>6</b><span>14.3% (ideal 15%)</span></div></div><section class="chart-card">'+cur2([4,6,3,12,42,14,8,6,5],1)+'</section></article>'}],
+["promotions","Promotions","Every recommendation and its status","See who is Promoted, Recommended, Not Recommended or Rejected by HR. Filter and export to CSV.","Everyone (HR decides)",function(){return bar()+'<div class="page-head"><div><h1>Promotions</h1><p>Promotion recommendations and final status (Promoted / Rejected by HR / Not Recommended).</p></div><button class="btn ghost">Export CSV</button></div><div class="kpis k5">'+kp("Employees in scope","42","in the current filter")+kp("Promoted","3","7.1% of employees")+kp("Not Recommended","28","66.7% of employees")+kp("Rejected by HR","2","4.8% of employees")+kp("Recommended · awaiting HR","5","4 still pending")+'</div><section class="glass pad card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div><h2>All employees</h2><p class="sub" style="margin:0">Select a name to open the form.</p></div><div class="seg"><button aria-pressed="true">All</button><button>Promoted</button><button>Not Recommended</button><button>Rejected by HR</button><button>Recommended</button><button>Pending</button></div></div><div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Grade</th><th>2025 final</th><th>Status</th><th>Recommended position</th><th>Organogram</th></tr></thead><tbody><tr><td>712</td><td><span class="name-chip">Sana Malik</span></td><td>E3</td><td>'+cde("AA")+'</td><td>'+chp("Promoted","a")+'</td><td>Senior Accountant</td><td>'+chp("Available","a")+'</td></tr><tr><td>690</td><td><span class="name-chip">Ahmed Raza</span></td><td>MM2</td><td>'+cde("BB")+'</td><td>'+chp("Recommended","b")+'</td><td>Senior HR Officer</td><td>'+chp("HR pending","na")+'</td></tr><tr><td>745</td><td><span class="name-chip">Bilal Ahmed</span></td><td>E2</td><td>'+cde("CB")+'</td><td>'+chp("Not Recommended","c")+'</td><td>–</td><td>–</td></tr></tbody></table></div></section>'}]],
+pi=0,ptm=null,pmv=null,psc=null,rif=$("rif"),rwp=$("pgx");
+rif.srcdoc=$("rdoc").textContent;
+function fit(){var w=rwp.clientWidth||700,sc=w/1280;rif.style.transform="scale("+sc+")";rif.style.height=(rwp.clientHeight/sc)+"px"}
+window.addEventListener("resize",fit);
+function rdoc(){return rif.contentDocument}
+function rnav(){var d=rdoc();if(!d||!d.getElementById("rn"))return 0;var n=d.getElementById("rn");if(!n.children.length){n.innerHTML=PGS.map(function(g){return'<button data-v="'+g[0]+'">'+ic(g[0]==="guidelines"?"g":g[0]==="dashboard"?"d":g[0]==="employees"?"e":g[0]==="form"?"f":g[0]==="report"?"r":"p")+g[1]+'</button>'}).join("")}return 1}
+function pshow(k,anim){pi=k;clearTimeout(pmv);clearTimeout(psc);fit();if(!rnav()){pmv=setTimeout(function(){pshow(k,anim)},300);return}
+ var d=rdoc(),b=d.querySelector('[data-v="'+PGS[k][0]+'"]'),cu=$("cur"),sc=rwp.clientWidth/1280,r=b.getBoundingClientRect();
+ cu.style.left=(r.left*sc+r.width*sc*.72)+"px";cu.style.top=(r.top*sc+r.height*sc/2-10)+"px";
+ function draw(){cu.classList.remove("k");void cu.offsetWidth;cu.classList.add("k");[].forEach.call(d.querySelectorAll("#rn button"),function(x){if(x===b)x.setAttribute("aria-current","page");else x.removeAttribute("aria-current")});
+  d.getElementById("view").innerHTML=PGS[k][5]();rdoc().defaultView.scrollTo(0,0);
+  $("pt").textContent=PGS[k][1]+": "+PGS[k][2];$("pu").innerHTML="<em>Use it to:</em> "+PGS[k][3];$("pw").innerHTML="<em>Who:</em> "+PGS[k][4];
+  psc=setTimeout(function(){var w=rdoc().defaultView,m=rdoc().documentElement.scrollHeight-w.innerHeight;if(m>0)w.scrollTo({top:m*.7,behavior:"smooth"})},2600)}
+ if(anim)pmv=setTimeout(draw,750);else draw()}
+function pp(){fit();pshow(0,false);clearInterval(ptm);ptm=setInterval(function(){pshow((pi+1)%PGS.length,true)},6500)}
+rwp.onclick=function(e){};
+/* rights */
+var RT=[["Fill the form while Draft",1,1,1],["Send to HOD",1,1,1],["Promotion Yes / No and details",1,1,1],["Dashboard page",1,1,0],["Edit the form while it is with the HOD",1,1,0],["Approve or return with a note",1,1,0],["Reopen an approved form",1,0,0],["HR section of promotion",1,0,0],["Add, edit, delete employees; import",1,0,0],["Print and Excel objectives report",1,0,0]],RN=[["Admin / HR","#14532d"],["HOD","#1f7a4a"],["Line Manager","#d9824f"]];
+h="<span></span>"+RN.map(function(r,k){var c=RT.reduce(function(a,x){return a+x[k+1]},0);return'<div class="rh pop" style="--d:'+(k+1)+'"><svg viewBox="0 0 100 100" style="width:66px"><circle cx="50" cy="50" r="40" fill="none" stroke="#cfe0d4" stroke-width="10"/><circle class="ring" style="--o:'+(251*(1-c/10))+'" cx="50" cy="50" r="40" fill="none" stroke="'+r[1]+'" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="60" text-anchor="middle" font-family="Outfit" font-weight="700" font-size="30" fill="#14532d">'+c+'</text></svg><b>'+r[0]+'</b></div>'}).join("");
+RT.forEach(function(r,k){h+='<div class="rl pop" style="--d:'+(k+3)+'">'+r[0]+'</div>';for(var j=1;j<4;j++)h+='<span class="ck pop'+(r[j]?"":" n")+'" style="--d:'+(k+4)+'">'+(r[j]?"✔":"✕")+'</span>'});
+$("rm").innerHTML=h;
+/* form walkthrough */
+var O=[["Close monthly payroll on time","≤ 2 days","≤ 3 days","> 3 days",30,100],["Reduce time to hire","≤ 25 days","≤ 30 days","> 30 days",25,95],["Complete HR policy audits","12 audits","10 audits","< 10 audits",25,85],["Launch the employee portal","By Sep","By Oct","After Oct",20,100]],
+BN=["Teamwork","Coaching","Ownership","Humility","Integrity","Innovation"],
+C=[["1. Open the employee","Type the Employee ID in the code box, or click the name on the Employees page.","Name, designation, grade, line manager and HOD fill in from the Master list."],
+["2. Write the objectives","Type 4 to 7 SMART objectives with their A, B and C targets. Use Add smart objective for more rows.","Nothing is saved yet. It stays a draft on your screen."],
+["3. Give weightage","Enter a weightage for every objective. The total must be 100 and none above 30.","The total is checked and the green message confirms it."],
+["4. Enter achievement %","Type how much of each objective was achieved.","Level A, B or C and the score appear. The IPI total and rating are calculated."],
+["5. Rate the 6 behaviours","For each competency choose Developed Behaviour or Need Improvement.","Each Developed counts 16.67%. The BPI total and rating are calculated."],
+["6. Read the final rating","Check the result at the top and in the Final rating section.","IPI + BPI make the final code and the 9-box lights up."],
+["7. Promotion Yes or No","Choose Yes or No. Yes opens the promotion form with position and grade.","Send to HOD stays disabled until you choose."],
+["8. Save and send","Press Save changes and confirm. Then press Send to HOD.","The form locks for you and its status becomes Submitted – with HOD."]],
+fs=0,ft=null,play=true,tm=[];
+$("ob").innerHTML=O.map(function(o){var L=o[5]>=98?"A":"B";return'<tr><td class="ob"></td><td class="rv" data-s="1">'+o[1]+'</td><td class="rv" data-s="1">'+o[2]+'</td><td class="rv" data-s="1">'+o[3]+'</td><td class="rv" data-s="2">'+o[4]+'</td><td class="rv" data-s="3">'+o[5]+'%</td><td class="rv" data-s="3"><i class="lv'+(L==="B"?" b":"")+'">'+L+'</i></td><td class="rv" data-s="3">'+(o[4]*o[5]/100)+'</td></tr>'}).join("");
+$("bp").innerHTML=BN.map(function(n){return'<tr><td><b>'+n+'</b></td><td><span class="sel">Select Rating</span></td></tr>'}).join("");
+$("dts").innerHTML=C.map(function(){return"<i></i>"}).join("");
+function ty(c,t){var n=0;(function s(){c.textContent=t.slice(0,++n);if(n<t.length)tm.push(setTimeout(s,26))})()}
+function fr(fwd){
+ tm.forEach(clearTimeout);tm=[];
+ [].forEach.call(document.querySelectorAll("#mock .rv"),function(e){e.classList.toggle("v",fs>=+e.dataset.s)});
+ [].forEach.call(document.querySelectorAll("#ob .ob"),function(c,k){var t=O[k][0];if(fs<1)c.textContent="";else if(fwd&&fs===1){c.textContent="";tm.push(setTimeout(function(){ty(c,t)},k*800))}else c.textContent=t});
+ [].forEach.call(document.querySelectorAll(".sel"),function(e,k){function st(){var on=fs>=4;e.textContent=on?(k<5?"Developed Behaviour":"Need Improvement"):"Select Rating";e.className="sel"+(on?(k<5?" d":" ni"):"")}if(fwd&&fs===4)tm.push(setTimeout(st,k*380));else st()});
+ $("cin").textContent="690";$("hc").textContent=fs>=5?"BB":"–";
+ for(var z=0;z<8;z++)$("z"+z).classList.toggle("hl",z===fs);
+ var zt=$("z"+fs).offsetTop-60;$("mock").scrollTo({top:Math.max(0,zt),behavior:"smooth"});
+ $("py").className="pbtn"+(fs>=6?" on3":"");$("pn").className="pbtn";
+ $("snd").classList.toggle("on2",fs>=6&&fs<7);
+ $("stc").textContent=fs>=7?"Submitted – with HOD":"Draft – with Line Manager";$("stc").className="chp"+(fs>=7?" go":"");
+ $("hint").textContent=fs<6?"Please select Yes or No for the Promotion recommendation before clicking Send to HOD.":fs<7?"Complete the assessment. Once finished, click Send to HOD.":"The form is currently under HOD review and is locked for editing.";
+ $("svs").textContent=fs<1?"":fs<7?"Unsaved changes. Press Save changes to save.":"All changes saved to the Google Sheet";
+ if(fs>=5)hot($("mnb"),"BB");else hot($("mnb"),"");
+ $("ct").textContent=C[fs][0];$("cy").innerHTML="<em>You:</em> "+C[fs][1];$("ca").innerHTML="<em>System:</em> "+C[fs][2];
+ [].forEach.call($("dts").children,function(d,k){d.className=k<=fs?"f":""})}
+function fgo(k){var p=fs;fs=(k+8)%8;fr(fs===p+1)}
+function fplay(on){play=on;clearInterval(ft);$("fpl").textContent=on?"Pause":"Play";if(on)ft=setInterval(function(){fgo(fs+1)},4200)}
+$("fpv").onclick=function(){fplay(false);fgo(fs-1)};$("fnx").onclick=function(){fplay(false);fgo(fs+1)};$("fpl").onclick=function(){fplay(!play)};fr();
+/* navigation */
+function show(k){i=Math.max(0,Math.min(S.length-1,k));S.forEach(function(s,j){s.classList.toggle("on",j===i)});S[i].scrollTop=0;
+$("cnt").textContent=(i+1)+" / "+S.length;$("pb").style.width=((i+1)/S.length*100)+"%";pv.disabled=!i;nx.disabled=i===S.length-1;
+clearInterval(ft);clearInterval(auto);clearInterval(ptm);clearTimeout(pmv);if(S[i].contains($("mock"))){fs=0;fr();fplay(true)}if(S[i].contains($("nb")))demo();if(S[i].contains($("pgx")))pp();
+try{history.replaceState(null,"","#"+(i+1))}catch(e){}}
+pv.onclick=function(){show(i-1)};nx.onclick=function(){show(i+1)};
+document.addEventListener("keydown",function(e){if(e.target.type==="range")return;var k=e.key;if(k==="ArrowRight"||k==="PageDown"||k===" "){e.preventDefault();show(i+1)}else if(k==="ArrowLeft"||k==="PageUp"){e.preventDefault();show(i-1)}else if(k==="Home")show(0);else if(k==="End")show(S.length-1)});
+var x0=null;document.addEventListener("touchstart",function(e){x0=e.touches[0].clientX},{passive:true});
+document.addEventListener("touchend",function(e){if(x0===null||e.target.type==="range")return;var d=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(d)>60)show(d<0?i+1:i-1)});
+show((parseInt(location.hash.slice(1),10)||1)-1);
 })();
 </script>
 </body>
