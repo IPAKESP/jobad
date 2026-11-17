@@ -104,9 +104,14 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 .lv.c{background:#fbe2d1;color:#8a3d18}.lv.n{background:#e3e8ee;color:#3d4a58}
 @media (max-width:900px){.rr{grid-template-columns:1fr}.app{grid-template-columns:1fr;height:auto}.sb{flex-direction:row;flex-wrap:wrap}}
 
-.rwrap{position:relative;height:min(470px,calc(100vh - 215px));border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 40px -24px rgba(20,83,45,.6);background:#eef4ee}
+/* LIVE VIEW: bigger height (was min(470px,calc(100vh - 215px))) */
+.rwrap{position:relative;height:max(360px,calc(100vh - 235px));border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 18px 40px -24px rgba(20,83,45,.6);background:#eef4ee}
 .rwrap iframe{position:absolute;left:0;top:0;width:1280px;border:0;transform-origin:0 0}
 .rwrap .cur{position:absolute;left:30px;top:60px;width:20px;height:20px;border-radius:50%;background:var(--or);box-shadow:0 0 0 6px rgba(217,130,79,.3);z-index:5;transition:left .7s ease,top .7s ease;pointer-events:none}.rwrap .cur.k{animation:rip .45s}
+/* FULL PAGE mode */
+.rwrap.full{position:fixed;inset:0;z-index:60;height:100vh;border-radius:0;border:0;animation:none!important;transform:none!important}
+.fsb{position:absolute;right:12px;top:12px;z-index:6;border:0;border-radius:9px;padding:6px 12px;background:var(--g1);color:#fff;font:600 13px var(--fb);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.fsb:hover{background:var(--g2)}
 </style>
 </head>
 <body>
@@ -114,7 +119,7 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 
 <section class="slide dk on">
   <svg class="hex" viewBox="0 0 44 40" aria-hidden="true"><g><polygon points="11,6 19,6 23,13 19,20 11,20 7,13" fill="#3f7d3a"/></g><g><polygon points="19,6 27,6 31,13 27,20 19,20 15,13" fill="#74b043"/></g><g><polygon points="27,6 35,6 39,13 35,20 27,20 23,13" fill="#a7cf74"/></g><g><polygon points="19,19 27,19 31,26 27,33 19,33 15,26" fill="#d1e6b0"/></g></svg>
-  <h1 class="a">Performance Management System 2026</h1>
+  <h1 class="a">Performance Management System 2025</h1>
   <p class="sub a" style="--d:2;font-size:21px;max-width:34ch">A step by step guide: who can do what, how to fill the form, and how the rating is decided.</p>
   <p class="sub a" style="--d:3">Team HR · IPAK</p>
 </section>
@@ -142,11 +147,12 @@ input[type=range]{width:100%;accent-color:var(--g2)}
 
 <section class="slide">
   <h2 class="a">What each page does: live view</h2>
-  <div class="g fm" style="grid-template-columns:2.2fr 1fr;align-items:start">
-    <div class="rwrap a" style="--d:1" id="pgx"><iframe id="rif" title="Live system view" tabindex="-1"></iframe><span class="cur" id="cur"></span></div>
+  <!-- CHANGED: 2.2fr 1fr -> 3.6fr 1fr (wider live view) -->
+  <div class="g fm" style="grid-template-columns:3.6fr 1fr;align-items:start">
+    <div class="rwrap a" style="--d:1" id="pgx"><iframe id="rif" title="Live system view" tabindex="-1"></iframe><span class="cur" id="cur"></span><button class="fsb" id="fsb" type="button">⛶ Full page</button></div>
     <div>
       <div class="cap a" style="--d:2" aria-live="polite"><b id="pt"></b><p id="pu"></p><p id="pw"></p></div>
-      <p class="sub" style="font-size:13px;margin-top:8px">This is the real system screen with sample data. The cursor opens each page from the sidebar.</p>
+      <p class="sub" style="font-size:13px;margin-top:8px">This is the real system screen with sample data. The cursor opens each page from the sidebar. Press “Full page” for a full screen view (Esc to close).</p>
     </div>
   </div>
   <script type="text/plain" id="rdoc"><!DOCTYPE html><html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"><style>
@@ -160,6 +166,7 @@ h1,h2,h3{font-family:var(--font-d);margin:0;font-weight:600;letter-spacing:-.01e
 .brand{padding:4px 8px 0}.brand img{height:46px;display:block}.nav{display:flex;flex-direction:column;gap:4px}
 .nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:0;border-radius:12px;background:transparent;color:var(--ink2);text-align:left;font-weight:500}
 .nav button[aria-current="page"]{background:linear-gradient(135deg,#14532d,#2e9d63);color:#f4fbf6;box-shadow:0 8px 18px -10px rgba(20,83,45,.75)}
+.nav svg{width:18px;height:18px;flex:none}
 .side-foot{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid var(--line)}.side-foot small{color:var(--ink3);font-size:12.5px;padding:0 6px 4px}.link-btn{padding:8px 10px;color:var(--ink2);font-size:13.5px}
 main{min-width:0;display:flex;flex-direction:column;gap:20px}
 .glass{background:var(--card);border:1px solid var(--edge);border-radius:var(--r-lg);box-shadow:var(--shadow)}.pad{padding:24px}
@@ -333,7 +340,10 @@ function pshow(k,anim){pi=k;clearTimeout(pmv);clearTimeout(psc);fit();if(!rnav()
   psc=setTimeout(function(){var w=rdoc().defaultView,m=rdoc().documentElement.scrollHeight-w.innerHeight;if(m>0)w.scrollTo({top:m*.7,behavior:"smooth"})},2600)}
  if(anim)pmv=setTimeout(draw,750);else draw()}
 function pp(){fit();pshow(0,false);clearInterval(ptm);ptm=setInterval(function(){pshow((pi+1)%PGS.length,true)},6500)}
-rwp.onclick=function(e){};
+/* full page toggle */
+function fsSet(on){rwp.classList.toggle("full",on);$("fsb").textContent=on?"✕ Close":"⛶ Full page";setTimeout(function(){fit();pshow(pi,false)},60)}
+$("fsb").onclick=function(e){e.stopPropagation();fsSet(!rwp.classList.contains("full"))};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&rwp.classList.contains("full"))fsSet(false)});
 /* rights */
 var RT=[["Fill the form while Draft",1,1,1],["Send to HOD",1,1,1],["Promotion Yes / No and details",1,1,1],["Dashboard page",1,1,0],["Edit the form while it is with the HOD",1,1,0],["Approve or return with a note",1,1,0],["Reopen an approved form",1,0,0],["HR section of promotion",1,0,0],["Add, edit, delete employees; import",1,0,0],["Print and Excel objectives report",1,0,0]],RN=[["Admin / HR","#14532d"],["HOD","#1f7a4a"],["Line Manager","#d9824f"]];
 h="<span></span>"+RN.map(function(r,k){var c=RT.reduce(function(a,x){return a+x[k+1]},0);return'<div class="rh pop" style="--d:'+(k+1)+'"><svg viewBox="0 0 100 100" style="width:66px"><circle cx="50" cy="50" r="40" fill="none" stroke="#cfe0d4" stroke-width="10"/><circle class="ring" style="--o:'+(251*(1-c/10))+'" cx="50" cy="50" r="40" fill="none" stroke="'+r[1]+'" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)"/><text x="50" y="60" text-anchor="middle" font-family="Outfit" font-weight="700" font-size="30" fill="#14532d">'+c+'</text></svg><b>'+r[0]+'</b></div>'}).join("");
@@ -375,7 +385,7 @@ function fgo(k){var p=fs;fs=(k+8)%8;fr(fs===p+1)}
 function fplay(on){play=on;clearInterval(ft);$("fpl").textContent=on?"Pause":"Play";if(on)ft=setInterval(function(){fgo(fs+1)},4200)}
 $("fpv").onclick=function(){fplay(false);fgo(fs-1)};$("fnx").onclick=function(){fplay(false);fgo(fs+1)};$("fpl").onclick=function(){fplay(!play)};fr();
 /* navigation */
-function show(k){i=Math.max(0,Math.min(S.length-1,k));S.forEach(function(s,j){s.classList.toggle("on",j===i)});S[i].scrollTop=0;
+function show(k){i=Math.max(0,Math.min(S.length-1,k));if(rwp.classList.contains("full")){rwp.classList.remove("full");$("fsb").textContent="⛶ Full page"}S.forEach(function(s,j){s.classList.toggle("on",j===i)});S[i].scrollTop=0;
 $("cnt").textContent=(i+1)+" / "+S.length;$("pb").style.width=((i+1)/S.length*100)+"%";pv.disabled=!i;nx.disabled=i===S.length-1;
 clearInterval(ft);clearInterval(auto);clearInterval(ptm);clearTimeout(pmv);if(S[i].contains($("mock"))){fs=0;fr();fplay(true)}if(S[i].contains($("nb")))demo();if(S[i].contains($("pgx")))pp();
 try{history.replaceState(null,"","#"+(i+1))}catch(e){}}
