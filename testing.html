@@ -391,6 +391,8 @@ dialog footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 2
 .cloud:not(.is-admin) [data-act="import"]{display:none!important}
 [data-act="signout"]{display:none}
 .cloud [data-act="signout"]{display:flex}
+[data-act="change-pin"]{display:none}
+.cloud [data-act="change-pin"]{display:flex}
 .side-foot #saveState{color:var(--ink2)}
 .locked .shell{grid-template-columns:1fr;max-width:520px;padding-top:9vh}
 .locked .side{display:none}
@@ -497,16 +499,6 @@ dialog[open]{animation:dlg .3s cubic-bezier(.2,.8,.2,1)}
 </style>
 </head>
 <body>
-<script>
-window.addEventListener("error", function (e) {
-  var v = document.getElementById("view");
-  if (v) v.innerHTML = '<pre style="padding:20px;white-space:pre-wrap;color:#a3262a">' +
-    (e.message || "") + "\nline " + e.lineno + ":" + e.colno + "</pre>";
-});
-</script>
-<div class="shell">
-  <aside class="side">
-  ...
 <div class="shell">
   <aside class="side">
     <div class="brand"><svg width="44" height="40" viewBox="0 0 44 40" aria-hidden="true"><g stroke="none"><polygon points="11,6 19,6 23,13 19,20 11,20 7,13" fill="#3f7d3a"/><polygon points="19,6 27,6 31,13 27,20 19,20 15,13" fill="#74b043" opacity=".92"/><polygon points="27,6 35,6 39,13 35,20 27,20 23,13" fill="#a7cf74" opacity=".9"/><polygon points="19,19 27,19 31,26 27,33 19,33 15,26" fill="#d1e6b0" opacity=".85"/></g></svg><div><b>IPAK</b><small>Performance Assessment 2026</small></div></div>
@@ -517,10 +509,11 @@ window.addEventListener("error", function (e) {
       <button data-v="form"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>Assessment form</button>
       <button data-v="report"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Report</button>
     </nav>
-    <div class="side-foot"><small id="who">Data is kept in this browser.</small><small id="saveState"></small><small id="buildTag" style="font-size:11px;color:var(--ink3)">Build 2026-11-18 · LM dashboard</small>
+    <div class="side-foot"><small id="who">Data is kept in this browser.</small><small id="saveState"></small>
       <button class="link-btn" id="themeBtn" data-act="theme"></button>
       <button class="link-btn needs-dl" data-act="export-json"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Export backup</button>
       <button class="link-btn" data-act="import"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7 9l5-5 5 5M5 20h14"/></svg>Import backup</button>
+      <button class="link-btn" data-act="change-pin">Change PIN</button>
       <button class="link-btn" data-act="signout" id="signoutBtn">Sign out</button>
       <button class="link-btn" data-act="reset"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg>Restore original data</button>
     </div>
@@ -648,18 +641,10 @@ const ROLE_PAGES = {
   hod: ["guidelines", "dashboard", "employees", "form", "report"],
   lm: ["guidelines", "dashboard", "employees", "form", "report"]
 };
-const normRole = (r) => {
-  r = String(r || "").toLowerCase().replace(/[^a-z]/g, "");
-  if (["lm", "linemanager", "manager"].includes(r)) return "lm";
-  if (["hod", "headofdepartment"].includes(r)) return "hod";
-  if (["hr"].includes(r)) return "hr";
-  if (["admin", "administrator"].includes(r)) return "admin";
-  return r;
-};
-const allowed = (v) => (ROLE_PAGES[normRole(ME.role)] || ["guidelines", "form"]).includes(v);
+const allowed = (v) => (ROLE_PAGES[ME.role] || ["guidelines", "form"]).includes(v);
 let saveT = null;
 function save() { if (CLOUD) return; clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); }
-const ui = { view: "guidelines", id: null, q: "", org: false, set: "mgr", rd: "", rs: "" };
+const ui = { view: "guidelines", id: null, q: "", org: false, set: "mgr", co: "", rd: "", rs: "" };
 const formOf = (id) => (S.forms[id] || (S.forms[id] = blankForm()));
 const empOf = (id) => S.emps.find((e) => e.id === id);
 const COMP = DATA.comp;
@@ -823,7 +808,7 @@ function compGrid(set) {
 function heroHTML() {
   return `<section class="hero-banner">
     <div><h1>Performance Assessment 2026</h1><p class="hb-tag">Your Performance. <b>Your Growth.</b></p></div>
-    <div class="hb-dates"><div><small>Period</small><strong>Jan – Dec 2026</strong></div><div><small>Start</small><strong>24 Nov 2026</strong></div><div class="end"><small>Deadline</small><strong>25 Dec 2026</strong></div></div>
+    <div class="hb-dates"><div><small>Period</small><strong>Jan – Dec 2026</strong></div><div><small>Start</small><strong>24 Nov 2026</strong></div><div class="end"><small>Deadline</small><strong>10 Dec 2026</strong></div></div>
   </section>`;
 }
 
@@ -931,8 +916,8 @@ function viewDashboard() {
 function viewEmployees() {
   const res = results(), q = ui.q.trim().toLowerCase();
   const list = res.filter((r) => !q || [r.e.id, r.e.name, r.e.desig, r.e.grade, r.e.dept, r.e.section, r.e.sup].join(" ").toLowerCase().includes(q));
-  const head = ["Sr.", "Emp ID", "Full name", "Designation", "Location*", "Geo*", "Department*", "Section*", "Grade", "Date of joining", "Direct supervisor*", "HOD*", "2026 performance", "IPI 2026", "Short IPI", "BPI 2026", "Short BPI", "Final performance", ""];
-  const th = head.map((h) => { const org = h.endsWith("*"); return `<th class="${org ? "org" : ""}${["Sr.", "IPI 2026", "BPI 2026", "2026 performance"].includes(h) ? " num" : ""}">${esc(h.replace("*", ""))}</th>`; }).join("");
+  const head = ["Sr.", "Emp ID", "Full name", "Designation", "Company*", "Geo*", "Department*", "Section*", "Grade", "Date of joining", "Direct supervisor*", "HOD*", "2025 performance", "IPI 2025", "Short IPI", "BPI 2025", "Short BPI", "Final performance", ""];
+  const th = head.map((h) => { const org = h.endsWith("*"); return `<th class="${org ? "org" : ""}${["Sr.", "IPI 2025", "BPI 2025", "2025 performance"].includes(h) ? " num" : ""}">${esc(h.replace("*", ""))}</th>`; }).join("");
   const body = list.map((r, i) => { const e = r.e, sIpi = shortOf(r.ipiR), sBpi = shortOf(r.bpiR);
     return `<tr data-act="open-row" data-id="${e.id}"><td class="num">${S.emps.indexOf(e) + 1}</td><td>${e.id}</td><td class="sticky"><button class="name-chip" style="border:0;background:none;padding:0;font-weight:600;font-size:15px" data-act="open" data-id="${e.id}">${esc(e.name)}</button></td><td>${esc(e.desig)}</td>
     <td class="org">${esc(e.loc)}</td><td class="org">${esc(e.geo)}</td><td class="org">${esc(e.dept)}</td><td class="org">${esc(e.section)}</td><td>${esc(e.grade)}</td><td style="white-space:nowrap">${fmtDate(e.doj)}</td><td class="org">${esc(e.sup)}</td><td class="org">${esc(e.hod)}</td>
@@ -942,7 +927,7 @@ function viewEmployees() {
   <div class="page-head"><div><h1>Employees</h1><p></p></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost needs-dl" data-act="export-csv">${ico("down")}Export CSV</button>${isAdmin() ? `<button class="btn" data-act="add-emp">${ico("plus")}Add employee</button>` : ""}</div></div>
   <div class="toolbar"><label class="search"><span class="sr">Search employees</span>${ico("search")}<input id="q" type="search" placeholder="Search by name, ID, designation or grade" value="${esc(ui.q)}"></label>
-    <label class="toggle"><input type="checkbox" id="orgT" ${ui.org ? "checked" : ""}> Show location, department and reporting columns</label></div>
+    <label class="toggle"><input type="checkbox" id="orgT" ${ui.org ? "checked" : ""}> Show company, department and reporting columns</label></div>
   <div class="glass ${ui.org ? "show-org" : ""}" id="empWrap" style="padding:8px"><div class="tbl-wrap" style="border:0;background:transparent"><table class="emp-table"><thead><tr>${th}</tr></thead><tbody id="empBody">${body || ""}</tbody></table>${list.length ? "" : '<div class="empty">No employees match that search.</div>'}</div></div>
   <p style="color:var(--ink2);font-size:13.5px;padding:0 4px" id="empCount">Showing ${list.length} of ${res.length} employees</p>${moreActions()}`;
 }
@@ -996,7 +981,7 @@ function viewForm() {
       ${canPrint() ? `<button class="btn ghost" data-act="print">${ico("print")}Print form</button>` : ""}</div></div>
   <article class="glass paper">
     <header class="paper-head"><div><h1>IPAK Performance Assessment Form – 2026</h1><p>${esc(e.name)} · ${esc(e.desig)}</p></div><div class="final"><div><small>Final rating</small><b id="hdrCode"></b></div><span id="hdrLabel" style="font-weight:600"></span></div></header>
-    <section class="sec"><h2>Employee information</h2><div class="info"><div>${rowsInfo([["Employee ID", e.id], ["Name", esc(e.name)], ["Designation", esc(e.desig)], ["Department", esc(e.dept)], ["Sub department", esc(e.section)]])}</div><div>${rowsInfo([["Grade", esc(e.grade)], ["Line manager", esc(e.sup)], ["Head of department", esc(e.hod)], ["Date of joining", fmtDate(e.doj)], ["Performance rating 2026", esc(e.perf25 || "N/A")]])}</div></div></section>
+    <section class="sec"><h2>Employee information</h2><div class="info"><div>${rowsInfo([["Employee ID", e.id], ["Name", esc(e.name)], ["Designation", esc(e.desig)], ["Department", esc(e.dept)], ["Sub department", esc(e.section)]])}</div><div>${rowsInfo([["Grade", esc(e.grade)], ["Line manager", esc(e.sup)], ["Head of department", esc(e.hod)], ["Date of joining", fmtDate(e.doj)], ["Performance rating 2025", esc(e.perf25 || "N/A")]])}</div></div></section>
     <section class="sec"><h2>Individual Performance Indicator – IPI</h2><p class="sub">Add 4 to 7 SMART objectives. Weightage must total 100.</p>
       <div class="tbl-wrap table-scroll"><table class="ipi stack"><thead><tr><th rowspan="2">Smart objective</th><th class="grp" colspan="3">Achievement level</th><th rowspan="2" class="num">Weightage</th><th rowspan="2">Achievement</th><th rowspan="2" class="num">Achievement %</th><th rowspan="2">Level</th><th rowspan="2" class="num">Score</th><th rowspan="2" class="no-print"><span class="sr">Remove</span></th></tr><tr><th>A – Exceed</th><th>B – Meet</th><th>C – Below</th></tr></thead>
         <tbody id="ipiBody">${f.objs.map(ipiRow).join("")}</tbody>
@@ -1046,7 +1031,7 @@ function viewReport() {
   const secs = [...new Set(all.filter((e) => !ui.rd || e.dept === ui.rd).map((e) => e.section).filter(Boolean))].sort();
   if (ui.rs && !secs.includes(ui.rs)) ui.rs = "";
   const res = repRes(), n = res.length, d = distribution(res);
-  const scope = admin ? (ui.rs ? (ui.rd || "All departments") + " · " + ui.rs : ui.rd || "All departments")
+  const scope = admin ? (ui.co ? ui.co + " · " : "") + (ui.rs ? (ui.rd || "All departments") + " · " + ui.rs : ui.rd || "All departments")
     : ME.role === "lm" ? "My team" + (ME.person ? " · " + ME.person : "") : (depts.join(", ") || "My department");
   const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   const avgI = n ? res.reduce((s, r) => s + r.ipi, 0) / n : 0, avgB = n ? (res.reduce((s, r) => s + r.bpi, 0) / n) * 100 : 0;
@@ -1087,7 +1072,7 @@ function viewReport() {
 
 /* ===================== SHELL ===================== */
 function moreActions() {
-  return `<div class="mob-menu"><button class="link-btn" data-act="theme">${ico(curTheme() === "dark" ? "sun" : "moon")}${curTheme() === "dark" ? "Light mode" : "Dark mode"}</button><button class="link-btn needs-dl" data-act="export-json">${ico("down")}Export backup</button><button class="link-btn" data-act="import">${ico("up")}Import backup</button><button class="link-btn" data-act="reset">${ico("reset")}Restore original data</button>${CLOUD ? `<button class="link-btn" data-act="signout">Sign out</button>` : ""}</div>`;
+  return `<div class="mob-menu"><button class="link-btn" data-act="theme">${ico(curTheme() === "dark" ? "sun" : "moon")}${curTheme() === "dark" ? "Light mode" : "Dark mode"}</button><button class="link-btn needs-dl" data-act="export-json">${ico("down")}Export backup</button><button class="link-btn" data-act="import">${ico("up")}Import backup</button><button class="link-btn" data-act="reset">${ico("reset")}Restore original data</button>${CLOUD ? `<button class="link-btn" data-act="change-pin">Change PIN</button><button class="link-btn" data-act="signout">Sign out</button>` : ""}</div>`;
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 function render() {
@@ -1114,9 +1099,9 @@ let DL = null;
 async function saveFile(name, data) { if (!DL) return; try { await DL.save({ filename: name, data }); toast("File saved"); } catch (e) { if (e && e.code !== "declined") toast("Could not save the file"); } }
 const csvCell = (v) => { const s = String(v == null ? "" : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 function exportCSV(list) {
-  const h = ["Sr. #", "Emp ID", "Full Name", "Designation", "Location", "Geo", "Department", "Section", "Grade", "Date of Joining", "Direct Supervisor", "HOD", "2026 - Performance", "IPI - 2026", "Short IPI", "BPI - 2026", "Short BPI", "Final Performance", "IPI Rating", "BPI Rating"];
+  const h = ["Sr. #", "Emp ID", "Full Name", "Designation", "Company", "Geo", "Department", "Section", "Grade", "Date of Joining", "Direct Supervisor", "HOD", "2025 - Performance", "IPI - 2025", "Short IPI", "BPI - 2025", "Short BPI", "Final Performance", "IPI Rating", "BPI Rating"];
   const rows = (list || results()).map((r, i) => [i + 1, r.e.id, r.e.name, r.e.desig, r.e.loc, r.e.geo, r.e.dept, r.e.section, r.e.grade, r.e.doj, r.e.sup, r.e.hod, r.e.perf25 || "N/A", fmtN(r.ipi), shortOf(r.ipiR), fmtN(r.bpi * 100) + "%", shortOf(r.bpiR), r.code, r.ipiR, r.bpiR]);
-  saveFile("ipak-pms-2026-employees.csv", "\ufeff" + [h, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n"));
+  saveFile("ipak-pms-2025-employees.csv", "\ufeff" + [h, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n"));
 }
 
 /* ----- dialogs ----- */
@@ -1129,7 +1114,7 @@ function openEmp(id) {
   const fld = (k, l, t = "text", extra = "") => `<div class="field"><label for="e_${k}">${l}</label><input id="e_${k}" name="${k}" type="${t}" value="${esc(k === "perf24" ? (typeof e.perf24 === "number" ? fmtN(e.perf24 * 100) : "") : e[k])}" ${extra}></div>`;
   const d = dlg(); d.onclose = null;
   d.innerHTML = `<form method="dialog" id="empForm" novalidate autocomplete="off"><header><h2>${id == null ? "Add employee" : "Edit employee"}</h2></header><div class="body">
-    ${fld("id", "Employee ID", "number", id == null ? 'min="1"' : "readonly")}${fld("name", "Full name")}${fld("desig", "Designation")}${fld("grade", "Grade")}${fld("loc", "Location")}${fld("geo", "Geo")}${fld("dept", "Department")}${fld("section", "Section (sub department)")}${fld("doj", "Date of joining", "date")}${fld("sup", "Direct supervisor")}${fld("hod", "Head of department")}
+    ${fld("id", "Employee ID", "number", id == null ? 'min="1"' : "readonly")}${fld("name", "Full name")}${fld("desig", "Designation")}${fld("grade", "Grade")}${fld("loc", "Company")}${fld("geo", "Geo")}${fld("dept", "Department")}${fld("section", "Section (sub department)")}${fld("doj", "Date of joining", "date")}${fld("sup", "Direct supervisor")}${fld("hod", "Head of department")}
     <div class="field span" id="empErr"></div></div><footer><button type="button" class="btn ghost" data-act="close-dlg">Cancel</button><button type="submit" class="btn" id="empSave">Save employee</button></footer></form>`;
   $("#empForm").addEventListener("submit", (ev) => {
     ev.preventDefault(); const g = (k) => $("#e_" + k).value.trim(); const err = (t) => { $("#empErr").innerHTML = `<div class="msg bad">${ico("alert", 16)}<span>${esc(t)}</span></div>`; };
@@ -1195,7 +1180,7 @@ document.addEventListener("click", async (ev) => {
   if (act === "export-json") {
     /* in cloud mode the backup contains only what is saved in the Google Sheet (no unsubmitted drafts) */
     const st = CLOUD ? { emps: S.emps, forms: Object.fromEntries(Object.entries(SAVED).map(([k, v]) => [k, JSON.parse(v)])) } : S;
-    return saveFile("ipak-pms-2026-backup.json", JSON.stringify(st, null, 1));
+    return saveFile("ipak-pms-2025-backup.json", JSON.stringify(st, null, 1));
   }
   if (act === "import") return $("#file").click();
   if (act === "reset") { if (await confirmBox("Restore original data?", "This replaces everything in this browser with the data from the Excel workbook. Changes you made will be lost.", "Restore", true)) { S = seed(); save(); render(); toast("Original data restored"); } return; }
@@ -1243,8 +1228,8 @@ function importFile(file) {
 }
 try { const t = localStorage.getItem(THEME_KEY); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch (e) {}
 
-/* ===== DEPARTMENT FILTER + STATUS FILTER + APPROVAL WORKFLOW (Line Manager -> HOD -> Final) ===== */
-const nm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+/* ===== COMPANY + DEPARTMENT FILTER + STATUS FILTER + APPROVAL WORKFLOW (Line Manager -> HOD -> Final) ===== */
+const nm = (s) => String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
 const stOf = (id) => (S.forms[id] && S.forms[id].status) || "draft";
 const ST_LABEL = { draft: "Draft – with Line Manager", submitted: "Submitted – with HOD", approved: "Approved – final" };
 const ST_SHORT = { draft: "With Line Manager", submitted: "With HOD", approved: "Approved" };
@@ -1252,20 +1237,23 @@ const ST_CHIP = { draft: "chip-na", submitted: "chip-b", approved: "chip-a" };
 const WF_ACT = { submit: "Sent to HOD", approve: "Approved (final)", return: "Returned to Line Manager", reopen: "Reopened" };
 ui.st = "";
 
-/* ----- department / section / status scope ----- */
-const deptsOf = () => [...new Set(S.emps.map((e) => e.dept).filter(Boolean))].sort();
-const secsOf = () => [...new Set(S.emps.filter((e) => !ui.rd || e.dept === ui.rd).map((e) => e.section).filter(Boolean))].sort();
-const scoped = () => S.emps.filter((e) => (!ui.rd || e.dept === ui.rd) && (!ui.rs || e.section === ui.rs) && (!ui.st || stOf(e.id) === ui.st));
+/* ----- company / department / section / status scope ----- */
+const compsOf = () => [...new Set(S.emps.map((e) => e.loc).filter(Boolean))].sort();
+const deptsOf = () => [...new Set(S.emps.filter((e) => !ui.co || e.loc === ui.co).map((e) => e.dept).filter(Boolean))].sort();
+const secsOf = () => [...new Set(S.emps.filter((e) => (!ui.co || e.loc === ui.co) && (!ui.rd || e.dept === ui.rd)).map((e) => e.section).filter(Boolean))].sort();
+const scoped = () => S.emps.filter((e) => (!ui.co || e.loc === ui.co) && (!ui.rd || e.dept === ui.rd) && (!ui.rs || e.section === ui.rs) && (!ui.st || stOf(e.id) === ui.st));
 function scopeBar() {
+  if (ui.co && !compsOf().includes(ui.co)) ui.co = "";
   if (ui.rd && !deptsOf().includes(ui.rd)) ui.rd = "";
   if (ui.rs && !secsOf().includes(ui.rs)) ui.rs = "";
   const d = deptsOf(), showDept = d.length > 1 || isAdmin();
   const opt = (a, cur) => a.map((x) => `<option${x === cur ? " selected" : ""}>${esc(x)}</option>`).join("");
+  const comp = compsOf().length > 1 || isAdmin() ? `<label><span class="sr">Company</span><select id="sco"><option value="">All companies</option>${opt(compsOf(), ui.co)}</select></label>` : "";
   const dept = showDept ? `<label><span class="sr">Department</span><select id="sdept"><option value="">All departments</option>${opt(d, ui.rd)}</select></label><label><span class="sr">Section</span><select id="ssec"><option value="">All sections</option>${opt(secsOf(), ui.rs)}</select></label>` : "";
   const stat = CLOUD ? `<label><span class="sr">Status</span><select id="sstat"><option value="">All status</option>${Object.keys(ST_SHORT).map((k) => `<option value="${k}"${ui.st === k ? " selected" : ""}>${ST_SHORT[k]}</option>`).join("")}</select></label>` : "";
-  const active = !!(ui.rd || ui.rs || ui.st);
+  const active = !!(ui.co || ui.rd || ui.rs || ui.st);
   const clr = `<button class="btn ghost" data-act="clear-filters" ${active ? "" : "disabled"}>${ico("reset")}Clear filters</button>`;
-  return `<div class="picker no-print">${dept}${stat}${clr}<span style="color:var(--ink2);font-size:13.5px">${scoped().length} employees</span></div>`;
+  return `<div class="picker no-print">${comp}${dept}${stat}${clr}<span style="color:var(--ink2);font-size:13.5px">${scoped().length} employees</span></div>`;
 }
 results = () => scoped().map((e) => ({ e, ...evaluate(formOf(e.id)) }));
 repRes = () => results();
@@ -1287,7 +1275,7 @@ viewEmployees = scopedView(viewEmployees, (h) => {
 });
 const goOrig = go;
 go = function (v, id) {
-  if (v === "form" && id != null) { const e = empOf(id); if (e && !scoped().includes(e)) { ui.rd = ""; ui.rs = ""; ui.st = ""; } }
+  if (v === "form" && id != null) { const e = empOf(id); if (e && !scoped().includes(e)) { ui.co = ""; ui.rd = ""; ui.rs = ""; ui.st = ""; } }
   return goOrig(v, id);
 };
 document.addEventListener("click", (ev) => {
@@ -1298,13 +1286,14 @@ document.addEventListener("click", (ev) => {
 }, true);
 document.addEventListener("change", (ev) => {
   const t = ev.target;
-  if (t.id === "sdept") { ui.rd = t.value; ui.rs = ""; render(); }
+  if (t.id === "sco") { ui.co = t.value; ui.rd = ""; ui.rs = ""; render(); }
+  else if (t.id === "sdept") { ui.rd = t.value; ui.rs = ""; render(); }
   else if (t.id === "ssec") { ui.rs = t.value; render(); }
   else if (t.id === "sstat") { ui.st = t.value; render(); }
 });
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest('[data-act="clear-filters"]'); if (!b || b.disabled) return;
-  ui.rd = ""; ui.rs = ""; ui.st = "";
+  ui.co = ""; ui.rd = ""; ui.rs = ""; ui.st = "";
   keepScroll(render);
   toast("Filters cleared");
 });
@@ -1508,7 +1497,7 @@ function promoOpen(id) {
   const inp = (k, label, val, ph) => `<div class="field"><label for="pr_${k}">${label}</label><input id="pr_${k}" value="${esc(val)}" placeholder="${esc(ph || "")}" ${dis}></div>`;
   const area = (k, label, val, d) => `<div class="field span"><label for="pr_${k}">${label}</label><textarea id="pr_${k}" class="cell-in" style="min-height:90px;overflow:auto;resize:vertical" ${d}>${esc(val)}</textarea></div>`;
   const d = dlg(); d.onclose = null;
-  d.innerHTML = `<form method="dialog" id="prForm" novalidate autocomplete="off"><header><h2>Employee promotion form</h2><p style="color:var(--ink2);font-size:14px;margin-top:4px">${esc(e.name)} · ${esc(e.desig)} · ID ${e.id} · Grade ${esc(e.grade)} · 2026 rating ${esc(ev.code.replace(" ", ""))} (${esc(ev.label)})</p></header><div class="body">
+  d.innerHTML = `<form method="dialog" id="prForm" novalidate autocomplete="off"><header><h2>Employee promotion form</h2><p style="color:var(--ink2);font-size:14px;margin-top:4px">${esc(e.name)} · ${esc(e.desig)} · ID ${e.id} · Grade ${esc(e.grade)} · 2025 rating ${esc(ev.code.replace(" ", ""))} (${esc(ev.label)})</p></header><div class="body">
     <div class="field span"><div class="pr-h">Previous performance history</div></div>
     ${[0, 1, 2].map((i) => inp("hy" + i, "Year", (hist[i] || {}).y || "", "e.g. 2023") + inp("hv" + i, "Performance rating " + (i + 1), (hist[i] || {}).r || "", "e.g. A, B or 85%")).join("")}
     <div class="field span"><div class="pr-h">Promotion recommendation</div></div>
@@ -1593,21 +1582,21 @@ const viewPromotions = scopedView(function () {
     <div class="glass kpi"><small>Recommended · awaiting HR</small><div class="v">${c("recommended")}</div><div class="s">${c("pending")} still pending a decision</div></div>
   </div>
   <section class="glass pad card"><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px"><div><h2>All employees</h2><p class="sub" style="margin:0">Select a name to open the form, or Details to see the full promotion form.</p></div><div class="seg" role="group" aria-label="Filter by status">${seg}</div></div>
-    <div class="tbl-wrap"><table style="min-width:1080px"><thead><tr><th>ID</th><th>Name</th><th>Designation</th><th>Grade</th><th>2026 final</th><th>Status</th><th>Recommended position</th><th>Recommended grade</th><th>Organogram</th><th>Updated by</th><th></th></tr></thead><tbody>${rows}</tbody></table>${list.length ? "" : '<div class="empty">No employees match this filter.</div>'}</div></section>
+    <div class="tbl-wrap"><table style="min-width:1080px"><thead><tr><th>ID</th><th>Name</th><th>Designation</th><th>Grade</th><th>2025 final</th><th>Status</th><th>Recommended position</th><th>Recommended grade</th><th>Organogram</th><th>Updated by</th><th></th></tr></thead><tbody>${rows}</tbody></table>${list.length ? "" : '<div class="empty">No employees match this filter.</div>'}</div></section>
   <section class="glass pad card"><h2>By department</h2><div class="tbl-wrap"><table><thead><tr><th>Department</th><th class="num">Employees</th><th class="num">Promoted</th><th class="num">Not Recommended</th><th class="num">Rejected by HR</th><th class="num">Recommended</th><th class="num">Pending</th></tr></thead><tbody>${dRows}</tbody></table></div></section>${moreActions()}`;
 });
 const viewGuidelinesBeforePromo = viewGuidelines;
 viewGuidelines = function () { return ui.view === "promotions" ? viewPromotions() : viewGuidelinesBeforePromo(); };
 
 function promoExportCSV() {
-  const h = ["Emp ID", "Name", "Designation", "Department", "Section", "Grade", "2026 Final", "Status", "Recommended Position", "Recommended Grade", "Performance History", "Key Achievements", "Remarks", "Position in Organogram", "HR Remarks", "Updated By", "Updated At"];
+  const h = ["Emp ID", "Name", "Designation", "Department", "Section", "Grade", "2025 Final", "Status", "Recommended Position", "Recommended Grade", "Performance History", "Key Achievements", "Remarks", "Position in Organogram", "HR Remarks", "Updated By", "Updated At"];
   const rows = results().map((r) => {
     const e = r.e, p = promoOf(e.id) || {};
     return [e.id, e.name, e.desig, e.dept, e.section, e.grade, r.code, PSTAT[pStat(e.id)][0], p.pos || "", p.grade || "",
       (p.hist || []).filter((x) => x.y || x.r).map((x) => x.y + ": " + x.r).join(" | "), (p.ach || []).filter(Boolean).map((a, i) => i + 1 + ". " + a).join(" | "), p.rem || "",
       p.decision === "yes" ? (p.org === "yes" ? "Yes" : p.org === "no" ? "No" : "HR pending") : "", p.hrRem || "", p.by || "", p.at || ""];
   });
-  saveFile("ipak-promotions-2026.csv", "\ufeff" + [h, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n"));
+  saveFile("ipak-promotions-2025.csv", "\ufeff" + [h, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n"));
 }
 document.addEventListener("click", (ev) => {
   const b = ev.target.closest("[data-pr]"); if (!b) return;
@@ -1624,7 +1613,7 @@ document.addEventListener("click", (ev) => {
   s.textContent = ".pr-hist{display:grid;grid-template-columns:64px repeat(3,minmax(0,1fr));gap:8px}.pr-hist .hh{font-size:12.5px;color:var(--ink2)}.pr-hist .cell-in{padding:8px 9px;font-size:14px}@media (max-width:560px){.pr-hist{grid-template-columns:48px repeat(3,minmax(0,1fr));gap:6px}.pr-hist .cell-in{padding:7px 6px;font-size:13px}}";
   document.head.appendChild(s);
 }
-const PR_YEARS = ["2023", "2024", "2025", "2026"];
+const PR_YEARS = ["2022", "2023", "2024", "2025"];
 let PROMO_OPENING = false;
 function promoOpen(id) {
   const e = empOf(id); if (!e) return;
@@ -1652,7 +1641,7 @@ function promoShow(id, mh, warn) {
   const hv = (y, k) => {
     let v = (mm[y] && mm[y][k]) || (sv[y] && sv[y][k]) || "";
     if (!v && k === "r" && y === "2024" && typeof e.perf24 === "number") v = fmtPerf(e.perf24);
-    if (!v && k === "r" && y === "2026" && stOf(id) === "approved") v = ev.code.replace(" ", "");
+    if (!v && k === "r" && y === "2025" && stOf(id) === "approved") v = ev.code.replace(" ", "");
     return v;
   };
   const kl = { r: "rating", p: "promotion", g: "grade" };
@@ -1690,7 +1679,7 @@ function promoShow(id, mh, warn) {
 }
 
 function promoExportCSV() {
-  const h = ["Emp ID", "Name", "Designation", "Department", "Section", "Grade", "2026 Final", "Status", "Recommended Position", "Recommended Grade", "Performance History", "Key Achievements", "Remarks", "Position in Organogram", "HR Remarks", "Updated By", "Updated At"];
+  const h = ["Emp ID", "Name", "Designation", "Department", "Section", "Grade", "2025 Final", "Status", "Recommended Position", "Recommended Grade", "Performance History", "Key Achievements", "Remarks", "Position in Organogram", "HR Remarks", "Updated By", "Updated At"];
   const rows = results().map((r) => {
     const e = r.e, p = promoOf(e.id) || {};
     return [e.id, e.name, e.desig, e.dept, e.section, e.grade, r.code, PSTAT[pStat(e.id)][0], p.pos || "", p.grade || "",
@@ -1699,128 +1688,281 @@ function promoExportCSV() {
   });
   saveFile("ipak-promotions-2026.csv", "\ufeff" + [h, ...rows].map((r) => r.map(csvCell).join(",")).join("\r\n"));
 }
-/* ===== ADMIN: EMPLOYEE OBJECTIVES REPORT (Excel .xlsx) ===== */
-(function () {
-  const xe = (s) => String(s == null ? "" : s)
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const colL = (i) => { let s = ""; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
 
-  /* ----- one worksheet as XML (row 1 = header, frozen, with filter) ----- */
-  function sheetXml(head, rows, widths) {
-    const cell = (v, r, c, st) => {
-      const ref = colL(c) + r;
-      if (typeof v === "number" && isFinite(v)) return `<c r="${ref}" s="${st === 2 ? 3 : st}"><v>${v}</v></c>`;
-      if (v === "" || v == null) return `<c r="${ref}" s="${st}"/>`;
-      return `<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`;
-    };
-    const all = [head.map((h) => ({ v: h, s: 1 }))].concat(rows.map((r) => r.map((v) => ({ v, s: 2 }))));
-    const data = all.map((r, i) => `<row r="${i + 1}"${i === 0 ? ' ht="30" customHeight="1"' : ""}>${r.map((c, j) => cell(c.v, i + 1, j, c.s)).join("")}</row>`).join("");
-    const cols = widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join("");
-    return `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${cols}</cols><sheetData>${data}</sheetData><autoFilter ref="A1:${colL(head.length - 1)}${Math.max(1, all.length)}"/></worksheet>`;
-  }
+/* ===== CHANGE PIN ===== */
+function changePinDialog() {
+  if (!CLOUD || !CRED) return;
+  const d = dlg(); d.onclose = null;
+  d.innerHTML = `<form method="dialog" id="pinForm" novalidate autocomplete="off"><header><h2>Change PIN</h2></header><div class="body one">
+    <div class="field"><label for="pn_old">Current PIN</label><input id="pn_old" type="password" inputmode="numeric" autocomplete="current-password"></div>
+    <div class="field"><label for="pn_new">New PIN (at least 4 characters)</label><input id="pn_new" type="password" inputmode="numeric" autocomplete="new-password"></div>
+    <div class="field"><label for="pn_new2">Confirm new PIN</label><input id="pn_new2" type="password" inputmode="numeric" autocomplete="new-password"></div>
+    <div id="pnErr"></div></div>
+    <footer><button type="button" class="btn ghost" data-act="close-dlg">Cancel</button><button type="submit" class="btn" id="pnSave">Change PIN</button></footer></form>`;
+  $("#pinForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const o = $("#pn_old").value.trim(), n = $("#pn_new").value.trim(), n2 = $("#pn_new2").value.trim();
+    const err = (t) => { $("#pnErr").innerHTML = `<div class="msg bad">${ico("alert", 16)}<span>${esc(t)}</span></div>`; };
+    if (!o || !n) return err("Enter your current PIN and the new PIN.");
+    if (n.length < 4) return err("New PIN must be at least 4 characters.");
+    if (n !== n2) return err("New PIN and confirmation do not match.");
+    if (n === o) return err("New PIN must be different from the current PIN.");
+    const b = $("#pnSave"); b.disabled = true; b.textContent = "Saving…";
+    run().withSuccessHandler(() => { d.close(); toast("PIN changed"); })
+      .withFailureHandler((e) => { err(errMsg(e)); b.disabled = false; b.textContent = "Change PIN"; })
+      .changePin(CRED, o, n);
+  });
+  d.showModal(); $("#pn_old").focus();
+}
+document.addEventListener("click", (ev) => { if (ev.target.closest('[data-act="change-pin"]')) changePinDialog(); });
 
-  /* ----- minimal ZIP writer (stored, no compression) ----- */
-  let CRC_T = null;
-  function crc32(u8) {
-    if (!CRC_T) { CRC_T = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC_T[n] = c >>> 0; } }
-    let c = 0xFFFFFFFF;
-    for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8);
-    return (c ^ 0xFFFFFFFF) >>> 0;
-  }
-  function zip(files) {
-    const enc = new TextEncoder(), chunks = [], central = [];
-    let offset = 0;
-    const u16 = (v, a) => { const d = new DataView(new ArrayBuffer(2)); d.setUint16(0, v, true); a.push(new Uint8Array(d.buffer)); };
-    const u32 = (v, a) => { const d = new DataView(new ArrayBuffer(4)); d.setUint32(0, v >>> 0, true); a.push(new Uint8Array(d.buffer)); };
-    files.forEach((f) => {
-      const name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
-      const lh = [];
-      u32(0x04034b50, lh); u16(20, lh); u16(0x0800, lh); u16(0, lh); u16(0, lh); u16(33, lh);
-      u32(crc, lh); u32(data.length, lh); u32(data.length, lh); u16(name.length, lh); u16(0, lh);
-      lh.push(name, data);
-      lh.forEach((p) => chunks.push(p));
-      const ch = [];
-      u32(0x02014b50, ch); u16(20, ch); u16(20, ch); u16(0x0800, ch); u16(0, ch); u16(0, ch); u16(33, ch);
-      u32(crc, ch); u32(data.length, ch); u32(data.length, ch); u16(name.length, ch); u16(0, ch); u16(0, ch);
-      u16(0, ch); u16(0, ch); u32(0, ch); u32(offset, ch); ch.push(name);
-      central.push(ch);
-      offset += 30 + name.length + data.length;
-    });
-    let cdSize = 0;
-    central.forEach((ch) => ch.forEach((p) => { chunks.push(p); cdSize += p.length; }));
-    const end = [];
-    u32(0x06054b50, end); u16(0, end); u16(0, end); u16(files.length, end); u16(files.length, end); u32(cdSize, end); u32(offset, end); u16(0, end);
-    end.forEach((p) => chunks.push(p));
-    return new Blob(chunks, { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-  }
-
-  function buildXlsx(sheets) {
-    const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
-    const files = [
-      { name: "[Content_Types].xml", data: `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>` },
-      { name: "_rels/.rels", data: `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
-      { name: "xl/workbook.xml", data: `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook ${NS} xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s, i) => `<sheet name="${xe(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("")}</sheets></workbook>` },
-      { name: "xl/_rels/workbook.xml.rels", data: `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
-      { name: "xl/styles.xml", data: `${"<"}?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet ${NS}><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14532D"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFD3C6"/></left><right style="thin"><color rgb="FFBFD3C6"/></right><top style="thin"><color rgb="FFBFD3C6"/></top><bottom style="thin"><color rgb="FFBFD3C6"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="top"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>` }
-    ];
-    sheets.forEach((s, i) => files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, data: sheetXml(s.head, s.rows, s.widths) }));
-    return zip(files);
-  }
-
-  /* ----- collect data (saved versions only) ----- */
-  function savedForm(id) {
-    if (!CLOUD) return S.forms[id] || null;
-    try { return SAVED[id] ? JSON.parse(SAVED[id]) : null; } catch (e) { return null; }
-  }
-  function exportObjectivesXlsx() {
-    if (!isAdmin()) return toast("Only Admin or HR can export this report.");
-    const list = scoped();
-    if (!list.length) return toast("No employees to export.");
-    const objRows = [], sumRows = [];
-    list.forEach((e) => {
-      const f = savedForm(e.id) || blankForm();
-      const ev = evaluate(f);
-      const base = [e.id, e.name, e.desig, e.dept, e.section, e.grade, e.sup, e.hod, ST_SHORT[f.status || "draft"] || "With Line Manager"];
-      const filled = (f.objs || []).map((o, i) => ({ o, i })).filter(({ o }) => String(o.obj || "").trim() || String(o.A || "").trim() || String(o.B || "").trim() || String(o.C || "").trim() || String(o.ach || "").trim() || Number(o.w) || Number(o.pct));
-      if (!filled.length) objRows.push(base.concat(["", "", "", "", "", "", "", "", "", ""]));
-      filled.forEach(({ o, i }) => {
-        const pct = Math.round((Number(o.pct) || 0) * 10000) / 100;
-        objRows.push(base.concat([i + 1, o.obj || "", o.A || "", o.B || "", o.C || "", Number(o.w) || 0, o.ach || "", pct, short(achievementLevel(o.pct)), Math.round(weighted(o.w, o.pct) * 100) / 100]));
-      });
-      sumRows.push(base.concat([(f.objs || []).length, weightTotal(f.objs || []), Math.round(ev.ipi * 100) / 100, ev.done ? ev.ipiR : "Not assessed", Math.round(ev.bpi * 10000) / 100, ev.done ? ev.bpiR : "Not assessed", ev.done ? ev.code.replace(" ", "") : "N/A", ev.label || "", f.lm || "", f.hod || ""]));
-    });
-    const hb = ["Emp ID", "Full Name", "Designation", "Department", "Section", "Grade", "Line Manager", "HOD", "Form Status"];
-    const blob = buildXlsx([
-      { name: "Objectives", head: hb.concat(["Obj #", "Smart Objective", "A - Exceed", "B - Meet", "C - Below", "Weightage", "Achievement", "Achievement %", "Level", "Score"]), rows: objRows, widths: [9, 24, 24, 18, 18, 9, 22, 22, 18, 7, 44, 26, 26, 26, 11, 30, 13, 18, 9] },
-      { name: "Employee summary", head: hb.concat(["Objectives", "Total Weightage", "IPI Score", "IPI Rating", "BPI %", "BPI Rating", "Final Code", "Final Performance", "Line Manager Comments", "HOD Comments"]), rows: sumRows, widths: [9, 24, 24, 18, 18, 9, 22, 22, 18, 11, 12, 10, 24, 9, 24, 11, 22, 40, 40] }
-    ]);
-    const name = "IPAK-Objectives-Report-" + new Date().toISOString().slice(0, 10) + ".xlsx";
-    try {
-      const url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-      toast(dirty.size ? "Excel downloaded (unsaved drafts are not included)" : "Excel downloaded: " + list.length + " employees");
-    } catch (e) { toast("Could not create the Excel file"); }
-  }
-
-  /* ----- button on the Employees page (Admin/HR only) ----- */
-  function addObjectivesBtn() {
-    if (!isAdmin()) return;
-    if (ui.view !== "employees" && ui.view !== "report") return;
-    if (document.querySelector('[data-xl="objectives"]')) return;
-    const host = document.querySelector("#view .page-head > div:last-child");
-    if (!host) return;
-    const isRep = ui.view === "report";
-    host.insertAdjacentHTML(
-      isRep ? "beforeend" : "afterbegin",
-      `<button class="btn" data-xl="objectives" title="Har employee ki detail aur uske objectives, Excel file mein">${ico("down")}${isRep ? "Generate Report (Excel)" : "Objectives report (Excel)"}</button>`
-    );
-  }
-  const renderBeforeXl = render;
-  render = function () { renderBeforeXl(); addObjectivesBtn(); };
-  document.addEventListener("click", (ev) => { if (ev.target.closest('[data-xl="objectives"]')) exportObjectivesXlsx(); });
+/* =====================================================================
+   DIRECT SUPERVISOR (DS) STAGE:  Direct Supervisor -> Line Manager -> HOD -> Final approval
+   It uses the same "layering" style as the existing patches (re-assigning existing functions),
+   so no other part of Index.html has to be rewritten.
+   ===================================================================== */
+ROLE_LABEL.ds = "Direct supervisor";
+ROLE_PAGES.ds = ["guidelines", "dashboard", "employees", "form", "report"];   // no Promotions page for a Direct Supervisor
+PLOG_ROLE.ds = "Direct supervisor";
+ST_LABEL.dsdraft = "Draft – with Direct Supervisor";
+ST_CHIP.dsdraft = "chip-na";
+(function () {                                  // put the new status first in the status filter
+  const old = Object.assign({}, ST_SHORT);
+  Object.keys(ST_SHORT).forEach((k) => delete ST_SHORT[k]);
+  ST_SHORT.dsdraft = "With Direct Supervisor";
+  Object.assign(ST_SHORT, old);
 })();
+WF_ACT.submit_lm = "Sent to Line Manager";
+WF_ACT.return_ds = "Returned to Direct Supervisor";
+
+{
+  const s = document.createElement("style");
+  s.textContent = ".ds-panel .ds-sum{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px}.ds-panel .tbl-wrap{margin-top:8px}.ds-comment{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--card-2);border:1px solid var(--line)}.ds-comment p{white-space:pre-wrap;margin-top:4px}" +
+    "@media print{html body .paper > .sec:nth-of-type(3){break-before:auto!important;page-break-before:auto!important}html body .paper > .sec.bpi-sec{break-before:page!important;page-break-before:always!important}.ds-panel .ds-sum{gap:4px 12px;margin-bottom:4px}.ds-comment{padding:4px 8px;margin-top:6px}}";
+  document.head.appendChild(s);
+}
+
+/* a form that has not been saved yet starts with the Direct Supervisor when one is mapped */
+function normalizeDs() {
+  if (!CLOUD || !CRED) return;
+  S.emps.forEach((e) => {
+    if (!e.ds) return;
+    const f = S.forms[e.id];
+    if (!f) S.forms[e.id] = Object.assign(blankForm(), { status: "dsdraft" });
+    else if (!f.status && !SAVED[e.id]) f.status = "dsdraft";
+  });
+}
+const renderBeforeDs = render;
+render = function () { normalizeDs(); renderBeforeDs(); };
+
+/* ----- who may do what (the Google Sheet script checks the same rules again) ----- */
+stageOf = function (e) {
+  if (isAdmin()) return "admin";
+  const p = nm(ME.person); if (!p) return null;
+  const allow = { ds: ["ds"], lm: ["lm", "ds"], hod: ["hod", "lm", "ds"] }[ME.role] || [];
+  const c = [];
+  if (nm(e.hod) === p) c.push("hod");
+  if (nm(e.sup) === p) c.push("lm");
+  if (e.ds && nm(e.ds) === p) c.push("ds");
+  const ok = c.filter((x) => allow.includes(x));
+  if (!ok.length) return null;
+  const st = stOf(e.id);
+  const pref = st === "dsdraft" ? ["ds", "lm", "hod"] : (st === "submitted" || st === "approved") ? ["hod", "lm", "ds"] : ["lm", "hod", "ds"];
+  return pref.find((x) => ok.includes(x)) || null;
+};
+canEditNow = function (e) {
+  const st = stOf(e.id), sg = stageOf(e), wf = !!e.ds;
+  if (!sg || st === "approved") return false;
+  if (sg === "admin") return true;
+  if (sg === "ds") return st === "dsdraft";
+  if (sg === "lm") return st === "draft" || st === "dsdraft";
+  if (sg === "hod") return wf ? st === "submitted" : (st === "draft" || st === "submitted");
+  return false;
+};
+
+/* ----- Direct Supervisor comments: typed into data-f="dsrem" ----- */
+document.addEventListener("input", (ev) => {
+  const t = ev.target;
+  if (!t.dataset || t.dataset.f !== "dsrem" || ui.view !== "form") return;
+  curForm().dsrem = t.value;
+  touchForm(ui.id);
+});
+
+/* ----- read-only panel with the submitted Direct Supervisor assessment (shown to LM, HOD, HR) ----- */
+function dsPanelHTML(e, f) {
+  const d = f.ds, set = d.set || compSetFor(e.grade);
+  const ev = evaluate({ objs: d.objs, bpi: d.bpi, status: "submitted" });
+  const rows = (d.objs || []).map((o) => { const lv = achievementLevel(o.pct); return `<tr><td>${esc(o.obj)}</td><td class="num">${fmtN(o.w)}</td><td class="num">${o.pct ? fmtN(o.pct * 100) : "0"}%</td><td>${chip(lv, short(lv))}</td><td class="num">${fmtN(weighted(o.w, o.pct))}</td></tr>`; }).join("");
+  const brows = (COMP[set] || []).map((c, i) => `<tr><td>${esc(c.name === "OWNERSIP" ? "Ownership" : c.name[0] + c.name.slice(1).toLowerCase())}</td><td>${esc(d.bpi[i] || "Select Rating")}</td></tr>`).join("");
+  return `<section class="sec ds-panel"><h2>Direct supervisor assessment</h2><p class="sub">Submitted by ${esc(d.by || "")}${d.at ? " · " + esc(new Date(d.at).toLocaleString("en-GB")) : ""}. Read-only: it is kept separate from the Line Manager’s assessment and cannot be changed by the Line Manager or HOD.</p>
+    <div class="ds-sum"><span>IPI ${fmtN(ev.ipi)} ${chip(ev.ipiR, short(ev.ipiR))}</span><span>BPI ${fmtN(ev.bpi * 100)}% ${chip(ev.bpiR, short(ev.bpiR))}</span><span>Final ${codeTag(ev.code)} ${esc(ev.label)}</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Smart objective</th><th class="num">Weightage</th><th class="num">Achievement %</th><th>Level</th><th class="num">Score</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Competency</th><th>Direct supervisor rating</th></tr></thead><tbody>${brows}</tbody></table></div>
+    <div class="ds-comment"><b>Direct supervisor comments</b><p>${esc(d.rem || "–")}</p></div></section>`;
+}
+
+/* ----- reason dialog (reason is mandatory) ----- */
+function askReason(title, label, btn) {
+  return new Promise((res) => {
+    const d = dlg(); let done = false;
+    d.innerHTML = `<form method="dialog" id="rsForm" novalidate><header><h2>${esc(title)}</h2></header><div class="body one"><div class="field"><label for="wfnote">${esc(label)}</label><textarea id="wfnote" class="cell-in" style="min-height:110px;overflow:auto"></textarea></div><div id="rsErr"></div></div><footer><button type="button" class="btn ghost" data-act="close-dlg">Cancel</button><button type="submit" class="btn">${esc(btn)}</button></footer></form>`;
+    d.onclose = () => { if (!done) res(null); };
+    $("#rsForm").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const v = $("#wfnote").value.trim();
+      if (!v) { $("#rsErr").innerHTML = `<div class="msg bad">${ico("alert", 16)}<span>Please enter a reason.</span></div>`; return; }
+      done = true; d.close(); res(v);
+    });
+    d.returnValue = ""; d.showModal();
+  });
+}
+
+/* ----- workflow panel + stage-specific form changes on the assessment form page ----- */
+wfDecorate = function () {
+  if (!CLOUD || !CRED || ui.view !== "form") return;
+  const paper = $(".paper"), e = empOf(ui.id);
+  if (!paper || !e) return;
+  const f = formOf(e.id), st = stOf(e.id), sg = stageOf(e), edit = canEditNow(e), wf = !!e.ds, hist = f.hist || [], last = hist[hist.length - 1];
+
+  /* employee information: show the Direct Supervisor next to the Line Manager */
+  const lmRow = $$(".paper .info .row").find((r) => /line manager/i.test(r.firstElementChild.textContent));
+  if (lmRow) lmRow.insertAdjacentHTML("beforebegin", `<div class="row"><span>Direct supervisor (DS)</span><strong>${esc(e.ds) || "–"}</strong></div>`);
+  const bpiSec = $("table.bpi") && $("table.bpi").closest(".sec"); if (bpiSec) bpiSec.classList.add("bpi-sec");
+
+  /* separate comment boxes: DS comments are written by the DS only; LM / HOD see them in the read-only panel */
+  const cm = $(".comments");
+  if (st === "dsdraft" && (sg === "ds" || sg === "admin") && cm) {
+    cm.insertAdjacentHTML("afterbegin", `<div class="field"><label for="c_dsrem">Direct supervisor comments</label><textarea id="c_dsrem" class="cell-in" style="min-height:140px;overflow:auto;resize:vertical" data-f="dsrem">${esc(f.dsrem)}</textarea><div class="sign"><span>Signature</span></div><div class="sign-spc"></div></div>`);
+    if (sg === "ds") { const lm = $("#c_lm"); if (lm) lm.closest(".field").remove(); }
+  } else if (st === "dsdraft" && sg === "lm" && cm) {
+    cm.insertAdjacentHTML("afterbegin", `<div class="field"><label>Direct supervisor comments (read-only)</label><textarea class="cell-in" style="min-height:140px;overflow:auto;resize:vertical" readonly>${esc(f.dsrem)}</textarea></div>`);
+  } else if (f.ds) {
+    const first = $$(".paper > .sec")[0];
+    if (first) first.insertAdjacentHTML("afterend", dsPanelHTML(e, f));
+  }
+
+  /* locking */
+  const lockAll = (except) => {
+    $$(".paper textarea,.paper input").forEach((x) => { if (!except || !x.matches(except)) x.readOnly = true; });
+    $$(".paper select").forEach((x) => { x.disabled = true; });
+    $$('[data-act="add-obj"],[data-act="del-obj"]').forEach((b) => { b.disabled = true; });
+  };
+  if (!edit) lockAll();
+  else if (sg === "hod" && wf) lockAll("#c_hod");       // with a DS stage the HOD writes only HOD comments
+
+  const sb = $("#submitBtn");
+  if (sb) { if (edit) { if (sb.lastChild) sb.lastChild.textContent = "Save draft"; } else if (sb.parentElement) sb.parentElement.style.display = "none"; }
+
+  const canSubmitLM = st === "dsdraft" && (sg === "ds" || sg === "admin");
+  const canSubmit = st === "draft" && (sg === "lm" || sg === "admin");
+  const canReturnDS = wf && st === "draft" && (sg === "lm" || sg === "admin") && !!f.ds;
+  const canApprove = (st === "submitted" || (st === "draft" && (!wf || sg === "admin"))) && (sg === "hod" || sg === "admin");
+  const canReturn = st === "submitted" && (sg === "hod" || sg === "admin");
+  const canReopen = st === "approved" && sg === "admin";
+  const promoOk = promoReady() && !!promoOf(e.id);
+
+  let hint = "";
+  if (st === "approved") hint = "This form has been finally approved and is locked.";
+  else if (st === "dsdraft") hint = sg === "lm" ? "This form is currently with the Direct Supervisor. You can also edit it (your changes are recorded in the history), but only the Direct Supervisor can submit it to you." : edit ? "Complete your assessment and comments, then click “Submit to Line Manager”. After you submit, your stage is locked unless the Line Manager sends it back." : "This form is with the Direct Supervisor and is locked for you.";
+  else if (st === "draft") hint = edit ? (f.ds ? "The Direct Supervisor’s assessment is shown above (read-only). Complete your own assessment and comments, then click “Submit to HOD”, or send it back to the Direct Supervisor with a reason." : "Complete the assessment. Once finished, click “Submit to HOD”.") : "This form is with the Line Manager and is locked for you.";
+  else if (st === "submitted") hint = edit ? (wf ? "Review the Direct Supervisor and Line Manager assessments. You can add HOD comments, then approve the form or send it back to the Line Manager with a reason." : "Review the assessment as HOD. Make changes if necessary, then approve it or send it back to the Line Manager.") : "The form is under HOD review and is locked for you.";
+  if (canSubmit && !promoOk) hint = "Select Yes or No for the Promotion Recommendation before clicking “Submit to HOD”.";
+
+  const label = st === "dsdraft" ? (last && last.a === "return_ds" ? "Returned to Direct Supervisor" : ST_LABEL.dsdraft) : st === "draft" ? (f.ds ? "With Line Manager – submitted by Direct Supervisor" : "Draft – with Line Manager") : ST_LABEL[st];
+  const retBy = (st === "draft" || st === "dsdraft") && last && (last.a === "return" || last.a === "return_ds");
+  const ret = retBy ? `<div class="msg bad">${ico("alert", 16)}<span><b>Returned by ${esc(last.by)} (${esc(PLOG_ROLE[last.r] || last.r)}):</b> ${esc(last.n || "(no reason given)")}</span></div>` : "";
+  const apr = st === "approved" && f.approvedBy ? `<div class="msg ok">${ico("check", 16)}<span>Approved by ${esc(f.approvedBy)}${f.approvedAt ? " · " + esc(new Date(f.approvedAt).toLocaleString("en-GB")) : ""}</span></div>` : "";
+  const btns =
+    (canSubmitLM ? `<button class="btn" data-wf="submit_lm">${ico("right")}Submit to Line Manager</button>` : "") +
+    (canReturnDS ? `<button class="btn ghost" data-wf="return_ds">${ico("left")}Send back to Direct Supervisor</button>` : "") +
+    (canSubmit ? `<button class="btn" data-wf="submit" ${promoOk ? "" : "disabled"}>${ico("right")}Submit to HOD</button>` : "") +
+    (canApprove ? `<button class="btn" data-wf="approve">${ico("check")}Approve final assessment</button>` : "") +
+    (canReturn ? `<button class="btn ghost" data-wf="return">${ico("left")}Send back to Line Manager</button>` : "") +
+    (canReopen ? `<button class="btn ghost" data-wf="reopen">${ico("reset")}Reopen</button>` : "");
+  const hl = hist.slice(-8).reverse().map((x) => `<li>${esc(WF_ACT[x.a] || x.a)} · ${esc(x.by)}${x.r && PLOG_ROLE[x.r] ? " (" + PLOG_ROLE[x.r] + ")" : ""} · ${esc(new Date(x.t).toLocaleString("en-GB"))}${x.n ? " — " + esc(x.n) : ""}</li>`).join("");
+  const wfHTML = `<section class="glass wf no-print"><div class="wf-top"><span class="chip ${ST_CHIP[st] || "chip-na"} lg">${esc(label)}</span><div class="wf-btns">${btns}</div></div><p>${esc(hint)}</p>${ret}${apr}${hl ? `<details><summary>History</summary><ul>${hl}</ul></details>` : ""}</section>`;
+  const bar = paper.nextElementSibling;
+  const anchor = bar && bar.classList.contains("sec-actions") ? bar : paper;
+  anchor.insertAdjacentHTML("afterend", wfHTML);
+};
+
+wfAct = async function (action) {
+  const id = ui.id, e = empOf(id); if (!e || !CLOUD) return;
+  let note = "";
+  if (action === "return") {
+    note = await askReason("Send back to Line Manager", "Reason for sending back (the Line Manager will see this)", "Send back");
+    if (note === null) return;
+  } else if (action === "return_ds") {
+    note = await askReason("Send back to Direct Supervisor", "Reason for sending back (the Direct Supervisor will see this)", "Send back");
+    if (note === null) return;
+  } else {
+    const T = {
+      submit_lm: ["Submit to Line Manager?", `${e.name} (ID ${id}): your assessment and comments will go to the Line Manager. After that you cannot edit them unless the Line Manager sends the form back.`, "Submit"],
+      submit: ["Submit to HOD?", `${e.name} (ID ${id}): the form will go to the HOD for approval. After that the Line Manager cannot edit it unless the HOD sends it back.`, "Submit to HOD"],
+      approve: ["Approve final assessment?", `${e.name} (ID ${id}): the form will be finally approved and locked.`, "Approve"],
+      reopen: ["Reopen form?", `${e.name}: the form goes back to the Line Manager as a draft.`, "Reopen"]
+    }[action];
+    if (!(await confirmBox(T[0], T[1], T[2]))) return;
+  }
+  setSave("Saving…");
+  run().withSuccessHandler((r) => {
+    S.forms[id] = r; SAVED[id] = JSON.stringify(r); dirty.delete(id);
+    setSave(dirty.size ? `Unsaved changes (${dirty.size}).` : "All changes saved to the Google Sheet");
+    render(); window.scrollTo(0, 0); toast(WF_ACT[action]);
+  }).withFailureHandler((err) => { setSave("Not saved"); toast(errMsg(err)); }).workflow(CRED, id, action, note, dirty.has(id) ? JSON.parse(snap(id)) : null);
+};
+
+/* a Direct Supervisor (acting only as DS) has no promotion card */
+const promoDecorateBeforeDs = promoDecorate;
+promoDecorate = function () {
+  const e = empOf(ui.id);
+  if (ui.view === "form" && e && stageOf(e) === "ds") return ensurePromos();
+  promoDecorateBeforeDs();
+};
+
+/* "Needs my action" counter next to the filters */
+const scopeBarBeforeDs = scopeBar;
+scopeBar = function () {
+  const h = scopeBarBeforeDs();
+  if (!CLOUD || isAdmin()) return h;
+  const n = S.emps.filter((x) => canEditNow(x)).length;
+  return h.replace(/<\/div>$/, `<span class="chip ${n ? "chip-b" : "chip-na"}">Needs my action: ${n}</span></div>`);
+};
+
+/* Employees page: the old "Direct supervisor" column is really the Line Manager, add the new DS column */
+const viewEmployeesBeforeDs = viewEmployees;
+viewEmployees = function () {
+  let h = viewEmployeesBeforeDs();
+  h = h.replace(">Direct supervisor</th>", ">Line manager</th>");
+  if (!CLOUD) return h;
+  h = h.replace("</tr></thead>", '<th class="org">Direct supervisor (DS)</th></tr></thead>');
+  return h.replace(/(<tr data-act="open-row" data-id="(\d+)">[\s\S]*?)<\/tr>/g, (m, a, id) => a + `<td class="org">${esc((empOf(Number(id)) || {}).ds)}</td></tr>`);
+};
+
+/* Add / edit employee dialog: Line Manager label + Direct Supervisor field */
+const openEmpBeforeDs = openEmp;
+openEmp = function (id) {
+  openEmpBeforeDs(id);
+  try {
+    const err = $("#empErr"); if (!err) return;
+    err.insertAdjacentHTML("beforebegin", `<div class="field"><label for="e_ds">Direct supervisor (DS)</label><input id="e_ds" name="ds" value="${esc(id == null ? "" : (empOf(id) || {}).ds)}"></div>`);
+    const l = $('label[for="e_sup"]'); if (l) l.textContent = "Line manager";
+  } catch (x) {}
+};
+const pushEmpBeforeDs = pushEmp;
+pushEmp = function (rec, isNew) {
+  const el = $("#e_ds");
+  if (el) rec.ds = el.value.trim();       // rec is the same object kept in S.emps
+  return pushEmpBeforeDs(rec, isNew);
+};
+
+/* Guidelines: describe the new first step */
+const viewGuidelinesBeforeDs = viewGuidelines;
+viewGuidelines = function () {
+  const h = viewGuidelinesBeforeDs();
+  return h.replace("<li>Line managers review the assessments of their teams.</li>", "<li>Direct Supervisors complete the first assessment and comments and submit it to the Line Manager.</li><li>Line managers review the Direct Supervisor’s assessment, complete their own assessment and comments, and submit it to the HOD (or send it back to the Direct Supervisor with a reason).</li>");
+};
+
 render(); if (CLOUD) startCloud();
 })();
 
@@ -1886,23 +2028,3 @@ body.no-print-role [data-act="print"]{display:none!important}
   }, true);
 })();
 </script>
-<!-- IPAK logo: is poore block ko </body> se theek pehle paste karein -->
-<script>
-(function () {
-  var LOGO = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDkyIiBoZWlnaHQ9IjIzNiIgdmlld0JveD0iMCAwIDQ5MiAyMzYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMF8zNF84KSI+CjxwYXRoIGQ9Ik0xNy4yNjExIDYuOTA5NDRWMTcyLjcyMUgwVjBIMTAuMzUzNkMxNC43ODg4IDAgMTcuMjYxMSAyLjQ3MzAxIDE3LjI2MTEgNi45MDk0NFoiIGZpbGw9IiM1ODdBMzciLz4KPHBhdGggZD0iTTEyMC43NjcgMjQuNjcwMVY2NS4xMzc2QzEyMC43NjcgODEuMTc0NiAxMTIuMTM3IDg5LjgwNzcgOTYuMTA0NSA4OS44MDc3SDgzLjc3MzFWMTcyLjcyMUg3My40MTk0QzY4Ljk4NDMgMTcyLjcyMSA2Ni41MTIgMTcwLjI0OCA2Ni41MTIgMTY1LjgxMVYwSDk2LjExOTVDMTEyLjE1MiAwIDEyMC43ODIgOC42MzMwNSAxMjAuNzgyIDI0LjY3MDFNOTMuNjMyMiA3NC41MkMxMDAuMDQ1IDc0LjUyIDEwMy41MDYgNzEuMDU3OCAxMDMuNTA2IDY0LjY0M1YyNS4xNjQ3QzEwMy41MDYgMTguNzQ5OSAxMDAuMDYgMTUuMjg3NyA5My42MzIyIDE1LjI4NzdIODMuNzU4MVY3NC41MDVIOTMuNjMyMlY3NC41MloiIGZpbGw9IiM1ODdBMzciLz4KPHBhdGggZD0iTTE3MyAwSDE4NS4zMzJDMTg5LjUyNyAwIDE5Mi4yMzkgMi4yMTgyMSAxOTIuNzMzIDYuNDE0ODRMMjE2LjY2MiAxNzIuNzIxSDE5OC42NTJMMTgyLjM2NSA0Ny4xMjIxTDE2Ni4wNzggMTcyLjcyMUgxNDguMDY3TDE3MyAwWiIgZmlsbD0iIzU4N0EzNyIvPgo8cGF0aCBkPSJNMjczLjEyIDE3Mi43MjFIMjU1Ljg1OVY2LjkwOTQ0QzI1NS44NTkgMi40NzMwMSAyNTguMzE2IDAgMjYyLjc2NyAwSDI3My4xMlYxNzIuNzIxWk0yOTMuOTE3IDBIMzExLjY3M0wyOTAuMjE2IDgyLjQxODZMMzE2LjM2MyAxNzIuNzM2SDMwNC43NjZDMzAwLjgxIDE3Mi43MzYgMjk4LjA5OCAxNzAuNzU4IDI5Ni44NjkgMTY2LjgxNkwyNzIuNzAxIDgyLjQzMzZMMjkzLjkxNyAwWiIgZmlsbD0iIzU4N0EzNyIvPgo8cGF0aCBkPSJNNDkwLjc4NiA3Ny41NjI2TDQ2MC4xOSAzLjY0MjEyQzQ1OC41NzIgLTEuMTk4OTggNDU1LjkwNSAtMS4xOTg5OCA0NTQuMjU2IDMuNjQyMTJMNDQ1LjIwNiAyNS4yNTQ3TDQzNi4yNjEgMy42NDIxMkM0MzQuNjQzIC0xLjE5ODk4IDQzMS45NzYgLTEuMTk4OTggNDMwLjMyOCAzLjY0MjEyTDQyMS4yNzggMjUuMjU0N0w0MTIuMzMyIDMuNjQyMTJDNDEwLjcxNCAtMS4xOTg5OCA0MDguMDQ3IC0xLjE5ODk4IDQwNi4zOTkgMy42NDIxMkwzOTcuMzQ5IDI1LjI1NDdMMzg4LjQwNCAzLjY0MjEyQzM4Ni43ODYgLTEuMTk4OTggMzg0LjExOCAtMS4xOTg5OCAzODIuNDcgMy42NDIxMkwzNzMuNDIgMjUuMjU0N0wzNjQuNDc1IDMuNjQyMTJDMzYyLjg1NyAtMS4xOTg5OCAzNjAuMTkgLTEuMTk4OTggMzU4LjU0MiAzLjY0MjEyTDMyNy41ODUgNzcuNTYyNkMzMjUuOTM3IDgyLjQwMzcgMzI1LjkwNyA5MC4zMzIzIDMyNy41NDEgOTUuMTczNEwzNTguMTM3IDE2OS4wOTRDMzU5Ljc1NSAxNzMuOTM1IDM2Mi40MzcgMTczLjkzNSAzNjQuMDg1IDE2OS4wOTRMMzczLjEzNSAxNDcuNDk2TDM4Mi4wODEgMTY5LjA5NEMzODMuNjk5IDE3My45MzUgMzg2LjM4MSAxNzMuOTM1IDM4OC4wMjkgMTY5LjA5NEwzOTcuMDc5IDE0Ny40OTZMNDA2LjAyNCAxNjkuMDk0QzQwNy42NDMgMTczLjkzNSA0MTAuMzI1IDE3My45MzUgNDExLjk3MyAxNjkuMDk0TDQyMS4wMjMgMTQ3LjQ5Nkw0MjkuOTY4IDE2OS4wOTRDNDMxLjU4NiAxNzMuOTM1IDQzNC4yNjggMTczLjkzNSA0MzUuOTE3IDE2OS4wOTRMNDQ0Ljk2NyAxNDcuNDk2TDQ1My45MTIgMTY5LjA5NEM0NTUuNTMgMTczLjkzNSA0NTguMjEyIDE3My45MzUgNDU5Ljg2IDE2OS4wOTRMNDkwLjgxNiA5NS4xNzM0QzQ5Mi40NjUgOTAuMzMyMyA0OTIuNDggODIuNDAzNyA0OTAuODQ2IDc3LjU2MjZINDkwLjc4NloiIGZpbGw9IndoaXRlIi8+CjxnIG9wYWNpdHk9IjAuOSI+CjxwYXRoIGQ9Ik0zMjcuNTU1IDc3LjU2MjZMMzU4LjUxMiAzLjYyNzFDMzYwLjE2IC0xLjIxNCAzNjIuODI3IC0xLjIxNCAzNjQuNDQ1IDMuNjI3MUwzOTUuMDQxIDc3LjU0NzZDMzk2LjY2IDgyLjM4ODcgMzk2LjY2IDkwLjMxNzMgMzk1LjAxMSA5NS4xNTg0TDM2NC4wNTUgMTY5LjA3OUMzNjIuNDA3IDE3My45MiAzNTkuNzI1IDE3My45MiAzNTguMTA3IDE2OS4wNzlMMzI3LjUxMSA5NS4xNTg0QzMyNS44OTIgOTAuMzE3MyAzMjUuOTA3IDgyLjM4ODcgMzI3LjU1NSA3Ny41NDc2IiBmaWxsPSIjMzE3RjNGIi8+CjwvZz4KPGcgb3BhY2l0eT0iMC45Ij4KPHBhdGggZD0iTTM1MS40OTkgNzcuNTYyNkwzODIuNDU1IDMuNjI3MUMzODQuMTAzIC0xLjIxNCAzODYuNzcxIC0xLjIxNCAzODguMzg5IDMuNjI3MUw0MTguOTg1IDc3LjU0NzZDNDIwLjYwMyA4Mi4zODg3IDQyMC41ODggOTAuMzE3MyA0MTguOTU1IDk1LjE1ODRMMzg3Ljk5OSAxNjkuMDc5QzM4Ni4zNTEgMTczLjkyIDM4My42NjkgMTczLjkyIDM4Mi4wNTEgMTY5LjA3OUwzNTEuNDU0IDk1LjE1ODRDMzQ5LjgzNiA5MC4zMTczIDM0OS44NTEgODIuMzg4NyAzNTEuNDk5IDc3LjU0NzYiIGZpbGw9IiM0NzkwNDIiLz4KPC9nPgo8ZyBvcGFjaXR5PSIwLjkiPgo8cGF0aCBkPSJNMzc1LjQyOCA3Ny41NjI2TDQwNi4zODQgMy42NDIxMkM0MDguMDMyIC0xLjE5ODk4IDQxMC42OTkgLTEuMTk4OTggNDEyLjMxNyAzLjY0MjEyTDQ0Mi45MTQgNzcuNTYyNkM0NDQuNTMyIDgyLjQwMzcgNDQ0LjUxNyA5MC4zMzIzIDQ0Mi44ODQgOTUuMTczNEw0MTEuOTI4IDE2OS4wOTRDNDEwLjI4IDE3My45MzUgNDA3LjU5OCAxNzMuOTM1IDQwNS45NzkgMTY5LjA5NEwzNzUuMzgzIDk1LjE3MzRDMzczLjc2NSA5MC4zMzIzIDM3My43OCA4Mi40MDM3IDM3NS40MjggNzcuNTYyNloiIGZpbGw9IiM4REMxNDYiLz4KPC9nPgo8ZyBvcGFjaXR5PSIwLjkiPgo8cGF0aCBkPSJNMzk5LjM3MiA3Ny41NjI2TDQzMC4zMjggMy42NDIxMkM0MzEuOTc2IC0xLjE5ODk4IDQzNC42NDMgLTEuMTk4OTggNDM2LjI2MSAzLjY0MjEyTDQ2Ni44NTggNzcuNTYyNkM0NjguNDc2IDgyLjQwMzcgNDY4LjQ2MSA5MC4zMzIzIDQ2Ni44MjggOTUuMTczNEw0MzUuODcyIDE2OS4wOTRDNDM0LjIyMyAxNzMuOTM1IDQzMS41NDEgMTczLjkzNSA0MjkuOTIzIDE2OS4wOTRMMzk5LjMyNyA5NS4xNzM0QzM5Ny43MDkgOTAuMzMyMyAzOTcuNzIzIDgyLjQwMzcgMzk5LjM3MiA3Ny41NjI2WiIgZmlsbD0iI0JERDM3OCIvPgo8L2c+CjxnIG9wYWNpdHk9IjAuOSI+CjxwYXRoIGQ9Ik00MjMuMyA3Ny41NjI2TDQ1NC4yNTYgMy42NDIxMkM0NTUuOTA1IC0xLjE5ODk4IDQ1OC41NzIgLTEuMTk4OTggNDYwLjE5IDMuNjQyMTJMNDkwLjc4NiA3Ny41NjI2QzQ5Mi40MDUgODIuNDAzNyA0OTIuMzkgOTAuMzMyMyA0OTAuNzU2IDk1LjE3MzRMNDU5LjggMTY5LjA5NEM0NTguMTUyIDE3My45MzUgNDU1LjQ3IDE3My45MzUgNDUzLjg1MiAxNjkuMDk0TDQyMy4yNTUgOTUuMTczNEM0MjEuNjM3IDkwLjMzMjMgNDIxLjY1MiA4Mi40MDM3IDQyMy4zIDc3LjU2MjZaIiBmaWxsPSIjRDhFNEI1Ii8+CjwvZz4KPHBhdGggZD0iTTIwLjI3MjcgMjEwLjQ5MUMyMS42OTYyIDIxMS43MiAyMi40MDA0IDIxMy42MjMgMjIuNDAwNCAyMTYuMjAxQzIyLjQwMDQgMjIyLjUyNiAxNy45OTUyIDIyNS42ODggOS4xOTk5IDIyNS42ODhIMFYxOTIuMzU1SDcuODgxMzVDMTIuMTA2NyAxOTIuMzU1IDE1LjM0MzIgMTkzLjA0NSAxNy41NzU3IDE5NC40MzlDMTkuODIzMiAxOTUuODMyIDIwLjkzMiAxOTcuOTQ2IDIwLjkzMiAyMDAuNzc4QzIwLjkzMiAyMDIuNzEyIDIwLjMzMjcgMjA0LjMzMSAxOS4xMTkgMjA1LjYyQzE3LjkwNTMgMjA2LjkwOSAxNi40MzcgMjA3LjczMyAxNC42OTg5IDIwOC4wOTNDMTYuOTkxNCAyMDguNDgyIDE4Ljg0OTMgMjA5LjI5MiAyMC4yNTc4IDIxMC41MDZMMjAuMjcyNyAyMTAuNDkxWk00LjU5OTk1IDE5NS45ODJWMjA2LjQ4OUg5LjYzNDQzQzExLjU2NzMgMjA2LjQ4OSAxMy4xNTU2IDIwNi4wMjQgMTQuMzk5MiAyMDUuMDhDMTUuNjQyOCAyMDQuMTUxIDE2LjI1NzIgMjAyLjgxNyAxNi4yNTcyIDIwMS4xMDhDMTYuMjU3MiAxOTkuMTc1IDE1LjU5NzkgMTk3Ljg0MSAxNC4yOTQzIDE5Ny4wOTFDMTIuOTkwNyAxOTYuMzU3IDExLjAxMjkgMTk1Ljk4MiA4LjM3NTgxIDE5NS45ODJINC41OTk5NVpNMTUuNDAzMSAyMjAuODAyQzE2Ljg0MTUgMjE5Ljk5MyAxNy41NjA3IDIxOC40NjQgMTcuNTYwNyAyMTYuMjAxQzE3LjU2MDcgMjEzLjkzOCAxNi44NzE1IDIxMi40MjQgMTUuNDc4IDIxMS40NjVDMTQuMDg0NSAyMTAuNDkxIDEyLjI4NjUgMjEwLjAxMSAxMC4wNTQgMjEwLjAxMUg0LjU4NDk3VjIyMi4wMTZIOS4xODQ5MkMxMS44OTY5IDIyMi4wMTYgMTMuOTY0NyAyMjEuNjEyIDE1LjQwMzEgMjIwLjgwMloiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik00Ni42Mjg4IDE5OS44OTRMNDUuODA0NyAyMDQuMjU2QzQ1LjAyNTYgMjA0LjA2MSA0NC4yOTE0IDIwMy45NzEgNDMuNTcyMiAyMDMuOTcxQzQxLjk5ODkgMjAzLjk3MSA0MC43MjUzIDIwNC41NTUgMzkuNzUxNCAyMDUuNzA5QzM4Ljc3NzQgMjA2Ljg2MyAzOC4wMjgzIDIwOC42NzcgMzcuNDczOSAyMTEuMTM1VjIyNS43MDNIMzMuMDIzOFYyMDAuMjA5SDM2Ljg0NDZMMzcuMjc5MSAyMDUuMzhDMzcuOTUzMyAyMDMuNDc2IDM4Ljg4MjMgMjAyLjAzNyA0MC4wMzYxIDIwMS4wNzhDNDEuMTg5OCAyMDAuMTA0IDQyLjU1MzMgMTk5LjYyNCA0NC4wOTY2IDE5OS42MjRDNDQuOTk1NiAxOTkuNjI0IDQ1LjgzNDcgMTk5LjcxNCA0Ni42MTM4IDE5OS45MDlMNDYuNjI4OCAxOTkuODk0WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTYwLjAyNDEgMTg4LjgxOEM2MC42MDg1IDE4OS40MDMgNjAuODkzMiAxOTAuMTIyIDYwLjg5MzIgMTkwLjk5MUM2MC44OTMyIDE5MS44NjEgNjAuNjA4NSAxOTIuNTggNjAuMDI0MSAxOTMuMTVDNTkuNDM5OCAxOTMuNzE5IDU4LjY5MDYgMTkzLjk4OSA1Ny43NDY2IDE5My45ODlDNTYuODAyNyAxOTMuOTg5IDU2LjA5ODQgMTkzLjcwNCA1NS41MTQxIDE5My4xNUM1NC45Mjk3IDE5Mi41OCA1NC42NDUgMTkxLjg2MSA1NC42NDUgMTkwLjk5MUM1NC42NDUgMTkwLjEyMiA1NC45Mjk3IDE4OS4zODggNTUuNTE0MSAxODguODE4QzU2LjA5ODQgMTg4LjIzNCA1Ni44MzI2IDE4Ny45NDkgNTcuNzQ2NiAxODcuOTQ5QzU4LjY2MDYgMTg3Ljk0OSA1OS40Mzk4IDE4OC4yMzQgNjAuMDI0MSAxODguODE4Wk02MC4wMjQxIDIwMC4xOTRWMjI1LjY4OEg1NS41NzRWMjAwLjE5NEg2MC4wMjQxWiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTkyLjc3ODIgMTg5LjkyN1YyMjUuNjg4SDg4Ljg2NzVMODguNDMyOSAyMjIuMTUxQzg3LjU5MzkgMjIzLjQ0IDg2LjU0NSAyMjQuNDQ0IDg1LjI4NjQgMjI1LjE3OUM4NC4wMjc4IDIyNS44OTggODIuNjE5MyAyMjYuMjczIDgxLjA3NiAyMjYuMjczQzc4LjA0OTMgMjI2LjI3MyA3NS42ODE5IDIyNS4wNzQgNzMuOTg4OCAyMjIuNjkxQzcyLjI5NTcgMjIwLjMwOCA3MS40NTY2IDIxNy4xIDcxLjQ1NjYgMjEzLjA2OUM3MS40NTY2IDIxMC40NjEgNzEuODYxMSAyMDguMTM3IDcyLjY3MDIgMjA2LjA5OUM3My40Nzk0IDIwNC4wNjEgNzQuNjMzMSAyMDIuNDcyIDc2LjE0NjQgMjAxLjMzM0M3Ny42NTk4IDIwMC4xOTQgNzkuNDQyOCAxOTkuNjA5IDgxLjQ2NTYgMTk5LjYwOUM4NC4wNzI3IDE5OS42MDkgODYuMzY1MiAyMDAuNjU5IDg4LjMyODEgMjAyLjc1N1YxODkuNDAzTDkyLjc3ODIgMTg5Ljk0MlYxODkuOTI3Wk04NS41MjYxIDIyMS43OTJDODYuNTAwMSAyMjEuMTYyIDg3LjQyOSAyMjAuMjE4IDg4LjMyODEgMjE4Ljk1OVYyMDYuNDc0Qzg3LjQ4OSAyMDUuMzggODYuNTkgMjA0LjU0IDg1LjY0NiAyMDMuOTg2Qzg0LjY4NzEgMjAzLjQxNiA4My42MjMyIDIwMy4xNDcgODIuNDI0NSAyMDMuMTQ3QzgwLjQ2MTcgMjAzLjE0NyA3OC45MzM0IDIwMy45NzEgNzcuODU0NiAyMDUuNjJDNzYuNzc1NyAyMDcuMjY4IDc2LjIzNjMgMjA5LjcxMSA3Ni4yMzYzIDIxMi45NzlDNzYuMjM2MyAyMTYuMjQ2IDc2LjczMDggMjE4LjcxOSA3Ny43MzQ3IDIyMC4zMzhDNzguNzM4NiAyMjEuOTU2IDgwLjE2MiAyMjIuNzUxIDgyLjAzNSAyMjIuNzUxQzgzLjM4MzUgMjIyLjc1MSA4NC41NTIyIDIyMi40MzYgODUuNTExMSAyMjEuODA3TDg1LjUyNjEgMjIxLjc5MloiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik0xMjYuNDAxIDIwMS4zNDhDMTI1LjQyNyAyMDEuNjc4IDEyNC4zNjQgMjAxLjg4NyAxMjMuMjEgMjAxLjk3N0MxMjIuMDU2IDIwMi4wNjcgMTIwLjYzMyAyMDIuMTI3IDExOC45NTQgMjAyLjEyN0MxMjEuOTUxIDIwMy40NzYgMTIzLjQ1IDIwNS42MzQgMTIzLjQ1IDIwOC41NTdDMTIzLjQ1IDIxMS4xMDUgMTIyLjU4IDIxMy4xODggMTIwLjg0MiAyMTQuNzkyQzExOS4xMDQgMjE2LjQxMSAxMTYuNzM3IDIxNy4yMDUgMTEzLjcyNSAyMTcuMjA1QzExMi41NzEgMjE3LjIwNSAxMTEuNDc4IDIxNy4wNCAxMTAuNDg5IDIxNi43MjZDMTEwLjA5OSAyMTYuOTggMTA5Ljc5OSAyMTcuMzI1IDEwOS41NzUgMjE3Ljc2QzEwOS4zNSAyMTguMTk0IDEwOS4yMyAyMTguNjQ0IDEwOS4yMyAyMTkuMDk0QzEwOS4yMyAyMjAuNDg4IDExMC4zMzkgMjIxLjE3NyAxMTIuNTcxIDIyMS4xNzdIMTE2LjYzMkMxMTguMzQgMjIxLjE3NyAxMTkuODUzIDIyMS40NzcgMTIxLjE3MiAyMjIuMDkxQzEyMi40OTEgMjIyLjcwNiAxMjMuNTI0IDIyMy41NDUgMTI0LjI0NCAyMjQuNjA5QzEyNC45NjMgMjI1LjY3MyAxMjUuMzM3IDIyNi44ODcgMTI1LjMzNyAyMjguMjM2QzEyNS4zMzcgMjMwLjcyNCAxMjQuMzE5IDIzMi42MjggMTIyLjI5NiAyMzMuOTc3QzEyMC4yNTggMjM1LjMxMSAxMTcuMjkxIDIzNS45ODUgMTEzLjM5NiAyMzUuOTg1QzExMC42NTQgMjM1Ljk4NSAxMDguNDgxIDIzNS43IDEwNi44OTMgMjM1LjE0NkMxMDUuMjg5IDIzNC41NzYgMTA0LjE2NiAyMzMuNzM3IDEwMy40NzYgMjMyLjYxM0MxMDIuODAyIDIzMS40ODkgMTAyLjQ1OCAyMzAuMDM1IDEwMi40NTggMjI4LjI1MUgxMDYuNDczQzEwNi40NzMgMjI5LjI4NSAxMDYuNjY4IDIzMC4wOTUgMTA3LjA1OCAyMzAuNjk0QzEwNy40NDcgMjMxLjI5NCAxMDguMTM2IDIzMS43NDMgMTA5LjE0IDIzMi4wNDNDMTEwLjE0NCAyMzIuMzQzIDExMS41NTMgMjMyLjUwOCAxMTMuMzk2IDIzMi41MDhDMTE2LjA3OCAyMzIuNTA4IDExNy45ODEgMjMyLjE3OCAxMTkuMTM0IDIzMS41MTlDMTIwLjI3MyAyMzAuODU5IDEyMC44NTcgMjI5Ljg3IDEyMC44NTcgMjI4LjUzNkMxMjAuODU3IDIyNy4zMzcgMTIwLjQwOCAyMjYuNDM4IDExOS41MDkgMjI1LjgyM0MxMTguNjEgMjI1LjIwOSAxMTcuMzUxIDIyNC45MDkgMTE1LjczMyAyMjQuOTA5SDExMS43MTdDMTA5LjU2IDIyNC45MDkgMTA3LjkyNyAyMjQuNDQ0IDEwNi44MDMgMjIzLjUzQzEwNS42OTQgMjIyLjYxNiAxMDUuMTQgMjIxLjQ2MiAxMDUuMTQgMjIwLjA2OEMxMDUuMTQgMjE5LjIyOSAxMDUuMzc5IDIxOC40MTkgMTA1Ljg1OSAyMTcuNjU1QzEwNi4zMzggMjE2Ljg3NSAxMDcuMDQzIDIxNi4xODYgMTA3Ljk0MiAyMTUuNTcxQzEwNi40NTggMjE0Ljc5MiAxMDUuMzY0IDIxMy44MzMgMTA0LjY3NSAyMTIuNjk0QzEwMy45ODYgMjExLjU1NSAxMDMuNjQxIDIxMC4xNjEgMTAzLjY0MSAyMDguNTEyQzEwMy42NDEgMjA2Ljg2MyAxMDQuMDc2IDIwNS4yNzUgMTA0LjkzIDIwMy45MTFDMTA1Ljc4NCAyMDIuNTYyIDEwNi45NjggMjAxLjQ5OCAxMDguNDY2IDIwMC43NDhDMTA5Ljk2NCAxOTkuOTg0IDExMS42MjcgMTk5LjYwOSAxMTMuNDcgMTk5LjYwOUMxMTUuNDYzIDE5OS42MzkgMTE3LjE0MSAxOTkuNTY0IDExOC41MDUgMTk5LjM4NUMxMTkuODUzIDE5OS4yMDUgMTIwLjk3NyAxOTguOTY1IDEyMS44NjEgMTk4LjY2NUMxMjIuNzQ1IDE5OC4zNjUgMTIzLjgzOSAxOTcuOTE2IDEyNS4xMjggMTk3LjMzMUwxMjYuNDMxIDIwMS4zNDhIMTI2LjQwMVpNMTA5LjU0NSAyMDQuMzc2QzEwOC42MzEgMjA1LjQyNSAxMDguMTY2IDIwNi44MDQgMTA4LjE2NiAyMDguNTEyQzEwOC4xNjYgMjEwLjIyMSAxMDguNjMxIDIxMS42NDUgMTA5LjU3NSAyMTIuNjk0QzExMC41MDQgMjEzLjc0MyAxMTEuODM3IDIxNC4yNjggMTEzLjU0NSAyMTQuMjY4QzExNS4yNTQgMjE0LjI2OCAxMTYuNjE3IDIxMy43NTggMTE3LjUzMSAyMTIuNzM5QzExOC40NDUgMjExLjcyIDExOC45MDkgMjEwLjI5NiAxMTguOTA5IDIwOC40NTJDMTE4LjkwOSAyMDQuNjc1IDExNy4wODIgMjAyLjc4NyAxMTMuNDQgMjAyLjc4N0MxMTEuNzYyIDIwMi43ODcgMTEwLjQ1OSAyMDMuMzExIDEwOS41NDUgMjA0LjM2MVYyMDQuMzc2WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTEzOS4zMTcgMTg4LjgxOEMxMzkuOTAxIDE4OS40MDMgMTQwLjE4NiAxOTAuMTIyIDE0MC4xODYgMTkwLjk5MUMxNDAuMTg2IDE5MS44NjEgMTM5LjkwMSAxOTIuNTggMTM5LjMxNyAxOTMuMTVDMTM4LjczMyAxOTMuNzE5IDEzNy45ODQgMTkzLjk4OSAxMzcuMDQgMTkzLjk4OUMxMzYuMDk2IDE5My45ODkgMTM1LjM5MSAxOTMuNzA0IDEzNC44MDcgMTkzLjE1QzEzNC4yMjMgMTkyLjU4IDEzMy45MzggMTkxLjg2MSAxMzMuOTM4IDE5MC45OTFDMTMzLjkzOCAxOTAuMTIyIDEzNC4yMjMgMTg5LjM4OCAxMzQuODA3IDE4OC44MThDMTM1LjM5MSAxODguMjM0IDEzNi4xMjYgMTg3Ljk0OSAxMzcuMDQgMTg3Ljk0OUMxMzcuOTU0IDE4Ny45NDkgMTM4LjczMyAxODguMjM0IDEzOS4zMTcgMTg4LjgxOFpNMTM5LjMxNyAyMDAuMTk0VjIyNS42ODhIMTM0Ljg2N1YyMDAuMTk0SDEzOS4zMTdaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMTY5Ljc2NCAyMDEuNjkzQzE3MS4wNjcgMjAzLjA4NiAxNzEuNzI3IDIwNC45OSAxNzEuNzI3IDIwNy40MDNWMjI1LjY4OEgxNjcuMjc2VjIwOC4wMzJDMTY3LjI3NiAyMDYuMjE5IDE2Ni45MzIgMjA0Ljk0NSAxNjYuMjU4IDIwNC4yMTFDMTY1LjU4MyAyMDMuNDc2IDE2NC41NzkgMjAzLjEwMSAxNjMuMjYxIDIwMy4xMDFDMTYxLjk0MiAyMDMuMTAxIDE2MC43MTQgMjAzLjQ5MSAxNTkuNjggMjA0LjI1NkMxNTguNjQ2IDIwNS4wMzUgMTU3LjY4NyAyMDYuMTQ0IDE1Ni43NzMgMjA3LjU5OFYyMjUuNjg4SDE1Mi4zMjNWMjAwLjE5NEgxNTYuMTQ0TDE1Ni41MzMgMjAzLjk3MUMxNTcuNDMyIDIwMi42MjIgMTU4LjU1NiAyMDEuNTU4IDE1OS44OSAyMDAuNzc4QzE2MS4yMjMgMTk5Ljk5OSAxNjIuNzA2IDE5OS42MjQgMTY0LjMxIDE5OS42MjRDMTY2LjYzMiAxOTkuNjI0IDE2OC40NDUgMjAwLjMxNCAxNjkuNzQ5IDIwMS43MDhMMTY5Ljc2NCAyMDEuNjkzWiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTIwNS4wOTUgMjAxLjM0OEMyMDQuMTIxIDIwMS42NzggMjAzLjA1NyAyMDEuODg3IDIwMS45MDMgMjAxLjk3N0MyMDAuNzUgMjAyLjA2NyAxOTkuMzI2IDIwMi4xMjcgMTk3LjY0OCAyMDIuMTI3QzIwMC42NDUgMjAzLjQ3NiAyMDIuMTQzIDIwNS42MzQgMjAyLjE0MyAyMDguNTU3QzIwMi4xNDMgMjExLjEwNSAyMDEuMjc0IDIxMy4xODggMTk5LjUzNiAyMTQuNzkyQzE5Ny43OTggMjE2LjQxMSAxOTUuNDMxIDIxNy4yMDUgMTkyLjQxOSAyMTcuMjA1QzE5MS4yNjUgMjE3LjIwNSAxOTAuMTcxIDIxNy4wNCAxODkuMTgyIDIxNi43MjZDMTg4Ljc5MyAyMTYuOTggMTg4LjQ5MyAyMTcuMzI1IDE4OC4yNjggMjE3Ljc2QzE4OC4wNDQgMjE4LjE5NCAxODcuOTI0IDIxOC42NDQgMTg3LjkyNCAyMTkuMDk0QzE4Ny45MjQgMjIwLjQ4OCAxODkuMDMzIDIyMS4xNzcgMTkxLjI2NSAyMjEuMTc3SDE5NS4zMjZDMTk3LjAzNCAyMjEuMTc3IDE5OC41NDcgMjIxLjQ3NyAxOTkuODY2IDIyMi4wOTFDMjAxLjE4NCAyMjIuNzA2IDIwMi4yMTggMjIzLjU0NSAyMDIuOTM3IDIyNC42MDlDMjAzLjY1NiAyMjUuNjczIDIwNC4wMzEgMjI2Ljg4NyAyMDQuMDMxIDIyOC4yMzZDMjA0LjAzMSAyMzAuNzI0IDIwMy4wMTIgMjMyLjYyOCAyMDAuOTg5IDIzMy45NzdDMTk4Ljk1MiAyMzUuMzExIDE5NS45ODUgMjM1Ljk4NSAxOTIuMDg5IDIzNS45ODVDMTg5LjM0NyAyMzUuOTg1IDE4Ny4xNzUgMjM1LjcgMTg1LjU4NiAyMzUuMTQ2QzE4My45ODMgMjM0LjU3NiAxODIuODU5IDIzMy43MzcgMTgyLjE3IDIzMi42MTNDMTgxLjQ5NiAyMzEuNDg5IDE4MS4xNTEgMjMwLjAzNSAxODEuMTUxIDIyOC4yNTFIMTg1LjE2N0MxODUuMTY3IDIyOS4yODUgMTg1LjM2MiAyMzAuMDk1IDE4NS43NTEgMjMwLjY5NEMxODYuMTQxIDIzMS4yOTQgMTg2LjgzIDIzMS43NDMgMTg3LjgzNCAyMzIuMDQzQzE4OC44MzggMjMyLjM0MyAxOTAuMjQ2IDIzMi41MDggMTkyLjA4OSAyMzIuNTA4QzE5NC43NzEgMjMyLjUwOCAxOTYuNjc0IDIzMi4xNzggMTk3LjgyOCAyMzEuNTE5QzE5OC45NjcgMjMwLjg1OSAxOTkuNTUxIDIyOS44NyAxOTkuNTUxIDIyOC41MzZDMTk5LjU1MSAyMjcuMzM3IDE5OS4xMDEgMjI2LjQzOCAxOTguMjAyIDIyNS44MjNDMTk3LjMwMyAyMjUuMjA5IDE5Ni4wNDUgMjI0LjkwOSAxOTQuNDI3IDIyNC45MDlIMTkwLjQxMUMxODguMjUzIDIyNC45MDkgMTg2LjYyIDIyNC40NDQgMTg1LjQ5NiAyMjMuNTNDMTg0LjM4OCAyMjIuNjE2IDE4My44MzMgMjIxLjQ2MiAxODMuODMzIDIyMC4wNjhDMTgzLjgzMyAyMTkuMjI5IDE4NC4wNzMgMjE4LjQxOSAxODQuNTUyIDIxNy42NTVDMTg1LjAzMiAyMTYuODc1IDE4NS43MzYgMjE2LjE4NiAxODYuNjM1IDIxNS41NzFDMTg1LjE1MiAyMTQuNzkyIDE4NC4wNTggMjEzLjgzMyAxODMuMzY5IDIxMi42OTRDMTgyLjY4IDIxMS41NTUgMTgyLjMzNSAyMTAuMTYxIDE4Mi4zMzUgMjA4LjUxMkMxODIuMzM1IDIwNi44NjMgMTgyLjc2OSAyMDUuMjc1IDE4My42MjMgMjAzLjkxMUMxODQuNDc4IDIwMi41NjIgMTg1LjY2MSAyMDEuNDk4IDE4Ny4xNiAyMDAuNzQ4QzE4OC42NTggMTk5Ljk4NCAxOTAuMzIxIDE5OS42MDkgMTkyLjE2NCAxOTkuNjA5QzE5NC4xNTcgMTk5LjYzOSAxOTUuODM1IDE5OS41NjQgMTk3LjE5OSAxOTkuMzg1QzE5OC41NDcgMTk5LjIwNSAxOTkuNjcxIDE5OC45NjUgMjAwLjU1NSAxOTguNjY1QzIwMS40MzkgMTk4LjM2NSAyMDIuNTMzIDE5Ny45MTYgMjAzLjgyMSAxOTcuMzMxTDIwNS4xMjUgMjAxLjM0OEgyMDUuMDk1Wk0xODguMjM4IDIwNC4zNzZDMTg3LjMyNCAyMDUuNDI1IDE4Ni44NiAyMDYuODA0IDE4Ni44NiAyMDguNTEyQzE4Ni44NiAyMTAuMjIxIDE4Ny4zMjQgMjExLjY0NSAxODguMjY4IDIxMi42OTRDMTg5LjE5NyAyMTMuNzQzIDE5MC41MzEgMjE0LjI2OCAxOTIuMjM5IDIxNC4yNjhDMTkzLjk0NyAyMTQuMjY4IDE5NS4zMTEgMjEzLjc1OCAxOTYuMjI1IDIxMi43MzlDMTk3LjEzOSAyMTEuNzIgMTk3LjYwMyAyMTAuMjk2IDE5Ny42MDMgMjA4LjQ1MkMxOTcuNjAzIDIwNC42NzUgMTk1Ljc3NSAyMDIuNzg3IDE5Mi4xMzQgMjAyLjc4N0MxOTAuNDU2IDIwMi43ODcgMTg5LjE1MiAyMDMuMzExIDE4OC4yMzggMjA0LjM2MVYyMDQuMzc2WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTIzNS4wNDcgMTkyLjM1NVYyMjUuNjg4SDIzMC40NDdWMTkyLjM1NUgyMzUuMDQ3WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTI2NS43MzMgMjAxLjY5M0MyNjcuMDM3IDIwMy4wODYgMjY3LjY5NiAyMDQuOTkgMjY3LjY5NiAyMDcuNDAzVjIyNS42ODhIMjYzLjI0NlYyMDguMDMyQzI2My4yNDYgMjA2LjIxOSAyNjIuOTAxIDIwNC45NDUgMjYyLjIyNyAyMDQuMjExQzI2MS41NTMgMjAzLjQ3NiAyNjAuNTQ5IDIwMy4xMDEgMjU5LjIzIDIwMy4xMDFDMjU3LjkxMiAyMDMuMTAxIDI1Ni42ODMgMjAzLjQ5MSAyNTUuNjQ5IDIwNC4yNTZDMjU0LjYxNiAyMDUuMDM1IDI1My42NTcgMjA2LjE0NCAyNTIuNzQzIDIwNy41OThWMjI1LjY4OEgyNDguMjkzVjIwMC4xOTRIMjUyLjExM0wyNTIuNTAzIDIwMy45NzFDMjUzLjQwMiAyMDIuNjIyIDI1NC41MjYgMjAxLjU1OCAyNTUuODU5IDIwMC43NzhDMjU3LjE5MyAxOTkuOTk5IDI1OC42NzYgMTk5LjYyNCAyNjAuMjc5IDE5OS42MjRDMjYyLjYwMiAxOTkuNjI0IDI2NC40MTUgMjAwLjMxNCAyNjUuNzE4IDIwMS43MDhMMjY1LjczMyAyMDEuNjkzWiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTI5Ny45NDggMjAxLjY5M0MyOTkuMjUyIDIwMy4wODYgMjk5LjkxMSAyMDQuOTkgMjk5LjkxMSAyMDcuNDAzVjIyNS42ODhIMjk1LjQ2MVYyMDguMDMyQzI5NS40NjEgMjA2LjIxOSAyOTUuMTE2IDIwNC45NDUgMjk0LjQ0MiAyMDQuMjExQzI5My43NjggMjAzLjQ3NiAyOTIuNzY0IDIwMy4xMDEgMjkxLjQ0NSAyMDMuMTAxQzI5MC4xMjcgMjAzLjEwMSAyODguODk4IDIwMy40OTEgMjg3Ljg2NCAyMDQuMjU2QzI4Ni44MyAyMDUuMDM1IDI4NS44NzEgMjA2LjE0NCAyODQuOTU3IDIwNy41OThWMjI1LjY4OEgyODAuNTA3VjIwMC4xOTRIMjg0LjMyOEwyODQuNzE4IDIwMy45NzFDMjg1LjYxNyAyMDIuNjIyIDI4Ni43NCAyMDEuNTU4IDI4OC4wNzQgMjAwLjc3OEMyODkuNDA3IDE5OS45OTkgMjkwLjg5MSAxOTkuNjI0IDI5Mi40OTQgMTk5LjYyNEMyOTQuODE2IDE5OS42MjQgMjk2LjYyOSAyMDAuMzE0IDI5Ny45MzMgMjAxLjcwOEwyOTcuOTQ4IDIwMS42OTNaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMzMwLjU5NyAyMDMuMTkyQzMzMi41NzUgMjA1LjU3NSAzMzMuNTc5IDIwOC44MjcgMzMzLjU3OSAyMTIuOTE5QzMzMy41NzkgMjE1LjU3MiAzMzMuMTI5IDIxNy44OTUgMzMyLjIzIDIxOS45MThDMzMxLjMzMSAyMjEuOTQxIDMzMC4wMjggMjIzLjUgMzI4LjMwNSAyMjQuNjA5QzMyNi41OTcgMjI1LjcxOCAzMjQuNTU5IDIyNi4yNzMgMzIyLjIwNiAyMjYuMjczQzMxOC42MjUgMjI2LjI3MyAzMTUuODM4IDIyNS4wNzQgMzEzLjgzMSAyMjIuNjkxQzMxMS44MzggMjIwLjMwOCAzMTAuODM0IDIxNy4wNTUgMzEwLjgzNCAyMTIuOTY0QzMxMC44MzQgMjEwLjMyNiAzMTEuMjgzIDIwNy45ODggMzEyLjE4MiAyMDUuOTY0QzMxMy4wODEgMjAzLjk1NiAzMTQuMzg1IDIwMi4zODIgMzE2LjEwOCAyMDEuMjczQzMxNy44MTYgMjAwLjE2NCAzMTkuODY5IDE5OS42MDkgMzIyLjI1MSAxOTkuNjA5QzMyNS44MzIgMTk5LjYwOSAzMjguNjE5IDIwMC44MDggMzMwLjU5NyAyMDMuMTkyWk0zMTUuNjI5IDIxMi45NjRDMzE1LjYyOSAyMTkuNDUzIDMxNy44MTYgMjIyLjY5MSAzMjIuMjA2IDIyMi42OTFDMzI2LjU5NyAyMjIuNjkxIDMyOC43ODQgMjE5LjQzOCAzMjguNzg0IDIxMi45MTlDMzI4Ljc4NCAyMDYuMzk5IDMyNi42MTIgMjAzLjE5MiAzMjIuMjUxIDIwMy4xOTJDMzE3Ljg5MSAyMDMuMTkyIDMxNS42MjkgMjA2LjQ0NCAzMTUuNjI5IDIxMi45NjRaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNMzYyLjU1NyAyMDAuMTk0TDM1My44OTcgMjI1LjY4OEgzNDguNTMyTDMzOS43MjIgMjAwLjE5NEgzNDQuNTYyTDM1MS4yNDQgMjIxLjczMUwzNTcuODY3IDIwMC4xOTRIMzYyLjU1N1oiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGQ9Ik0zODkuMjEzIDIyMi4wMzFDMzg5LjU3MiAyMjIuNTI2IDM5MC4wOTcgMjIyLjkxNiAzOTAuODE2IDIyMy4xN0wzODkuNzk3IDIyNi4yNzNDMzg4LjQ3OSAyMjYuMTA4IDM4Ny40MTUgMjI1LjczMyAzODYuNjA2IDIyNS4xNjRDMzg1Ljc5NyAyMjQuNTc5IDM4NS4xOTcgMjIzLjY4IDM4NC44MjMgMjIyLjQ1MUMzODMuMTE0IDIyNC45OTkgMzgwLjU4MiAyMjYuMjczIDM3Ny4yMjYgMjI2LjI3M0MzNzQuNzA5IDIyNi4yNzMgMzcyLjczMSAyMjUuNTY4IDM3MS4yNzcgMjI0LjE0NUMzNjkuODI0IDIyMi43MjEgMzY5LjEwNSAyMjAuODc3IDM2OS4xMDUgMjE4LjU4NEMzNjkuMTA1IDIxNS44NzEgMzcwLjA3OSAyMTMuNzg4IDM3Mi4wMjcgMjEyLjM0OUMzNzMuOTc1IDIxMC44OTUgMzc2Ljc0NyAyMTAuMTc2IDM4MC4zMjggMjEwLjE3NkgzODQuMjUzVjIwOC4yODdDMzg0LjI1MyAyMDYuNDc0IDM4My44MTkgMjA1LjE4NSAzODIuOTUgMjA0LjQyQzM4Mi4wODEgMjAzLjY0MSAzODAuNzQ3IDIwMy4yNjYgMzc4LjkzNCAyMDMuMjY2QzM3Ny4xMjEgMjAzLjI2NiAzNzQuNzY5IDIwMy43MTYgMzcyLjA3MiAyMDQuNjE1TDM3MC45NjMgMjAxLjM3OEMzNzQuMTI0IDIwMC4yMjQgMzc3LjA2MSAxOTkuNjM5IDM3OS43NzMgMTk5LjYzOUMzODIuNzcgMTk5LjYzOSAzODUuMDE3IDIwMC4zNzQgMzg2LjUwMSAyMDEuODQzQzM4Ny45ODQgMjAzLjMxMSAzODguNzMzIDIwNS4zOTUgMzg4LjczMyAyMDguMTA3VjIxOS43NjhDMzg4LjczMyAyMjAuODAyIDM4OC45MTMgMjIxLjU2NyAzODkuMjczIDIyMi4wNjFMMzg5LjIxMyAyMjIuMDMxWk0zODQuMjIzIDIxOC45NTlWMjEzLjA5OEgzODAuODgyQzM3Ni4xNzcgMjEzLjA5OCAzNzMuODI1IDIxNC44MzcgMzczLjgyNSAyMTguMzI5QzM3My44MjUgMjE5Ljg0MyAzNzQuMTk5IDIyMC45OTcgMzc0LjkzMyAyMjEuNzYxQzM3NS42NjggMjIyLjU0MSAzNzYuNzc2IDIyMi45MTYgMzc4LjIzIDIyMi45MTZDMzgwLjc3NyAyMjIuOTE2IDM4Mi43NyAyMjEuNTk3IDM4NC4yMjMgMjE4Ljk0NFYyMTguOTU5WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTQxNC41NSAyMjQuNTE5QzQxMi44NzIgMjI1LjY3MyA0MTAuOTY5IDIyNi4yNTggNDA4Ljg0MSAyMjYuMjU4QzQwNi43MTQgMjI2LjI1OCA0MDQuOTkxIDIyNS42NDMgNDAzLjc5MiAyMjQuMzk5QzQwMi41NzggMjIzLjE1NSA0MDEuOTc5IDIyMS4zNTcgNDAxLjk3OSAyMTkuMDA0VjIwMy42MTFIMzk3LjUyOVYyMDAuMTc5SDQwMS45NzlWMTk0LjQyM0w0MDYuNDI5IDE5My44ODRWMjAwLjE3OUg0MTIuNDgyTDQxMi4wMDMgMjAzLjYxMUg0MDYuNDQ0VjIxOC44MDlDNDA2LjQ0NCAyMjAuMTI4IDQwNi42ODQgMjIxLjA4NyA0MDcuMTQ4IDIyMS42ODdDNDA3LjYxMyAyMjIuMjg2IDQwOC4zOTIgMjIyLjU4NiA0MDkuNTAxIDIyMi41ODZDNDEwLjUwNCAyMjIuNTg2IDQxMS42MjggMjIyLjI0MSA0MTIuODg3IDIyMS41NjdMNDE0LjU4IDIyNC41MTlINDE0LjU1WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTQyNy40NjYgMTg4LjgxOEM0MjguMDUgMTg5LjQwMyA0MjguMzM1IDE5MC4xMjIgNDI4LjMzNSAxOTAuOTkxQzQyOC4zMzUgMTkxLjg2MSA0MjguMDUgMTkyLjU4IDQyNy40NjYgMTkzLjE1QzQyNi44ODEgMTkzLjcxOSA0MjYuMTMyIDE5My45ODkgNDI1LjE4OCAxOTMuOTg5QzQyNC4yNDQgMTkzLjk4OSA0MjMuNTQgMTkzLjcwNCA0MjIuOTU2IDE5My4xNUM0MjIuMzcxIDE5Mi41OCA0MjIuMDg3IDE5MS44NjEgNDIyLjA4NyAxOTAuOTkxQzQyMi4wODcgMTkwLjEyMiA0MjIuMzcxIDE4OS4zODggNDIyLjk1NiAxODguODE4QzQyMy41NCAxODguMjM0IDQyNC4yNzQgMTg3Ljk0OSA0MjUuMTg4IDE4Ny45NDlDNDI2LjEwMiAxODcuOTQ5IDQyNi44ODEgMTg4LjIzNCA0MjcuNDY2IDE4OC44MThaTTQyNy40NjYgMjAwLjE5NFYyMjUuNjg4SDQyMy4wMTZWMjAwLjE5NEg0MjcuNDY2WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggZD0iTTQ1OC40MDcgMjAzLjE5MkM0NjAuMzg1IDIwNS41NzUgNDYxLjM4OSAyMDguODI3IDQ2MS4zODkgMjEyLjkxOUM0NjEuMzg5IDIxNS41NzIgNDYwLjkzOSAyMTcuODk1IDQ2MC4wNCAyMTkuOTE4QzQ1OS4xNDEgMjIxLjk0MSA0NTcuODM4IDIyMy41IDQ1Ni4xMTQgMjI0LjYwOUM0NTQuNDA2IDIyNS43MTggNDUyLjM2OSAyMjYuMjczIDQ1MC4wMTYgMjI2LjI3M0M0NDYuNDM1IDIyNi4yNzMgNDQzLjY0OCAyMjUuMDc0IDQ0MS42NCAyMjIuNjkxQzQzOS42NDcgMjIwLjMwOCA0MzguNjQ0IDIxNy4wNTUgNDM4LjY0NCAyMTIuOTY0QzQzOC42NDQgMjEwLjMyNiA0MzkuMDkzIDIwNy45ODggNDM5Ljk5MiAyMDUuOTY0QzQ0MC44OTEgMjAzLjk1NiA0NDIuMTk1IDIwMi4zODIgNDQzLjkxOCAyMDEuMjczQzQ0NS42MjYgMjAwLjE2NCA0NDcuNjc5IDE5OS42MDkgNDUwLjA2MSAxOTkuNjA5QzQ1My42NDIgMTk5LjYwOSA0NTYuNDI5IDIwMC44MDggNDU4LjQwNyAyMDMuMTkyWk00NDMuNDM4IDIxMi45NjRDNDQzLjQzOCAyMTkuNDUzIDQ0NS42MjYgMjIyLjY5MSA0NTAuMDE2IDIyMi42OTFDNDU0LjQwNiAyMjIuNjkxIDQ1Ni41OTQgMjE5LjQzOCA0NTYuNTk0IDIxMi45MTlDNDU2LjU5NCAyMDYuMzk5IDQ1NC40MjEgMjAzLjE5MiA0NTAuMDYxIDIwMy4xOTJDNDQ1LjcwMSAyMDMuMTkyIDQ0My40MzggMjA2LjQ0NCA0NDMuNDM4IDIxMi45NjRaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNNDkwLjAzNyAyMDEuNjkzQzQ5MS4zNDEgMjAzLjA4NiA0OTIgMjA0Ljk5IDQ5MiAyMDcuNDAzVjIyNS42ODhINDg3LjU1VjIwOC4wMzJDNDg3LjU1IDIwNi4yMTkgNDg3LjIwNSAyMDQuOTQ1IDQ4Ni41MzEgMjA0LjIxMUM0ODUuODU3IDIwMy40NzYgNDg0Ljg1MyAyMDMuMTAxIDQ4My41MzQgMjAzLjEwMUM0ODIuMjE2IDIwMy4xMDEgNDgwLjk4NyAyMDMuNDkxIDQ3OS45NTMgMjA0LjI1NkM0NzguOTE5IDIwNS4wMzUgNDc3Ljk2IDIwNi4xNDQgNDc3LjA0NiAyMDcuNTk4VjIyNS42ODhINDcyLjU5NlYyMDAuMTk0SDQ3Ni40MTdMNDc2LjgwNyAyMDMuOTcxQzQ3Ny43MDYgMjAyLjYyMiA0NzguODI5IDIwMS41NTggNDgwLjE2MyAyMDAuNzc4QzQ4MS40OTcgMTk5Ljk5OSA0ODIuOTggMTk5LjYyNCA0ODQuNTgzIDE5OS42MjRDNDg2LjkwNiAxOTkuNjI0IDQ4OC43MTkgMjAwLjMxNCA0OTAuMDIyIDIwMS43MDhMNDkwLjAzNyAyMDEuNjkzWiIgZmlsbD0iYmxhY2siLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zNF84Ij4KPHJlY3Qgd2lkdGg9IjQ5MiIgaGVpZ2h0PSIyMzYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==";
-  var img = function (h) { return '<img src="' + LOGO + '" alt="IPAK logo" style="height:' + h + 'px;width:auto;display:block">'; };
-  var css = document.createElement("style");
-  css.textContent = '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand img,:root:not([data-theme="light"]) .login .brandrow img{background:#fff;padding:5px 9px;border-radius:9px}}:root[data-theme="dark"] .brand img,:root[data-theme="dark"] .login .brandrow img{background:#fff;padding:5px 9px;border-radius:9px}';
-  document.head.appendChild(css);
-  function fix() {
-    var b = document.querySelector(".side .brand");
-    if (b && !b.dataset.logo) { b.dataset.logo = "1"; b.innerHTML = "<div>" + img(46) + "<small></small></div>"; }
-    var r = document.querySelector(".login .brandrow");
-    if (r && !r.dataset.logo) { r.dataset.logo = "1"; r.innerHTML = img(56); }
-  }
-  fix();
-  new MutationObserver(fix).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
-</body>
-</html>
