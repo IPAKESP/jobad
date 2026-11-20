@@ -324,6 +324,15 @@ dialog footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 2
 }
 .mob-menu{display:none;gap:8px;flex-wrap:wrap}
 
+
+/* ===== filters: always on one line ===== */
+.scope-bar{flex-wrap:nowrap!important;gap:8px!important;align-items:center;padding:10px 12px;border-radius:16px;background:var(--card);border:1px solid var(--edge);box-shadow:var(--shadow);overflow-x:auto;scrollbar-width:thin}
+.scope-bar label{flex:1 1 0;min-width:120px;max-width:230px}
+.scope-bar select{width:100%!important;min-width:0!important;font-weight:600;padding:9px 10px}
+.scope-bar .btn{flex:none;padding:9px 12px;white-space:nowrap}
+.scope-bar>span{flex:none;white-space:nowrap;font-size:13.5px}
+@media (max-width:860px){.scope-bar label{flex:0 0 150px}}
+
 /* A4 print (portrait, sections flow continuously) */
 @page{size:A4 portrait;margin:8mm}
 @media print{
@@ -394,12 +403,56 @@ dialog footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 2
 [data-act="change-pin"]{display:none}
 .cloud [data-act="change-pin"]{display:flex}
 .side-foot #saveState{color:var(--ink2)}
-.locked .shell{grid-template-columns:1fr;max-width:520px;padding-top:9vh}
+.locked .shell{display:block;max-width:none;padding:0}
 .locked .side{display:none}
-.login form{display:flex;flex-direction:column;gap:14px;margin-top:6px}
-.login .brandrow{display:flex;gap:12px;align-items:center;margin-bottom:18px}
-.login .brandrow b{display:block;font:600 22px/1 var(--font-d);letter-spacing:.04em}
-.login .brandrow small{display:block;color:var(--ink2);font-size:12.5px;margin-top:3px}
+.locked #view{display:block;gap:0}
+.locked #view>*{animation:none}
+.lg-wrap{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.lg-hero{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:40px;padding:48px 56px;color:#f4fbf6;background:linear-gradient(150deg,#0b2b1a 0%,#0f4125 45%,#1f7a4a 100%)}
+.lg-hero::before{content:"";position:absolute;right:-140px;top:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(167,207,116,.42),transparent 68%)}
+.lg-hero::after{content:"";position:absolute;left:-100px;bottom:-160px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(79,212,155,.26),transparent 68%)}
+.lg-hero>*{position:relative;z-index:1}
+.lg-brand{display:flex;align-items:center;gap:14px}
+.lg-brand b{display:block;font:600 26px/1 var(--font-d);letter-spacing:.08em;color:#fff}
+.lg-brand small{display:block;margin-top:4px;color:#bfe3cc;font-size:13px;letter-spacing:.02em}
+.lg-copy h1{font-size:clamp(34px,4.2vw,56px);line-height:1.05;letter-spacing:-.03em;color:#fff;max-width:14ch}
+.lg-copy .tag{margin-top:14px;font:300 clamp(18px,2vw,24px)/1.3 var(--font-d);color:#d4efdd}
+.lg-copy .tag b{font-weight:600;color:#fff}
+.lg-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.lg-pills span{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:13.5px;font-weight:500;color:#eaf7ef}
+.lg-pills span svg{flex:none;opacity:.9}
+.lg-foot{display:flex;flex-wrap:wrap;gap:10px 28px;color:#bfe3cc;font-size:13px}
+.lg-foot b{color:#fff;font-weight:600}
+.lg-panel{display:flex;align-items:center;justify-content:center;padding:40px 28px}
+.lg-card{width:100%;max-width:420px}
+.lg-mbrand{display:none}
+.lg-card h2{font-size:30px;letter-spacing:-.02em}
+.lg-card .sub{color:var(--ink2);margin:8px 0 26px}
+.lg-card form{display:flex;flex-direction:column;gap:18px}
+.lg-field label{display:block;font-size:13.5px;font-weight:600;color:var(--ink2);margin-bottom:7px}
+.lg-inp{position:relative}
+.lg-inp>svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none}
+.lg-inp input{width:100%;padding:14px 46px 14px 44px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);font-size:15.5px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.lg-inp input::placeholder{color:var(--ink3)}
+.lg-inp input:focus{border-color:var(--navy2);box-shadow:0 0 0 4px rgba(46,157,99,.18);background:var(--card-solid)}
+.lg-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--ink3);cursor:pointer}
+.lg-eye:hover{background:var(--card-2);color:var(--ink)}
+.lg-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 18px;border:0;border-radius:14px;background:linear-gradient(135deg,#14532d,#2e9d63);color:#f4fbf6;font:600 16px var(--font-d);letter-spacing:.02em;cursor:pointer;box-shadow:0 14px 26px -14px rgba(20,83,45,.8);transition:transform .2s,box-shadow .2s,filter .2s}
+.lg-btn:hover{transform:translateY(-2px);box-shadow:0 18px 30px -14px rgba(20,83,45,.85);filter:brightness(1.06)}
+.lg-btn:active{transform:scale(.98)}
+.lg-btn[disabled]{opacity:.65;cursor:progress;transform:none}
+.lg-note{display:flex;gap:10px;align-items:flex-start;margin-top:22px;padding:12px 14px;border-radius:12px;background:var(--card-2);border:1px solid var(--line);color:var(--ink2);font-size:13.5px}
+.lg-note svg{flex:none;margin-top:2px;color:var(--curve)}
+.lg-copy-r{margin-top:26px;text-align:center;color:var(--ink3);font-size:12.5px}
+@media (max-width:960px){
+  .lg-wrap{grid-template-columns:1fr}
+  .lg-hero{display:none}
+  .lg-panel{min-height:100dvh;padding:28px 20px;background:linear-gradient(160deg,var(--bg1),var(--bg2))}
+  .lg-mbrand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .lg-mbrand b{display:block;font:600 22px/1 var(--font-d);letter-spacing:.06em}
+  .lg-mbrand small{display:block;color:var(--ink2);font-size:12.5px;margin-top:3px}
+}
+@media print{.lg-wrap{display:none}}
 
 /* ===== light motion (screen only) ===== */
 @media screen{
@@ -661,7 +714,7 @@ const saveSession = (c) => { try { localStorage.setItem(SESS_KEY, JSON.stringify
 const clearSession = () => { try { localStorage.removeItem(SESS_KEY); } catch (e) {} };
 const errMsg = (e) => {
   const m = String((e && e.message) || e || "Something went wrong").replace(/^Error:\s*/, "");
-  if (m.indexOf("SESSION_EXPIRED") >= 0) { setTimeout(() => { expireSession(); renderLogin("Session expire ho gaya. Dobara sign in karein."); }, 0); return "Session expire ho gaya. Dobara sign in karein."; }
+  if (m.indexOf("SESSION_EXPIRED") >= 0) { setTimeout(() => { expireSession(); renderLogin("Your session has expired. Please sign in again."); }, 0); return "Your session has expired. Please sign in again."; }
   return m;
 };
 function expireSession() { clearSession(); CRED = null; dirty.clear(); S = { emps: [], forms: {} }; document.body.classList.remove("is-admin"); whoAmI(); render(); }
@@ -678,12 +731,40 @@ const run = () => google.script.run;
 function setSave(t) { const el = $("#saveState"); if (el) el.textContent = t; }
 function whoAmI() { const el = $("#who"); if (el && CLOUD) el.textContent = CRED ? ME.email + " · " + (ROLE_LABEL[ME.role] || ME.role) : "Not signed in"; }
 function renderLogin(err) {
-  $("#view").innerHTML = `<section class="glass pad card login"><div class="brandrow">${mark}<div><b>IPAK</b><small>Performance Assessment 2026</small></div></div><h2>Sign in</h2><p class="sub">Use the email and PIN that HR gave you.</p>
-  <form id="loginForm" novalidate><div class="field"><label for="li_email">Email</label><input id="li_email" type="email" autocomplete="username" required></div>
-  <div class="field"><label for="li_pin">PIN</label><input id="li_pin" type="password" inputmode="numeric" autocomplete="current-password" required></div>
-  <div id="loginErr">${err ? `<div class="msg bad">${ico("alert", 16)}<span>${esc(err)}</span></div>` : ""}</div><button class="btn" type="submit" id="loginBtn">Sign in</button></form></section>`;
+  const pill = (p, t) => `<span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>${t}</span>`;
+  const IC_USER = '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-3.8 3.4-6 7.5-6s7.5 2.2 7.5 6"/>';
+  const IC_LOCK = '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>';
+  const IC_EYE = '<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/>';
+  const IC_SHIELD = '<path d="M12 3l8 3v6c0 4.6-3.2 7.8-8 9-4.8-1.2-8-4.4-8-9V6z"/><path d="M8.8 12.2l2.4 2.4 4-4.6"/>';
+  const IC_TARGET = '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>';
+  const IC_FLOW = '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="12" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 6H12a3 3 0 0 1 3 3v0M8.5 18H12a3 3 0 0 0 3-3v0"/>';
+  $("#view").innerHTML = `<div class="lg-wrap">
+    <section class="lg-hero" aria-hidden="false">
+      <div class="lg-brand">${mark}<div><b>IPAK</b><small>Human Resources</small></div></div>
+      <div class="lg-copy"><h1>Performance Assessment 2026</h1><p class="tag">Your Performance. <b>Your Growth.</b></p>
+        <div class="lg-pills">${pill(IC_TARGET, "SMART objectives (IPI)")}${pill(IC_FLOW, "Behaviour assessment (BPI)")}${pill(IC_FLOW, "Multi-stage approval")}</div></div>
+      <div class="lg-foot"><span>Period <b>Jan – Dec 2026</b></span><span>Deadline <b>10 Dec 2026</b></span></div>
+    </section>
+    <section class="lg-panel"><div class="lg-card">
+      <div class="lg-mbrand">${mark}<div><b>IPAK</b><small>Performance Assessment 2026</small></div></div>
+      <h2>Welcome back</h2><p class="sub">Sign in with the email and PIN provided by HR.</p>
+      <form id="loginForm" novalidate>
+        <div class="lg-field"><label for="li_email">Email address</label><div class="lg-inp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC_USER}</svg><input id="li_email" type="email" autocomplete="username" placeholder="name@ipak.com" required></div></div>
+        <div class="lg-field"><label for="li_pin">PIN</label><div class="lg-inp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC_LOCK}</svg><input id="li_pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Enter your PIN" required><button type="button" class="lg-eye" data-act="toggle-pin" aria-label="Show PIN" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC_EYE}</svg></button></div></div>
+        <div id="loginErr" role="alert">${err ? `<div class="msg bad">${ico("alert", 16)}<span>${esc(err)}</span></div>` : ""}</div>
+        <button class="lg-btn" type="submit" id="loginBtn">Sign in</button>
+      </form>
+      <div class="lg-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC_SHIELD}</svg><span>Confidential. Performance data is visible only to authorised people. You are signed out automatically after 30 minutes of inactivity.</span></div>
+      <p class="lg-copy-r">© 2026 IPAK · Human Resources Department</p>
+    </div></section></div>`;
   const e = $("#li_email"); if (e) e.focus();
 }
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest('[data-act="toggle-pin"]'); if (!b) return;
+  const i = $("#li_pin"); if (!i) return;
+  const show = i.type === "password"; i.type = show ? "text" : "password";
+  b.setAttribute("aria-pressed", String(show)); b.setAttribute("aria-label", show ? "Hide PIN" : "Show PIN"); i.focus();
+});
 function doLogin(email, pin) {
   const btn = $("#loginBtn"); if (btn) { btn.disabled = true; btn.textContent = "Signing in…"; }
   const cred = { email: String(email).trim(), pin: String(pin).trim() };
@@ -699,7 +780,7 @@ function reloadState() {
     .withFailureHandler((e) => toast(errMsg(e))).getState(CRED);
 }
 async function signOut() {
-  if (dirty.size && !(await confirmBox("Unsaved changes", "Kuch changes save nahi hui hain. Sign out karne par woh chali jayengi.", "Sign out", true))) return;
+  if (dirty.size && !(await confirmBox("Unsaved changes", "You have unsaved changes. They will be lost if you sign out.", "Sign out", true))) return;
   if (CRED && CRED.token) { try { run().withSuccessHandler(() => {}).withFailureHandler(() => {}).logout(CRED); } catch (e) {} }
   clearSession(); clearTimeout(idleT);
   dirty.clear(); CRED = null; S = { emps: [], forms: {} }; ui.id = null;
@@ -720,7 +801,7 @@ function touchForm(id) {
 async function submitForm() {
   const id = ui.id, e = empOf(id);
   if (!CLOUD || !e || !dirty.has(id)) return;
-  if (!(await confirmBox("Save changes?", `${e.name} (ID ${id}) ki assessment form ki changes Google Sheet mein save ho jayengi.`, "Save"))) return;
+  if (!(await confirmBox("Save changes?", `Changes to the assessment form of ${e.name} (ID ${id}) will be saved to the Google Sheet.`, "Save"))) return;
   const json = snap(id); setSave("Saving…");
   run().withSuccessHandler(() => {
     SAVED[id] = json; if (snap(id) === json) dirty.delete(id);
@@ -730,7 +811,7 @@ async function submitForm() {
 async function discardForm() {
   const id = ui.id;
   if (!CLOUD || !dirty.has(id)) return;
-  if (!(await confirmBox("Discard changes?", "Is form ki unsaved changes khatam ho jayengi aur last saved version wapas aa jayega.", "Discard", true))) return;
+  if (!(await confirmBox("Discard changes?", "The unsaved changes on this form will be discarded and the last saved version will be restored.", "Discard", true))) return;
   S.forms[id] = SAVED[id] ? JSON.parse(SAVED[id]) : blankForm();
   dirty.delete(id); setSave(dirty.size ? `Unsaved changes (${dirty.size}).` : ""); keepScroll(render); toast("Changes discarded");
 }
@@ -1253,7 +1334,7 @@ function scopeBar() {
   const stat = CLOUD ? `<label><span class="sr">Status</span><select id="sstat"><option value="">All status</option>${Object.keys(ST_SHORT).map((k) => `<option value="${k}"${ui.st === k ? " selected" : ""}>${ST_SHORT[k]}</option>`).join("")}</select></label>` : "";
   const active = !!(ui.co || ui.rd || ui.rs || ui.st);
   const clr = `<button class="btn ghost" data-act="clear-filters" ${active ? "" : "disabled"}>${ico("reset")}Clear filters</button>`;
-  return `<div class="picker no-print">${comp}${dept}${stat}${clr}<span style="color:var(--ink2);font-size:13.5px">${scoped().length} employees</span></div>`;
+  return `<div class="picker scope-bar no-print">${comp}${dept}${stat}${clr}<span style="color:var(--ink2);font-size:13.5px">${scoped().length} employees</span></div>`;
 }
 results = () => scoped().map((e) => ({ e, ...evaluate(formOf(e.id)) }));
 repRes = () => results();
@@ -1345,9 +1426,9 @@ const promoOk = promoReady() && !!promoOf(e.id);
   else if (st === "submitted") hint = "The form is currently under HOD review and is locked for editing.";
   else if (edit && sg === "hod") hint = "You are also this employee’s Line Manager. Complete the form and approve it directly.";
   else if (edit) hint = "Complete the assessment. Once finished, click “Send to HOD";
-  else hint = "Is form par abhi aap ka koi action nahi.";
+  else hint = "You have no action to take on this form right now.";
 if (canSubmit && !promoOk) hint = "Please select Yes or No for the Promotion Recommendation before clicking “Send to HOD.”";
-  const ret = st === "draft" && last && last.a === "return" ? `<div class="msg bad">${ico("alert", 16)}<span><b>HOD ne wapas bheja:</b> ${esc(last.n || "(koi note nahi)")}</span></div>` : "";
+  const ret = st === "draft" && last && last.a === "return" ? `<div class="msg bad">${ico("alert", 16)}<span><b>Returned by HOD:</b> ${esc(last.n || "(no note)")}</span></div>` : "";
   const apr = st === "approved" && f.approvedBy ? `<div class="msg ok">${ico("check", 16)}<span>Approved by ${esc(f.approvedBy)}${f.approvedAt ? " · " + esc(new Date(f.approvedAt).toLocaleString("en-GB")) : ""}</span></div>` : "";
   const btns = (canSubmit ? `<button class="btn" data-wf="submit" ${promoOk ? "" : "disabled"}>${ico("right")}Send to HOD</button>` : "") + (canApprove ? `<button class="btn" data-wf="approve">${ico("check")}Approve (final)</button>` : "") + (canReturn ? `<button class="btn ghost" data-wf="return">${ico("left")}Return to Line Manager</button>` : "") + (canReopen ? `<button class="btn ghost" data-wf="reopen">${ico("reset")}Reopen</button>` : "");
   const hl = hist.slice(-8).reverse().map((x) => `<li>${esc(WF_ACT[x.a] || x.a)} · ${esc(x.by)} · ${esc(new Date(x.t).toLocaleString("en-GB"))}${x.n ? " — " + esc(x.n) : ""}</li>`).join("");
@@ -1362,7 +1443,7 @@ render = function () { renderOrig(); wfDecorate(); };
 function askNote() {
   return new Promise((res) => {
     const d = dlg();
-    d.innerHTML = `<form method="dialog"><header><h2>Return to Line Manager</h2></header><div class="body one"><div class="field"><label for="wfnote">Kya changes chahiye? (Line Manager ko nazar aayega)</label><textarea id="wfnote" class="cell-in" style="min-height:110px;overflow:auto"></textarea></div></div><footer><button class="btn ghost" value="no" formnovalidate>Cancel</button><button class="btn" value="yes">Return form</button></footer></form>`;
+    d.innerHTML = `<form method="dialog"><header><h2>Return to Line Manager</h2></header><div class="body one"><div class="field"><label for="wfnote">What changes are needed? (The Line Manager will see this)</label><textarea id="wfnote" class="cell-in" style="min-height:110px;overflow:auto"></textarea></div></div><footer><button class="btn ghost" value="no" formnovalidate>Cancel</button><button class="btn" value="yes">Return form</button></footer></form>`;
     d.onclose = () => res(d.returnValue === "yes" ? $("#wfnote").value.trim() : null);
     d.returnValue = ""; d.showModal();
   });
@@ -1373,9 +1454,9 @@ async function wfAct(action) {
   if (action === "return") { note = await askNote(); if (note === null) return; }
   else {
     const T = {
-      submit: ["Send to HOD?", `${e.name} (ID ${id}) ka form HOD ko approval ke liye chala jayega. Iske baad Line Manager ise edit nahi kar sakega.`, "Send to HOD"],
-      approve: ["Approve final?", `${e.name} (ID ${id}) ka form final approve ho jayega. Is form ko (HOD ke changes samet) final assessment mana jayega aur ye lock ho jayega.`, "Approve"],
-      reopen: ["Reopen form?", `${e.name} ka form wapas Draft (Line Manager) mein chala jayega.`, "Reopen"]
+      submit: ["Send to HOD?", `The form of ${e.name} (ID ${id}) will go to the HOD for approval. After that the Line Manager will not be able to edit it.`, "Send to HOD"],
+      approve: ["Approve final?", `The form of ${e.name} (ID ${id}) will be finally approved. This form (including the HOD’s changes) will be treated as the final assessment and will be locked.`, "Approve"],
+      reopen: ["Reopen form?", `The form of ${e.name} will go back to Draft (Line Manager).`, "Reopen"]
     }[action];
     if (!(await confirmBox(T[0], T[1], T[2]))) return;
   }
@@ -1483,7 +1564,7 @@ function promoSave(id, rec, ok, fail) {
 async function promoNo(id) {
   const e = empOf(id); if (!e) return;
   const old = promoOf(id);
-  if (old && old.decision === "yes" && !(await confirmBox("Change to No?", `${e.name} ki promotion recommendation ki saari details hat jayengi aur "Not Recommended" save ho jayega.`, "Change to No", true))) return;
+  if (old && old.decision === "yes" && !(await confirmBox("Change to No?", `All promotion recommendation details for ${e.name} will be removed and “Not Recommended” will be saved.`, "Change to No", true))) return;
   promoSave(id, { decision: "no" }, () => { keepScroll(render); toast("Saved: Not Recommended"); }, () => {});
 }
 
@@ -1897,7 +1978,7 @@ wfAct = async function (action) {
     if (note === null) return;
   } else {
     const T = {
-      submit_lm: ["Submit to Line Manager?", `${e.name} (ID ${id}): your assessment and comments will go to the Line Manager. After that you cannot edit them unless the Line Manager sends the form back.`, "Submit"],
+      submit_lm: ["Submit to Line Manager?", `${e.name} (ID ${id}): The assessment and comments will go to the Line Manager. After that you cannot edit them unless the Line Manager sends the form back.`, "Submit"],
       submit: ["Submit to HOD?", `${e.name} (ID ${id}): the form will go to the HOD for approval. After that the Line Manager cannot edit it unless the HOD sends it back.`, "Submit to HOD"],
       approve: ["Approve final assessment?", `${e.name} (ID ${id}): the form will be finally approved and locked.`, "Approve"],
       reopen: ["Reopen form?", `${e.name}: the form goes back to the Line Manager as a draft.`, "Reopen"]
