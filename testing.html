@@ -1511,11 +1511,28 @@ Object.keys(ROLE_PAGES).forEach((k) => { if (!ROLE_PAGES[k].includes("promotions
 const PR = () => (CLOUD ? PROMOS : (S.promos || (S.promos = {})));
 const promoOf = (id) => PR()[id] || null;
 /* Final promotion status: pending / recommended (Yes, waiting for HR) / promoted / nonpromoted (No, or HR decided) */
-const PSTAT = { promoted: ["Promoted", "chip-a"], nonpromoted: ["Not Recommended", "chip-c"], rejected: ["Rejected by HR", "chip-c"], recommended: ["Recommended", "chip-b"], pending: ["Pending", "chip-na"] };
-const pStat = (id) => { const p = promoOf(id); if (!p) return "pending"; if (p.decision === "no") return "nonpromoted"; if (p.status === "nonpromoted") return "rejected"; return p.status || "recommended"; };
+const PSTAT = { promoted: ["Promoted", "chip-a"], nonpromoted: ["Not Recommended", "chip-c"], rejected: ["Rejected by HR", "chip-c"], recommended: ["HR decision pending", "chip-b"], pending: ["Pending", "chip-na"] };
+const pStat = (id) => {
+  const p = promoOf(id); if (!p) return "pending";
+  if (p.decision === "no") return "nonpromoted";
+  if (p.status === "nonpromoted" || p.status === "rejected") return p.hrBy ? "rejected" : "recommended";   // HR ne action na liya ho to rejected nahi
+  return p.status || "recommended";
+};
 const pChip = (k) => `<span class="chip ${PSTAT[k][1]}">${PSTAT[k][0]}</span>`;
 const promoReady = () => !CLOUD || PROMO_READY;
-const canPromo = (e) => !!stageOf(e);
+const canPromo = (e) => {
+  const sg = stageOf(e), st = stOf(e.id);
+  if (!sg) return false;
+  if (sg === "admin") return true;
+  const pp = promoOf(e.id); if (pp && pp.steps && pp.steps[sg]) return false;   // decision le liya -> lock
+  if (sg === "ds") return st === "dsdraft";
+  if (sg === "lm") return st === "draft";
+  if (sg === "hod") return e.ds && !e.solo ? st === "submitted" : (st === "draft" || st === "submitted");
+  return false;
+};
+const promoStepDone = (e, key) => { const p = promoOf(e.id); if (!p) return false; if (isAdmin() || !e.ds || !p.steps) return true; return !!p.steps[key]; };
+const STEP_LBL = { ds: "Direct supervisor", lm: "Line manager", hod: "HOD" };
+const promoStepsHTML = (p) => { const s = p && p.steps; if (!s) return ""; return ["ds", "lm", "hod"].filter((k) => s[k]).map((k) => `<span class="chip ${s[k].d === "yes" ? "chip-a" : "chip-c"}">${STEP_LBL[k]}: ${s[k].d === "yes" ? "Yes" : "No"}${s[k].c ? " ✓" : ""}</span>`).join(""); };
 const pDate = (t) => { const d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }); };
 const promoWait = () => (PROMO_ERR ? "Could not load promotions. Check that Code.gs is updated and redeployed." : "Loading promotions from the Google Sheet…");
 
@@ -1526,7 +1543,7 @@ function ensurePromos() {
   PROMO_FOR = CRED.email;
   run().withSuccessHandler((p) => {
     PROMOS = p || {}; PROMO_READY = true; PROMO_ERR = false;
-    if (ui.view === "form" || ui.view === "promotions") keepScroll(render);
+    if (ui.view === "form" || ui.view === "promotions" || isAdmin()) keepScroll(render);
   }).withFailureHandler((err) => { PROMO_ERR = true; toast(errMsg(err)); if (ui.view === "form" || ui.view === "promotions") keepScroll(render); }).getPromos(CRED);
 }
 
@@ -1586,7 +1603,7 @@ function promoOpen(id) {
     <div class="field span"><label for="pr_ach">Key achievements of the recommended employee during IPAK career</label><textarea id="pr_ach" class="cell-in" style="min-height:200px;overflow:auto;resize:vertical" ${dis}>${esc((ach || []).filter(Boolean).join("\n"))}</textarea></div>
     <div class="field span"><div class="pr-h">Human Resource Department</div></div>
     <div class="field"><label for="pr_org">Position is available in organogram</label><select id="pr_org" ${hrDis}><option value="">Select</option><option value="yes"${p.org === "yes" ? " selected" : ""}>Yes</option><option value="no"${p.org === "no" ? " selected" : ""}>No</option></select></div>
-    <div class="field"><label for="pr_status">Final status</label><select id="pr_status" ${hrDis}><option value="">Select</option><option value="promoted"${p.status === "promoted" ? " selected" : ""}>Promoted</option><option value="rejected"${(p.status === "rejected" || p.status === "nonpromoted") ? " selected" : ""}>Rejected by HR</option></select>${hr ? "" : '<span class="pr-sub">Only HR can fill this section.</span>'}</div>
+    <div class="field"><label for="pr_status">Final status</label><select id="pr_status" ${hrDis}><option value="">Select</option><option value="promoted"${p.status === "promoted" ? " selected" : ""}>Promoted</option><option value="rejected"${(p.hrBy && (p.status === "rejected" || p.status === "nonpromoted")) ? " selected" : ""}>Rejected by HR</option></select>${hr ? "" : '<span class="pr-sub">Only HR can fill this section.</span>'}</div>
     ${area("hrrem", "HR remarks", p.hrRem || "", hrDis)}
     <div class="field span" id="prErr"></div>${p.log ? `<div class="field span">${promoLogHTML(p)}</div>` : ""}</div>
     <footer><button type="button" class="btn ghost" data-act="close-dlg">${ro ? "Close" : "Cancel"}</button>${ro ? "" : '<button type="submit" class="btn" id="prSave">Save promotion</button>'}</footer></form>`;
@@ -1607,24 +1624,28 @@ function promoOpen(id) {
 
 /* card on the assessment form, just above the "Save changes" bar */
 function promoCardHTML(e) {
-  const p = promoOf(e.id), can = canPromo(e), id = e.id;
+  const p = promoOf(e.id), can = canPromo(e), id = e.id, sg = stageOf(e);
+  const needsConfirm = !!(can && p && p.steps && (sg === "ds" || sg === "lm" || sg === "hod") && !p.steps[sg]);
+  const confirmBtn = (yes) => needsConfirm ? `<button class="btn" data-pr="confirm" data-id="${id}">${ico("check")}Confirm: ${yes ? "Yes" : "No"}</button>` : "";
   let chipH = "", sum = "", btns = "";
   if (!promoReady()) chipH = `<span class="chip chip-na">${PROMO_ERR ? "Could not load" : "Loading…"}</span>`;
   else if (!p) {
     chipH = '<span class="chip chip-na">Decision pending</span>';
-    if (can) btns = `<button class="btn ghost" data-pr="yes" data-id="${id}">Yes</button><button class="btn ghost" data-pr="no" data-id="${id}">No</button>`;
-    else sum = "<span>Only the Line Manager, HOD or HR can answer this.</span>";
+    if (can) { btns = `<button class="btn ghost" data-pr="yes" data-id="${id}">Yes</button><button class="btn ghost" data-pr="no" data-id="${id}">No</button>`; sum = "<span>Yes/No save karne ke baad decision lock ho jayega.</span>"; }
+    else sum = "<span>Only the person who currently holds the form can answer this.</span>";
   } else if (p.decision === "no") {
     chipH = pChip("nonpromoted");
     sum = `<span>Marked by <b>${esc(p.by || "")}</b>${p.at ? " · " + esc(pDate(p.at)) : ""}</span>`;
-    if (can) btns = `<button class="btn ghost" data-pr="yes" data-id="${id}">Change to Yes</button>`;
+    if (can) btns = confirmBtn(false) + `<button class="btn ghost" data-pr="yes" data-id="${id}">Change to Yes</button>`;
   } else {
     const org = p.org === "yes" ? '<span class="chip chip-a">Position available</span>' : p.org === "no" ? '<span class="chip chip-c">Position not available</span>' : '<span class="chip chip-na">HR review pending</span>';
     chipH = pChip(pStat(id));
     sum = `<span>Position: <b>${esc(p.pos)}</b></span><span>Grade: <b>${esc(p.grade)}</b></span>${org}`;
-    btns = `<button class="btn" data-pr="yes" data-id="${id}">${can ? "Edit details" : "View details"}</button>` + (can ? `<button class="btn ghost" data-pr="no" data-id="${id}">Change to No</button>` : "");
+    btns = confirmBtn(true) + `<button class="btn ${needsConfirm ? "ghost" : ""}" data-pr="yes" data-id="${id}">${can ? "Edit details" : "View details"}</button>` + (can ? `<button class="btn ghost" data-pr="no" data-id="${id}">Change to No</button>` : "");
   }
-  return `<section class="glass pr-card no-print"><div class="pr-top"><div><h2>Promotion recommendation</h2><p>Do you want to recommend <b>${esc(e.name)}</b> for a promotion?</p></div><div class="pr-btns">${btns}</div></div><div class="pr-sum">${chipH}${sum}</div>${promoLogHTML(p)}</section>`;
+  const steps = promoStepsHTML(p);
+  const lockedNote = (sg && sg !== "admin" && p && p.steps && p.steps[sg]) ? '<span style="color:var(--ink2);font-size:13.5px">🔒 Your decision is locked.</span>' : "";
+  return `<section class="glass pr-card no-print"><div class="pr-top"><div><h2>Promotion recommendation</h2><p>Do you want to recommend <b>${esc(e.name)}</b> for a promotion?</p></div><div class="pr-btns">${btns}</div></div><div class="pr-sum">${chipH}${sum}</div>${steps || lockedNote ? `<div class="pr-sum">${steps}${lockedNote}</div>` : ""}${promoLogHTML(p)}</section>`;
 }
 function promoDecorate() {
   ensurePromos();
@@ -1645,7 +1666,7 @@ const viewPromotions = scopedView(function () {
   const res = results(), n = res.length, st = (r) => pStat(r.e.id);
   const c = (k) => res.filter((r) => st(r) === k).length;
   const list = res.filter((r) => !ui.pd || st(r) === ui.pd);
-  const seg = [["", "All"], ["promoted", "Promoted"], ["nonpromoted", "Not Recommended"], ["rejected", "Rejected by HR"], ["recommended", "Recommended"], ["pending", "Pending"]].map(([v, l]) => `<button data-pr="filter" data-v="${v}" aria-pressed="${ui.pd === v}">${l}</button>`).join("");
+  const seg = [["", "All"], ["promoted", "Promoted"], ["nonpromoted", "Not Recommended"], ["rejected", "Rejected by HR"], ["recommended", "HR decision pending"], ["pending", "Pending"]].map(([v, l]) => `<button data-pr="filter" data-v="${v}" aria-pressed="${ui.pd === v}">${l}</button>`).join("");
   const rows = list.map((r) => {
     const e = r.e, p = promoOf(e.id), s = st(r), yes = p && p.decision === "yes";
     const org = !yes ? "–" : p.org === "yes" ? '<span class="chip chip-a">Available</span>' : p.org === "no" ? '<span class="chip chip-c">Not available</span>' : '<span class="chip chip-na">HR pending</span>';
@@ -1740,7 +1761,7 @@ function promoShow(id, mh, warn) {
     <div class="field span"><label for="pr_ach">Key achievements of the recommended employee during IPAK career</label><textarea id="pr_ach" class="cell-in" style="min-height:200px;overflow:auto;resize:vertical" ${dis}>${esc(ach.filter(Boolean).join("\n"))}</textarea></div>
     <div class="field span"><div class="pr-h">Human Resource Department</div></div>
     <div class="field"><label for="pr_org">Position is available in organogram</label><select id="pr_org" ${hrDis}><option value="">Select</option><option value="yes"${p.org === "yes" ? " selected" : ""}>Yes</option><option value="no"${p.org === "no" ? " selected" : ""}>No</option></select></div>
-    <div class="field"><label for="pr_status">Final status</label><select id="pr_status" ${hrDis}><option value="">Select</option><option value="promoted"${p.status === "promoted" ? " selected" : ""}>Promoted</option><option value="rejected"${(p.status === "rejected" || p.status === "nonpromoted") ? " selected" : ""}>Rejected by HR</option></select>${hr ? "" : '<span class="pr-sub">Only HR can fill this section.</span>'}</div>
+    <div class="field"><label for="pr_status">Final status</label><select id="pr_status" ${hrDis}><option value="">Select</option><option value="promoted"${p.status === "promoted" ? " selected" : ""}>Promoted</option><option value="rejected"${(p.hrBy && (p.status === "rejected" || p.status === "nonpromoted")) ? " selected" : ""}>Rejected by HR</option></select>${hr ? "" : '<span class="pr-sub">Only HR can fill this section.</span>'}</div>
     ${area("hrrem", "HR remarks", p.hrRem || "", hrDis)}
     <div class="field span" id="prErr">${warn ? `<div class="msg">${ico("alert", 16)}<span>${esc(warn)}</span></div>` : ""}</div>${p.log ? `<div class="field span">${promoLogHTML(p)}</div>` : ""}</div>
     <footer><button type="button" class="btn ghost" data-act="close-dlg">${ro ? "Close" : "Cancel"}</button>${ro ? "" : '<button type="submit" class="btn" id="prSave">Save promotion</button>'}</footer></form>`;
@@ -1803,7 +1824,7 @@ document.addEventListener("click", (ev) => { if (ev.target.closest('[data-act="c
    so no other part of Index.html has to be rewritten.
    ===================================================================== */
 ROLE_LABEL.ds = "Direct supervisor";
-ROLE_PAGES.ds = ["guidelines", "dashboard", "employees", "form", "report"];   // no Promotions page for a Direct Supervisor
+ROLE_PAGES.ds = ["guidelines", "dashboard", "employees", "form", "report", "promotions"];
 PLOG_ROLE.ds = "Direct supervisor";
 ST_LABEL.dsdraft = "Draft – with Direct Supervisor";
 ST_CHIP.dsdraft = "chip-na";
@@ -1921,6 +1942,13 @@ wfDecorate = function () {
     const first = $$(".paper > .sec")[0];
     if (first) first.insertAdjacentHTML("afterend", dsPanelHTML(e, f));
   }
+  if (f.ds && st !== "dsdraft" && cm) {   // LM and HOD also see the Direct Supervisor comments next to their own
+    cm.insertAdjacentHTML("afterbegin", `<div class="field"><label>Direct supervisor comments (read-only)</label><textarea class="cell-in" style="min-height:140px;overflow:auto;resize:vertical" readonly>${esc(f.ds.rem)}</textarea><div class="sign"><span>Signature</span></div><div class="sign-spc"></div></div>`);
+  }
+  const star = (cid) => { const l = $('label[for="' + cid + '"]'); if (l && !/\*/.test(l.textContent)) l.textContent += " *"; };
+  if (edit && sg === "ds" && st === "dsdraft") star("c_dsrem");
+  if (edit && sg === "lm") star("c_lm");
+  if (edit && sg === "hod") star("c_hod");
 
   /* locking */
   const lockAll = (except) => {
@@ -1940,24 +1968,27 @@ wfDecorate = function () {
   const canApprove = (st === "submitted" || (st === "draft" && (!wf || sg === "admin"))) && (sg === "hod" || sg === "admin");
   const canReturn = st === "submitted" && (sg === "hod" || sg === "admin");
   const canReopen = st === "approved" && sg === "admin";
-  const promoOk = promoReady() && !!promoOf(e.id);
+  const pOk = (k) => promoReady() && promoStepDone(e, k);
+  const promoOk = pOk("lm");
 
   let hint = "";
   if (st === "approved") hint = "This form has been finally approved and is locked.";
   else if (st === "dsdraft") hint = sg === "lm" ? "This form is currently with the Direct Supervisor. You can also edit it (your changes are recorded in the history), but only the Direct Supervisor can submit it to you." : edit ? "Complete your assessment and comments, then click “Submit to Line Manager”. After you submit, your stage is locked unless the Line Manager sends it back." : "This form is with the Direct Supervisor and is locked for you.";
   else if (st === "draft") hint = edit ? (f.ds ? "The Direct Supervisor’s assessment is shown above (read-only). Complete your own assessment and comments, then click “Submit to HOD”, or send it back to the Direct Supervisor with a reason." : "Complete the assessment. Once finished, click “Submit to HOD”.") : "This form is with the Line Manager and is locked for you.";
   else if (st === "submitted") hint = edit ? (wf ? "Review the Direct Supervisor and Line Manager assessments. You can add HOD comments, then approve the form or send it back to the Line Manager with a reason." : "Review the assessment as HOD. Make changes if necessary, then approve it or send it back to the Line Manager.") : "The form is under HOD review and is locked for you.";
-  if (canSubmit && !promoOk) hint = "Select Yes or No for the Promotion Recommendation before clicking “Submit to HOD”.";
+  if (canSubmit && !promoOk) hint = "Confirm the Direct Supervisor’s promotion recommendation (or change it) and write your comments before “Submit to HOD”.";
+  if (canSubmitLM && !pOk("ds")) hint = "Select Yes or No in the Promotion recommendation and write your comments before “Submit to Line Manager”.";
+  if (canApprove && st === "submitted" && !pOk("hod")) hint = "Confirm or change the Promotion recommendation and write your HOD comments before approving.";
 
   const label = st === "dsdraft" ? (last && last.a === "return_ds" ? "Returned to Direct Supervisor" : ST_LABEL.dsdraft) : st === "draft" ? (f.ds ? "With Line Manager – submitted by Direct Supervisor" : "Draft – with Line Manager") : ST_LABEL[st];
   const retBy = (st === "draft" || st === "dsdraft") && last && (last.a === "return" || last.a === "return_ds");
   const ret = retBy ? `<div class="msg bad">${ico("alert", 16)}<span><b>Returned by ${esc(last.by)} (${esc(PLOG_ROLE[last.r] || last.r)}):</b> ${esc(last.n || "(no reason given)")}</span></div>` : "";
   const apr = st === "approved" && f.approvedBy ? `<div class="msg ok">${ico("check", 16)}<span>Approved by ${esc(f.approvedBy)}${f.approvedAt ? " · " + esc(new Date(f.approvedAt).toLocaleString("en-GB")) : ""}</span></div>` : "";
   const btns =
-    (canSubmitLM ? `<button class="btn" data-wf="submit_lm">${ico("right")}Submit to Line Manager</button>` : "") +
+    (canSubmitLM ? `<button class="btn" data-wf="submit_lm" ${pOk("ds") ? "" : "disabled"}>${ico("right")}Submit to Line Manager</button>` : "") +
     (canReturnDS ? `<button class="btn ghost" data-wf="return_ds">${ico("left")}Send back to Direct Supervisor</button>` : "") +
     (canSubmit ? `<button class="btn" data-wf="submit" ${promoOk ? "" : "disabled"}>${ico("right")}Submit to HOD</button>` : "") +
-    (canApprove ? `<button class="btn" data-wf="approve">${ico("check")}Approve final assessment</button>` : "") +
+    (canApprove ? `<button class="btn" data-wf="approve" ${pOk("hod") || st === "draft" ? "" : "disabled"}>${ico("check")}Approve final assessment</button>` : "") +
     (canReturn ? `<button class="btn ghost" data-wf="return">${ico("left")}Send back to Line Manager</button>` : "") +
     (canReopen ? `<button class="btn ghost" data-wf="reopen">${ico("reset")}Reopen</button>` : "");
   const hl = hist.slice(-8).reverse().map((x) => `<li>${esc(WF_ACT[x.a] || x.a)} · ${esc(x.by)}${x.r && PLOG_ROLE[x.r] ? " (" + PLOG_ROLE[x.r] + ")" : ""} · ${esc(new Date(x.t).toLocaleString("en-GB"))}${x.n ? " — " + esc(x.n) : ""}</li>`).join("");
@@ -1969,6 +2000,12 @@ wfDecorate = function () {
 
 wfAct = async function (action) {
   const id = ui.id, e = empOf(id); if (!e || !CLOUD) return;
+  const f0 = formOf(id);
+  if (!isAdmin()) {
+    if (action === "submit_lm" && !String(f0.dsrem || "").trim()) return toast("Direct Supervisor comments are required.");
+    if (action === "submit" && !String(f0.lm || "").trim()) return toast("Line Manager comments are required.");
+    if (action === "approve" && !String(f0.hod || "").trim()) return toast("HOD comments are required.");
+  }
   let note = "";
   if (action === "return") {
     note = await askReason("Send back to Line Manager", "Reason for sending back (the Line Manager will see this)", "Send back");
@@ -1993,13 +2030,6 @@ wfAct = async function (action) {
   }).withFailureHandler((err) => { setSave("Not saved"); toast(errMsg(err)); }).workflow(CRED, id, action, note, dirty.has(id) ? JSON.parse(snap(id)) : null);
 };
 
-/* a Direct Supervisor (acting only as DS) has no promotion card */
-const promoDecorateBeforeDs = promoDecorate;
-promoDecorate = function () {
-  const e = empOf(ui.id);
-  if (ui.view === "form" && e && stageOf(e) === "ds") return ensurePromos();
-  promoDecorateBeforeDs();
-};
 
 /* "Needs my action" counter next to the filters */
 const scopeBarBeforeDs = scopeBar;
@@ -2043,6 +2073,69 @@ viewGuidelines = function () {
   const h = viewGuidelinesBeforeDs();
   return h.replace("<li>Line managers review the assessments of their teams.</li>", "<li>Direct Supervisors complete the first assessment and comments and submit it to the Line Manager.</li><li>Line managers review the Direct Supervisor’s assessment, complete their own assessment and comments, and submit it to the HOD (or send it back to the Direct Supervisor with a reason).</li>");
 };
+
+/* ===== PROMOTION: "Confirm as is" ===== */
+function promoConfirm(id) {
+  run().withSuccessHandler((r) => { PROMOS[id] = r; keepScroll(render); toast("Recommendation confirmed"); })
+    .withFailureHandler((err) => toast(errMsg(err))).confirmPromo(CRED, id);
+}
+document.addEventListener("click", (ev) => { const b = ev.target.closest('[data-pr="confirm"]'); if (b) promoConfirm(Number(b.dataset.id)); });
+
+/* ===== NOTIFICATIONS: returned forms (LM / DS) + promotion recommendations waiting for HR ===== */
+{
+  const s = document.createElement("style");
+  s.textContent = ".nf{padding:16px 20px}.nf summary{cursor:pointer;display:flex;align-items:center;gap:10px;font:600 17px var(--font-d)}.nf .nf-n{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:99px;background:var(--bad);color:#fff;font:600 13px var(--font-d)}.nf h3{font-size:15px;margin:14px 0 6px}.nf ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.nf li{padding:9px 12px;border-radius:11px;background:var(--card-2);border:1px solid var(--line);font-size:14px}.nf li.ret{border-left:4px solid var(--bad)}.nf li.prm{border-left:4px solid var(--curve)}.nf .nf-sub{display:block;color:var(--ink2);font-size:13px;margin-top:3px}.nf .nf-top{display:flex;gap:8px;margin-left:auto}";
+  document.head.appendChild(s);
+}
+function notifItems() {
+  const ret = [], promo = [];
+  S.emps.forEach((e) => {
+    const f = S.forms[e.id]; if (!f) return;
+    const st = stOf(e.id), sg = stageOf(e);
+    const h = (f.hist || []).filter((x) => x.a !== "edit_lm"), last = h[h.length - 1];
+    if (!last) return;
+    if ((st === "draft" && last.a === "return" && sg === "lm") || (st === "dsdraft" && last.a === "return_ds" && sg === "ds")) ret.push({ e, last });
+  });
+  if (isAdmin() && promoReady()) S.emps.forEach((e) => { const p = promoOf(e.id); if (p && pStat(e.id) === "recommended" && (!p.steps || p.steps.hod)) promo.push({ e, p }); });
+  return { ret, promo };
+}
+function notifHTML() {
+  const { ret, promo } = notifItems(), n = ret.length + promo.length;
+  if (!n) return "";
+  const rl = ret.map(({ e, last }) => `<li class="ret"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — form aap ko wapas aaya hai${last.a === "return" ? " (HOD ki taraf se)" : " (Line Manager ki taraf se)"}<span class="nf-sub">Reason: ${esc(last.n || "(no reason)")} · ${esc(last.by)} · ${esc(new Date(last.t).toLocaleString("en-GB"))}</span></li>`).join("");
+  const pl = promo.map(({ e, p }) => `<li class="prm"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — promotion recommendation aayi hai<span class="nf-sub">${esc(p.pos || "")}${p.grade ? " · " + esc(p.grade) : ""}</span></li>`).join("");
+  return `<details class="glass nf no-print" open><summary><span class="nf-n">${n}</span>Notifications<span class="nf-top"><button type="button" class="btn ghost" data-nf="refresh">${ico("reset")}Refresh</button>${promo.length ? '<button type="button" class="btn ghost" data-nf="promos">Promotions page</button>' : ""}</span></summary>
+    ${ret.length ? `<h3>Wapas aaye hue forms (${ret.length}) – dobara dekhna hai</h3><ul>${rl}</ul>` : ""}
+    ${promo.length ? `<h3>HR decision pending – promotion recommendations (${promo.length})</h3><ul>${pl}</ul>` : ""}</details>`;
+}
+function notifDecorate() {
+  if (!CLOUD || !CRED || LOADING) return;
+  const v = $("#view"); if (!v) return;
+  const h = notifHTML(); if (h) v.insertAdjacentHTML("afterbegin", h);
+}
+const renderBeforeNotif = render;
+render = function () { renderBeforeNotif(); notifDecorate(); };
+
+/* naye returns / recommendations dikhane ke liye state quietly refresh (unsaved drafts ho to nahi chhoota) */
+let lastSync = Date.now();
+function refreshQuiet(force) {
+  if (!CLOUD || !CRED || LOADING) return;
+  if (dirty.size) { if (force) toast("Pehle apni unsaved changes save ya discard karein."); return; }
+  if (!force && Date.now() - lastSync < 60000) return;
+  lastSync = Date.now(); PROMO_FOR = null;
+  run().withSuccessHandler((st) => {
+    if (dirty.size) return;
+    S = { emps: st.emps || [], forms: st.forms || {} }; rememberSaved(S.forms); ME = st.user;
+    keepScroll(render); if (force) toast("Refreshed");
+  }).withFailureHandler((e) => { errMsg(e); }).getState(CRED);
+}
+const goBeforeNotif = go;
+go = function (v, id) { const r = goBeforeNotif(v, id); if (v !== "form") refreshQuiet(false); return r; };
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-nf]"); if (!b) return;
+  if (b.dataset.nf === "refresh") return refreshQuiet(true);
+  if (b.dataset.nf === "promos") { ui.pd = "recommended"; return go("promotions"); }
+});
 
 render(); if (CLOUD) startCloud();
 })();
