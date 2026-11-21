@@ -566,8 +566,6 @@ dialog[open]{animation:dlg .3s cubic-bezier(.2,.8,.2,1)}
       <button class="link-btn" id="themeBtn" data-act="theme"></button>
       <button class="link-btn needs-dl" data-act="export-json"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Export backup</button>
       <button class="link-btn" data-act="import"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7 9l5-5 5 5M5 20h14"/></svg>Import backup</button>
-      <button class="link-btn" data-act="change-pin">Change PIN</button>
-      <button class="link-btn" data-act="signout" id="signoutBtn">Sign out</button>
       <button class="link-btn" data-act="reset"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg>Restore original data</button>
     </div>
   </aside>
@@ -1153,7 +1151,7 @@ function viewReport() {
 
 /* ===================== SHELL ===================== */
 function moreActions() {
-  return `<div class="mob-menu"><button class="link-btn" data-act="theme">${ico(curTheme() === "dark" ? "sun" : "moon")}${curTheme() === "dark" ? "Light mode" : "Dark mode"}</button><button class="link-btn needs-dl" data-act="export-json">${ico("down")}Export backup</button><button class="link-btn" data-act="import">${ico("up")}Import backup</button><button class="link-btn" data-act="reset">${ico("reset")}Restore original data</button>${CLOUD ? `<button class="link-btn" data-act="change-pin">Change PIN</button><button class="link-btn" data-act="signout">Sign out</button>` : ""}</div>`;
+  return `<div class="mob-menu"><button class="link-btn" data-act="theme">${ico(curTheme() === "dark" ? "sun" : "moon")}${curTheme() === "dark" ? "Light mode" : "Dark mode"}</button><button class="link-btn needs-dl" data-act="export-json">${ico("down")}Export backup</button><button class="link-btn" data-act="import">${ico("up")}Import backup</button><button class="link-btn" data-act="reset">${ico("reset")}Restore original data</button></div>`;
 }
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 function render() {
@@ -2136,6 +2134,146 @@ document.addEventListener("click", (ev) => {
   if (b.dataset.nf === "refresh") return refreshQuiet(true);
   if (b.dataset.nf === "promos") { ui.pd = "recommended"; return go("promotions"); }
 });
+
+/* ===== TOP BAR: user chip + notification bell + popup animation ===== */
+{
+  const s = document.createElement("style");
+  s.textContent =
+  ".nf{display:none!important}" +
+  "main#view{padding-top:56px}" +
+  ".tb{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:16px;z-index:40;display:flex;gap:10px;align-items:center}" +
+  ".tb[hidden]{display:none!important}" +
+  ".tb-btn{position:relative;display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 12px;border-radius:14px;border:1px solid var(--edge);background:var(--card);box-shadow:var(--shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:var(--ink);cursor:pointer;font-weight:600}" +
+  ".tb-btn:hover{background:var(--card-solid)}" +
+  ".tb-av{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#14532d,#2e9d63);color:#f4fbf6;font:600 14px var(--font-d)}" +
+  ".tb-nm{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;max-width:170px}" +
+  ".tb-nm b{font:600 13.5px var(--font-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}" +
+  ".tb-nm small{font-size:11.5px;color:var(--ink2);font-weight:500}" +
+  ".tb-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font:600 12px/20px var(--font-d);text-align:center;border:2px solid var(--card-solid)}" +
+  ".tb-bell.ring svg{animation:tbring 1s ease-in-out 2;transform-origin:50% 0}" +
+  ".tb-bell.ring .tb-badge{animation:tbpulse .9s ease-out 3}" +
+  "@keyframes tbring{0%,100%{transform:rotate(0)}15%{transform:rotate(16deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}" +
+  "@keyframes tbpulse{0%{box-shadow:0 0 0 0 rgba(163,38,42,.6)}100%{box-shadow:0 0 0 12px rgba(163,38,42,0)}}" +
+  ".tb-panel{position:absolute;top:50px;right:0;width:min(390px,calc(100vw - 24px));max-height:70vh;overflow:auto;padding:14px;border-radius:18px;background:var(--card-solid);border:1px solid var(--edge);box-shadow:0 24px 50px -18px rgba(0,0,0,.45);animation:tbdrop .22s cubic-bezier(.2,.8,.2,1)}" +
+  ".tb-panel[hidden]{display:none}" +
+  "@keyframes tbdrop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}" +
+  ".tb-panel h3{font-size:14.5px;margin:10px 0 6px}.tb-panel h3:first-child{margin-top:0}" +
+  ".tb-panel ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}" +
+  ".tb-panel li{padding:9px 12px;border-radius:11px;background:var(--card-2);border:1px solid var(--line);font-size:14px}" +
+  ".tb-panel li.ret{border-left:4px solid var(--bad)}.tb-panel li.prm{border-left:4px solid var(--curve)}" +
+  ".tb-panel .nf-sub{display:block;color:var(--ink2);font-size:13px;margin-top:3px}" +
+  ".tb-panel .tb-empty{padding:18px;text-align:center;color:var(--ink2)}" +
+  ".tb-menu button{display:flex;width:100%;align-items:center;gap:9px;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ink);cursor:pointer;text-align:left}" +
+  ".tb-menu button:hover{background:var(--card-2)}" +
+  ".tb-pop{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:16px;z-index:60;display:flex;gap:10px;align-items:center;max-width:min(360px,calc(100vw - 32px));padding:12px 16px;border-radius:16px;background:var(--primary);color:var(--on-primary);box-shadow:0 20px 40px -16px rgba(0,0,0,.55);cursor:pointer;font-weight:600;animation:tbpop .5s cubic-bezier(.2,1.2,.3,1) both}" +
+  ".tb-pop.out{animation:tbpopout .3s ease-in both}" +
+  "@keyframes tbpop{from{opacity:0;transform:translateY(-24px) scale(.9)}to{opacity:1;transform:none}}" +
+  "@keyframes tbpopout{to{opacity:0;transform:translateY(-16px) scale(.95)}}" +
+  "@media (max-width:860px){.tb-nm{display:none}.tb{right:12px}}" +
+  "@media print{.tb,.tb-pop{display:none!important}main#view{padding-top:0}}";
+  document.head.appendChild(s);
+}
+
+let TB_OPEN = "";            // "", "bell" or "user"
+let TB_KEYS = null;          // notifications already seen (to detect new ones)
+const tbEl = document.createElement("div");
+tbEl.className = "tb no-print"; tbEl.hidden = true;
+document.body.appendChild(tbEl);
+
+IC.bell = '<path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4"/>';
+
+function tbPanelHTML(ret, promo) {
+  if (!ret.length && !promo.length) return '<div class="tb-empty">No new notifications.</div>';
+  const rl = ret.map(({ e, last }) => `<li class="ret"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — form has been returned<span class="nf-sub">Reason: ${esc(last.n || "(no reason given)")} · ${esc(last.by)} · ${esc(new Date(last.t).toLocaleString("en-GB"))}</span></li>`).join("");
+  const pl = promo.map(({ e, p }) => `<li class="prm"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — promotion recommendation received<span class="nf-sub">${esc(p.pos || "")}${p.grade ? " · " + esc(p.grade) : ""}</span></li>`).join("");
+  return (ret.length ? `<h3>Returned forms (${ret.length})</h3><ul>${rl}</ul>` : "") +
+         (promo.length ? `<h3>HR decision pending (${promo.length})</h3><ul>${pl}</ul>` : "") +
+         `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-nf="refresh">${ico("reset")}Refresh</button>${promo.length ? '<button class="btn ghost" data-nf="promos">Promotions page</button>' : ""}</div>`;
+}
+
+function showTbPop(count) {
+  const old = $(".tb-pop"); if (old) old.remove();
+  const p = document.createElement("div");
+  p.className = "tb-pop"; p.setAttribute("role", "status");
+  p.innerHTML = `${ico("bell", 20)}<span>${count === 1 ? "You have 1 new notification" : "You have " + count + " new notifications"}</span>`;
+  p.addEventListener("click", () => { TB_OPEN = "bell"; p.remove(); renderTopbar(); });
+  document.body.appendChild(p);
+  setTimeout(() => { p.classList.add("out"); setTimeout(() => p.remove(), 320); }, 5500);
+}
+
+function renderTopbar() {
+  if (!CLOUD || !CRED || LOADING) { tbEl.hidden = true; TB_KEYS = null; TB_OPEN = ""; const o = $(".tb-pop"); if (o) o.remove(); return; }
+  const { ret, promo } = notifItems(), n = ret.length + promo.length;
+  const keys = ret.map((x) => "r" + x.e.id + "|" + x.last.t).concat(promo.map((x) => "p" + x.e.id));
+  const fresh = TB_KEYS ? keys.filter((k) => !TB_KEYS.includes(k)) : [];
+  TB_KEYS = keys;
+  const name = ME.person || ME.email || "User", ini = String(name).trim().charAt(0).toUpperCase() || "U";
+  tbEl.hidden = false;
+  tbEl.innerHTML =
+    `<div style="position:relative"><button class="tb-btn tb-bell${fresh.length ? " ring" : ""}" data-tb="bell" aria-label="Notifications (${n})" aria-expanded="${TB_OPEN === "bell"}">${ico("bell", 20)}${n ? `<span class="tb-badge">${n}</span>` : ""}</button>
+       <div class="tb-panel" ${TB_OPEN === "bell" ? "" : "hidden"}>${tbPanelHTML(ret, promo)}</div></div>
+     <div style="position:relative"><button class="tb-btn" data-tb="user" aria-label="Account menu" aria-expanded="${TB_OPEN === "user"}"><span class="tb-av">${esc(ini)}</span><span class="tb-nm"><b>${esc(name)}</b><small>${esc(ROLE_LABEL[ME.role] || ME.role || "")}</small></span></button>
+       <div class="tb-panel tb-menu" style="width:220px" ${TB_OPEN === "user" ? "" : "hidden"}>
+         <div style="padding:6px 12px 10px;color:var(--ink2);font-size:13px;word-break:break-all">${esc(ME.email || "")}</div>
+         <button data-act="theme">${ico(curTheme() === "dark" ? "sun" : "moon")}${curTheme() === "dark" ? "Light mode" : "Dark mode"}</button>
+         <button data-act="change-pin">Change PIN</button>
+         <button data-act="signout">Sign out</button></div></div>`;
+  if (fresh.length) showTbPop(fresh.length);
+}
+
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-tb]");
+  if (b) { const k = b.dataset.tb; TB_OPEN = TB_OPEN === k ? "" : k; return renderTopbar(); }
+  if (!TB_OPEN) return;
+  const inPanel = ev.target.closest(".tb-panel");
+  const act = ev.target.closest("[data-act],[data-nf]");
+  if (!inPanel || act) { TB_OPEN = ""; setTimeout(renderTopbar, 0); }
+}, true);
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && TB_OPEN) { TB_OPEN = ""; renderTopbar(); } });
+
+const renderBeforeTb = render;
+render = function () { renderBeforeTb(); renderTopbar(); };
+
+/* ===== AUTO REFRESH: light checkUpdates first, full data only when something changed ===== */
+const POLL_MS = 30000;          // light check every 30 seconds
+const FULL_MS = 5 * 60 * 1000;  // forced full sync every 5 minutes (safety net)
+let polling = false, lastFp = null, lastFull = 0;
+function fullSync(fp) {
+  run().withSuccessHandler((st) => {
+    polling = false;
+    if (dirty.size || !CRED) return;
+    lastFp = fp; lastFull = Date.now();
+    const emps = st.emps || [], forms = st.forms || {};
+    const changed = JSON.stringify([emps, forms]) !== JSON.stringify([S.emps, S.forms]);
+    ME = st.user;
+    if (changed) {
+      S = { emps, forms }; rememberSaved(S.forms);
+      PROMO_FOR = null;
+      keepScroll(render);                                  // render => renderTopbar => popup + bell animation
+    }
+    if (isAdmin()) {                                       // HR pending promotions
+      run().withSuccessHandler((p) => {
+        const old = JSON.stringify(PROMOS);
+        PROMOS = p || {}; PROMO_READY = true;
+        if (JSON.stringify(PROMOS) !== old) renderTopbar();
+      }).withFailureHandler(() => {}).getPromos(CRED);
+    }
+  }).withFailureHandler((e) => { polling = false; errMsg(e); }).getState(CRED);
+}
+function autoSync() {
+  if (!CLOUD || !CRED || LOADING || polling || document.hidden) return;
+  if (dirty.size) return;                                  // do not touch unsaved work
+  if (document.querySelector("dialog[open]")) return;      // skip while a dialog is open
+  polling = true;
+  run().withSuccessHandler((fp) => {
+    if (dirty.size || !CRED) { polling = false; return; }
+    if (lastFp === null || fp !== lastFp || Date.now() - lastFull > FULL_MS) fullSync(fp);
+    else polling = false;                                  // nothing changed: stop here
+  }).withFailureHandler((e) => { polling = false; errMsg(e); }).checkUpdates(CRED);
+}
+setInterval(autoSync, POLL_MS);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) autoSync(); });
+window.addEventListener("focus", autoSync);
 
 render(); if (CLOUD) startCloud();
 })();
