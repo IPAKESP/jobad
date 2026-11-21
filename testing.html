@@ -707,7 +707,7 @@ const COMP = DATA.comp;
    only when the user presses "Save changes" and confirms. Sending to the HOD / approving
    is done with the workflow buttons (Send to HOD, Approve, Return). */
 const ROLE_LABEL = { admin: "Admin", hr: "HR", lm: "Line manager", hod: "Head of department" };
-/* ----- session (token) helpers: refresh par logout nahi, 30 min idle par logout ----- */
+/* ----- session (token) helpers: no logout on refresh, logout after 30 min idle ----- */
 const SESS_KEY = "ipak-pms-session";
 const readSession = () => { try { const s = JSON.parse(localStorage.getItem(SESS_KEY)); return s && s.email && s.token ? s : null; } catch (e) { return null; } };
 const saveSession = (c) => { try { localStorage.setItem(SESS_KEY, JSON.stringify({ email: c.email, token: c.token })); } catch (e) {} };
@@ -1480,7 +1480,7 @@ function bumpIdle() {
     if (dirty.size) { toast("You have unsaved changes. Please save your work, or you may be logged out shortly."); idleT = setTimeout(forceIdleOut, 2 * 60 * 1000); return; }
     forceIdleOut();
   }, IDLE_MS);
-  /* user active hai: har 5 minute mein server session aage badhao */
+  /* user is active: extend the server session every 5 minutes */
   const now = Date.now();
   if (CRED.token && now - lastPing > 5 * 60 * 1000) {
     lastPing = now;
@@ -1515,7 +1515,7 @@ const PSTAT = { promoted: ["Promoted", "chip-a"], nonpromoted: ["Not Recommended
 const pStat = (id) => {
   const p = promoOf(id); if (!p) return "pending";
   if (p.decision === "no") return "nonpromoted";
-  if (p.status === "nonpromoted" || p.status === "rejected") return p.hrBy ? "rejected" : "recommended";   // HR ne action na liya ho to rejected nahi
+  if (p.status === "nonpromoted" || p.status === "rejected") return p.hrBy ? "rejected" : "recommended";   // if HR has not acted, do not treat it as rejected
   return p.status || "recommended";
 };
 const pChip = (k) => `<span class="chip ${PSTAT[k][1]}">${PSTAT[k][0]}</span>`;
@@ -1524,7 +1524,7 @@ const canPromo = (e) => {
   const sg = stageOf(e), st = stOf(e.id);
   if (!sg) return false;
   if (sg === "admin") return true;
-  const pp = promoOf(e.id); if (pp && pp.steps && pp.steps[sg]) return false;   // decision le liya -> lock
+  const pp = promoOf(e.id); if (pp && pp.steps && pp.steps[sg]) return false;   // decision taken -> lock
   if (sg === "ds") return st === "dsdraft";
   if (sg === "lm") return st === "draft";
   if (sg === "hod") return e.ds && !e.solo ? st === "submitted" : (st === "draft" || st === "submitted");
@@ -1631,7 +1631,7 @@ function promoCardHTML(e) {
   if (!promoReady()) chipH = `<span class="chip chip-na">${PROMO_ERR ? "Could not load" : "Loading…"}</span>`;
   else if (!p) {
     chipH = '<span class="chip chip-na">Decision pending</span>';
-    if (can) { btns = `<button class="btn ghost" data-pr="yes" data-id="${id}">Yes</button><button class="btn ghost" data-pr="no" data-id="${id}">No</button>`; sum = "<span>Yes/No save karne ke baad decision lock ho jayega.</span>"; }
+    if (can) { btns = `<button class="btn ghost" data-pr="yes" data-id="${id}">Yes</button><button class="btn ghost" data-pr="no" data-id="${id}">No</button>`; sum = "<span>Your decision will be locked after you save Yes/No.</span>"; }
     else sum = "<span>Only the person who currently holds the form can answer this.</span>";
   } else if (p.decision === "no") {
     chipH = pChip("nonpromoted");
@@ -2102,10 +2102,10 @@ function notifItems() {
 function notifHTML() {
   const { ret, promo } = notifItems(), n = ret.length + promo.length;
   if (!n) return "";
-  const rl = ret.map(({ e, last }) => `<li class="ret"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — form aap ko wapas aaya hai${last.a === "return" ? " (HOD ki taraf se)" : " (Line Manager ki taraf se)"}<span class="nf-sub">Reason: ${esc(last.n || "(no reason)")} · ${esc(last.by)} · ${esc(new Date(last.t).toLocaleString("en-GB"))}</span></li>`).join("");
-  const pl = promo.map(({ e, p }) => `<li class="prm"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — promotion recommendation aayi hai<span class="nf-sub">${esc(p.pos || "")}${p.grade ? " · " + esc(p.grade) : ""}</span></li>`).join("");
+  const rl = ret.map(({ e, last }) => `<li class="ret"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — this form has been returned to you${last.a === "return" ? " (by the HOD)" : " (by the Line Manager)"}<span class="nf-sub">Reason: ${esc(last.n || "(no reason)")} · ${esc(last.by)} · ${esc(new Date(last.t).toLocaleString("en-GB"))}</span></li>`).join("");
+  const pl = promo.map(({ e, p }) => `<li class="prm"><button class="name-chip" data-act="open" data-id="${e.id}">${esc(e.name)} (ID ${e.id})</button> — a promotion recommendation has been received<span class="nf-sub">${esc(p.pos || "")}${p.grade ? " · " + esc(p.grade) : ""}</span></li>`).join("");
   return `<details class="glass nf no-print" open><summary><span class="nf-n">${n}</span>Notifications<span class="nf-top"><button type="button" class="btn ghost" data-nf="refresh">${ico("reset")}Refresh</button>${promo.length ? '<button type="button" class="btn ghost" data-nf="promos">Promotions page</button>' : ""}</span></summary>
-    ${ret.length ? `<h3>Wapas aaye hue forms (${ret.length}) – dobara dekhna hai</h3><ul>${rl}</ul>` : ""}
+    ${ret.length ? `<h3>Returned forms (${ret.length}) – need your review</h3><ul>${rl}</ul>` : ""}
     ${promo.length ? `<h3>HR decision pending – promotion recommendations (${promo.length})</h3><ul>${pl}</ul>` : ""}</details>`;
 }
 function notifDecorate() {
@@ -2116,11 +2116,11 @@ function notifDecorate() {
 const renderBeforeNotif = render;
 render = function () { renderBeforeNotif(); notifDecorate(); };
 
-/* naye returns / recommendations dikhane ke liye state quietly refresh (unsaved drafts ho to nahi chhoota) */
+/* quietly refresh state to show new returns / recommendations (does not touch unsaved drafts) */
 let lastSync = Date.now();
 function refreshQuiet(force) {
   if (!CLOUD || !CRED || LOADING) return;
-  if (dirty.size) { if (force) toast("Pehle apni unsaved changes save ya discard karein."); return; }
+  if (dirty.size) { if (force) toast("Please save or discard your unsaved changes first."); return; }
   if (!force && Date.now() - lastSync < 60000) return;
   lastSync = Date.now(); PROMO_FOR = null;
   run().withSuccessHandler((st) => {
@@ -2152,19 +2152,19 @@ body.no-print-role [data-act="print"]{display:none!important}
   /* Page 1: header + employee info + IPI.  Page 2: BPI + final rating + comments */
   .paper > .sec:nth-of-type(3){break-before:page!important;page-break-before:always!important}
 
-  /* BPI indicators print mein hide (ratings rehti hain) */
+  /* hide BPI indicators in print (ratings stay) */
   .bpi th:nth-child(2),.bpi th:nth-child(3),.bpi td.ind{width:0!important;padding:0!important;border:0!important;font-size:0!important;overflow:hidden}
   .bpi td.ind ul{display:none!important}
   .bpi th:nth-child(1){width:70%}
   .bpi th:nth-child(4){width:30%}
 
-  /* IPI thora compact */
+  /* make IPI slightly more compact */
   .ipi th,.ipi td,.ipi .cell-in{font-size:8px!important;line-height:1.25}
   .paper-head{padding:6px 10px!important}
   .paper .sec{padding:6px 4px!important}
 }
 
-/* Employee comments (aur HOD comments, Line Manager ke login par) sirf print mein */
+/* Employee comments (and HOD comments, on the Line Manager login) appear in print only */
 .print-only{display:none!important}
 @media print{.print-only{display:block!important}}
 .comments{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
@@ -2183,7 +2183,7 @@ body.no-print-role [data-act="print"]{display:none!important}
 <script id="print-patch-js">
 (function () {
   var who = document.getElementById('who');
-  /* #who mein "email · Admin" ya "email · HR" likha aata hai; baqi roles aur "Not signed in" blocked */
+  /* #who shows "email · Admin" or "email · HR"; other roles and "Not signed in" are blocked */
   function ok() {
     var t = (who && who.textContent) || '';
     if (t.indexOf('·') < 0) return t !== 'Not signed in';
