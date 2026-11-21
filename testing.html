@@ -1848,7 +1848,7 @@ WF_ACT.return_ds = "Returned to Direct Supervisor";
 function normalizeDs() {
   if (!CLOUD || !CRED) return;
   S.emps.forEach((e) => {
-    if (!e.ds) return;
+    if (!e.ds || e.dsLm) return;
     const f = S.forms[e.id];
     if (!f) S.forms[e.id] = Object.assign(blankForm(), { status: "dsdraft" });
     else if (!f.status && !SAVED[e.id]) f.status = "dsdraft";
@@ -1868,12 +1868,13 @@ stageOf = function (e) {
   if (e.ds && nm(e.ds) === p) c.push("ds");
   const ok = c.filter((x) => allow.includes(x));
   if (!ok.length) return null;
+  if (e.solo && ok.includes("hod")) return "hod";
   const st = stOf(e.id);
   const pref = st === "dsdraft" ? ["ds", "lm", "hod"] : (st === "submitted" || st === "approved") ? ["hod", "lm", "ds"] : ["lm", "hod", "ds"];
   return pref.find((x) => ok.includes(x)) || null;
 };
 canEditNow = function (e) {
-  const st = stOf(e.id), sg = stageOf(e), wf = !!e.ds;
+  const st = stOf(e.id), sg = stageOf(e), wf = !!e.ds && !e.solo;
   if (!sg || st === "approved") return false;
   if (sg === "admin") return true;
   if (sg === "ds") return st === "dsdraft";
@@ -1938,7 +1939,7 @@ wfDecorate = function () {
   if (!CLOUD || !CRED || ui.view !== "form") return;
   const paper = $(".paper"), e = empOf(ui.id);
   if (!paper || !e) return;
-  const f = formOf(e.id), st = stOf(e.id), sg = stageOf(e), edit = canEditNow(e), wf = !!e.ds, hist = f.hist || [], last = hist[hist.length - 1];
+  const f = formOf(e.id), st = stOf(e.id), sg = stageOf(e), edit = canEditNow(e), wf = !!e.ds && !e.solo, hist = f.hist || [], last = hist[hist.length - 1];
 
   /* employee information: show the Direct Supervisor next to the Line Manager */
   const lmRow = $$(".paper .info .row").find((r) => /line manager/i.test(r.firstElementChild.textContent));
@@ -1964,8 +1965,12 @@ wfDecorate = function () {
     const ipiSec = $("table.ipi") && $("table.ipi").closest(".sec"), bpiS = $("table.bpi") && $("table.bpi").closest(".sec");
     const finSec = $("#fIpi") && $("#fIpi").closest(".sec"), cmSec = cm && cm.closest(".sec");
     const head = (t, sub) => `<section class="sec stage-h"><h2>${t}</h2><p class="sub">${sub}</p></section>`;
-    if (sg === "lm" && st === "draft" && f.ds && ipiSec) {
-      ipiSec.insertAdjacentHTML("beforebegin", head("Line Manager Assessment", "Aap ki apni assessment: objectives, BPI aur comments neeche hain."));
+    if ((sg === "lm" || sg === "admin" || (sg === "hod" && !wf)) && st !== "dsdraft" && ipiSec) {
+      ipiSec.insertAdjacentHTML("beforebegin", head("Line Manager Assessment", !(st === "draft" && edit)
+        ? "The assessment below currently shows the Direct Supervisor's last submitted assessment. If you make any changes here, your edited version will go to the HOD as the final draft. The Direct Supervisor's original assessment is saved in the record above and stays unchanged"
+        : f.ds
+        ? "The assessment below currently shows the Direct Supervisor’s last submitted assessment. If you make any changes here, your edited version will go to the HOD as the final draft. The Direct Supervisor’s original assessment is saved in the record above and stays unchanged."
+        : "Complete the objectives, BPI ratings and comments below. This version will go to the HOD."));
     } else if (sg === "hod" && wf && !e.solo && ipiSec && bpiS && finSec && cmSec && (st === "submitted" || st === "approved")) {
       const ev = evaluate(f);
       const fold = document.createElement("details");
@@ -1973,7 +1978,7 @@ wfDecorate = function () {
       fold.innerHTML = `<summary><span class="ds-h">Line Manager Assessment</span><span class="ds-hint"></span></summary><p class="sub">Submitted by ${esc(f.submittedBy || "")}${f.submittedAt ? " · " + esc(new Date(f.submittedAt).toLocaleString("en-GB")) : ""}. Read-only.</p><div class="ds-sum"><span>IPI ${fmtN(ev.ipi)} ${chip(ev.ipiR, short(ev.ipiR))}</span><span>BPI ${fmtN(ev.bpi * 100)}% ${chip(ev.bpiR, short(ev.bpiR))}</span><span>Final ${codeTag(ev.code)} ${esc(ev.label)}</span></div><div class="ds-more"></div>`;
       ipiSec.parentNode.insertBefore(fold, ipiSec);
       const more = fold.querySelector(".ds-more"); [ipiSec, bpiS, finSec].forEach((x) => more.appendChild(x));
-      cmSec.insertAdjacentHTML("beforebegin", head("HOD Assessment", "Aap ki assessment: HOD comments aur promotion recommendation."));
+      cmSec.insertAdjacentHTML("beforebegin", head("HOD Assessment", "Add your HOD comments and confirm the promotion recommendation below. The Direct Supervisor and Line Manager assessments are saved in the records above."));
     }
   }
   const star = (cid) => { const l = $('label[for="' + cid + '"]'); if (l && !/\*/.test(l.textContent)) l.textContent += " *"; };
@@ -1995,7 +2000,7 @@ wfDecorate = function () {
 
   const canSubmitLM = st === "dsdraft" && (sg === "ds" || sg === "admin");
   const canSubmit = st === "draft" && (sg === "lm" || sg === "admin");
-  const canReturnDS = wf && st === "draft" && (sg === "lm" || sg === "admin") && !!f.ds;
+  const canReturnDS = wf && st === "draft" && (sg === "lm" || sg === "admin") && !!f.ds && !e.dsLm;
   const canApprove = (st === "submitted" || (st === "draft" && (!wf || sg === "admin"))) && (sg === "hod" || sg === "admin");
   const canReturn = st === "submitted" && (sg === "hod" || sg === "admin");
   const canReopen = st === "approved" && sg === "admin";
@@ -2007,7 +2012,9 @@ wfDecorate = function () {
   else if (st === "dsdraft") hint = sg === "lm" ? "This form is currently with the Direct Supervisor. You can also edit it (your changes are recorded in the history), but only the Direct Supervisor can submit it to you." : edit ? "Complete your assessment and comments, then click “Submit to Line Manager”. After you submit, your stage is locked unless the Line Manager sends it back." : "This form is with the Direct Supervisor and is locked for you.";
   else if (st === "draft") hint = edit ? (f.ds ? "The Direct Supervisor’s assessment is shown above (read-only). Complete your own assessment and comments, then click “Submit to HOD”, or send it back to the Direct Supervisor with a reason." : "Complete the assessment. Once finished, click “Submit to HOD”.") : "This form is with the Line Manager and is locked for you.";
   else if (st === "submitted") hint = edit ? (wf ? "Review the Direct Supervisor and Line Manager assessments. You can add HOD comments, then approve the form or send it back to the Line Manager with a reason." : "Review the assessment as HOD. Make changes if necessary, then approve it or send it back to the Line Manager.") : "The form is under HOD review and is locked for you.";
-  if (canSubmit && !promoOk) hint = "Confirm the Direct Supervisor’s promotion recommendation (or change it) and write your comments before “Submit to HOD”.";
+  if (st === "draft" && edit && e.solo) hint = "Aap is employee ke DS, Line Manager aur HOD hain. Form mukammal karein, promotion Yes/No dein, HOD comments likhein aur seedha “Approve final assessment” karein.";
+  else if (st === "draft" && edit && e.dsLm && sg === "lm") hint = "Aap is employee ke Direct Supervisor aur Line Manager dono hain. Assessment mukammal karein aur seedha “Submit to HOD” karein.";
+  if (canSubmit && !promoOk && !e.solo) hint = "Confirm the Direct Supervisor’s promotion recommendation (or change it) and write your comments before “Submit to HOD”.";
   if (canSubmitLM && !pOk("ds")) hint = "Select Yes or No in the Promotion recommendation and write your comments before “Submit to Line Manager”.";
   if (canApprove && st === "submitted" && !pOk("hod")) hint = "Confirm or change the Promotion recommendation and write your HOD comments before approving.";
 
@@ -2016,10 +2023,10 @@ wfDecorate = function () {
   const ret = retBy ? `<div class="msg bad">${ico("alert", 16)}<span><b>Returned by ${esc(last.by)} (${esc(PLOG_ROLE[last.r] || last.r)}):</b> ${esc(last.n || "(no reason given)")}</span></div>` : "";
   const apr = st === "approved" && f.approvedBy ? `<div class="msg ok">${ico("check", 16)}<span>Approved by ${esc(f.approvedBy)}${f.approvedAt ? " · " + esc(new Date(f.approvedAt).toLocaleString("en-GB")) : ""}</span></div>` : "";
   const btns =
-    (canSubmitLM ? `<button class="btn" data-wf="submit_lm" ${pOk("ds") ? "" : "disabled"}>${ico("right")}Submit to Line Manager</button>` : "") +
+    (canSubmitLM ? `<button class="btn" data-wf="submit_lm" ${pOk("ds") ? "" : 'data-blocked="1"'}>${ico("right")}Submit to Line Manager</button>` : "") +
     (canReturnDS ? `<button class="btn ghost" data-wf="return_ds">${ico("left")}Send back to Direct Supervisor</button>` : "") +
-    (canSubmit ? `<button class="btn" data-wf="submit" ${promoOk ? "" : "disabled"}>${ico("right")}Submit to HOD</button>` : "") +
-    (canApprove ? `<button class="btn" data-wf="approve" ${pOk("hod") || st === "draft" ? "" : "disabled"}>${ico("check")}Approve final assessment</button>` : "") +
+    (canSubmit ? `<button class="btn" data-wf="submit" ${promoOk ? "" : 'data-blocked="1"'}>${ico("right")}Submit to HOD</button>` : "") +
+    (canApprove ? `<button class="btn" data-wf="approve" ${pOk("hod") || (st === "draft" && !e.solo) ? "" : 'data-blocked="1"'}>${ico("check")}Approve final assessment</button>` : "") +
     (canReturn ? `<button class="btn ghost" data-wf="return">${ico("left")}Send back to Line Manager</button>` : "") +
     (canReopen ? `<button class="btn ghost" data-wf="reopen">${ico("reset")}Reopen</button>` : "");
   const hl = hist.slice(-8).reverse().map((x) => `<li>${esc(WF_ACT[x.a] || x.a)} · ${esc(x.by)}${x.r && PLOG_ROLE[x.r] ? " (" + PLOG_ROLE[x.r] + ")" : ""} · ${esc(new Date(x.t).toLocaleString("en-GB"))}${x.n ? " — " + esc(x.n) : ""}</li>`).join("");
@@ -2314,11 +2321,58 @@ setInterval(autoSync, POLL_MS);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) autoSync(); });
 window.addEventListener("focus", autoSync);
 
+/* ===== REQUIRED-FIELD CHECK: shake + red outline when Submit / Approve is pressed with missing fields ===== */
+function wfMissing(action) {
+  const id = ui.id, e = empOf(id), key = { submit_lm: "ds", submit: "lm", approve: "hod" }[action];
+  if (!e || !key) return [];
+  const f = formOf(id), st = stOf(id), miss = [], objs = f.objs || [];
+  $$("#ipiBody textarea[data-f='obj']").forEach((t) => { if (!String(t.value).trim()) miss.push(t); });
+  if (objs.length < 4 || weightTotal(objs) !== 100) { const w = $("#wTotal"); if (w) miss.push(w); }
+  $$("#ipiBody input[data-f='w']").forEach((x) => { if (Number(x.value) > 30) miss.push(x); });
+  $$("select[data-f='bpi']").forEach((x) => { if (x.value === "Select Rating") miss.push(x); });
+  if (!isAdmin()) {
+    const c = { submit_lm: ["#c_dsrem", f.dsrem], submit: ["#c_lm", f.lm], approve: ["#c_hod", f.hod] }[action];
+    if (!String(c[1] || "").trim()) { const el = $(c[0]); if (el) miss.push(el); }
+  }
+  const promoOkNow = promoReady() && (promoStepDone(e, key) || (action === "approve" && st === "draft" && !e.solo));
+  if (!promoOkNow) { const c = $(".pr-card"); if (c) miss.push(c); }
+  return miss;
+}
+function flagInvalid(list, btn) {
+  $$(".fx-invalid").forEach((x) => x.classList.remove("fx-invalid"));
+  const all = list.concat(btn ? [btn] : []);
+  all.forEach((el) => { el.classList.remove("fx-shake"); void el.offsetWidth; el.classList.add("fx-invalid", "fx-shake"); });
+  const first = list[0];
+  if (first) { try { first.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (x) {} if (/^(TEXTAREA|INPUT|SELECT)$/.test(first.tagName)) setTimeout(() => first.focus({ preventScroll: true }), 350); }
+  clearTimeout(flagInvalid.t);
+  flagInvalid.t = setTimeout(() => { if (btn) btn.classList.remove("fx-invalid"); }, 2500);
+  toast("Please complete the highlighted fields.");
+}
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-wf]"); if (!b) return;
+  const a = b.dataset.wf; if (a !== "submit_lm" && a !== "submit" && a !== "approve") return;
+  const miss = wfMissing(a); if (!miss.length) return;
+  ev.stopImmediatePropagation(); ev.preventDefault();
+  flagInvalid(miss, b);
+}, true);
+["input", "change"].forEach((n) => document.addEventListener(n, (ev) => { const t = ev.target; if (t && t.classList) t.classList.remove("fx-invalid"); }));
+document.addEventListener("animationend", (ev) => { if (ev.animationName === "fxshake" && ev.target.classList) ev.target.classList.remove("fx-shake"); });
+
 render(); if (CLOUD) startCloud();
 })();
 
 </script>
 <style id="print-patch">
+@media screen{
+.btn[data-blocked]{opacity:.55}
+.fx-invalid{outline:2px solid var(--bad)!important;outline-offset:2px;border-radius:10px;box-shadow:0 0 0 5px rgba(163,38,42,.16)!important;transition:outline-color .3s,box-shadow .3s}
+.pr-card.fx-invalid{border-radius:var(--r-lg)}
+@media (prefers-reduced-motion:no-preference){.fx-shake{animation:fxshake .6s cubic-bezier(.36,.07,.19,.97) both}}
+@keyframes fxshake{0%,100%{transform:translateX(0)}12%{transform:translateX(-8px)}28%{transform:translateX(7px)}44%{transform:translateX(-5px)}60%{transform:translateX(4px)}76%{transform:translateX(-2px)}90%{transform:translateX(1px)}}
+}
+
+@media screen{select,select option,select optgroup{background-color:#fff;color:#10281c}:root[data-theme="dark"] select,:root[data-theme="dark"] select option{background-color:#14291d;color:#e9f4ec}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) select option{background-color:#14291d;color:#e9f4ec}}}
+
   .bpi .sc{display:none!important}
 .bpi tfoot tr:first-child{display:none!important}
 body.no-print-role [data-act="print"]{display:none!important}
